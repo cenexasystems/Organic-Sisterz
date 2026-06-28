@@ -62,7 +62,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="font-display text-3xl md:text-4xl font-medium tracking-wide mb-2 text-center"
           >
-            Organic Sistez
+            Organic Sisterz
           </motion.h2>
 
           <motion.p

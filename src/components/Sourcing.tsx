@@ -14,8 +14,8 @@ export default function Sourcing() {
             className="col-span-1 lg:col-span-6 relative h-[60vh] md:h-[70vh] rounded-2xl overflow-hidden group"
           >
             <img 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbH6pEP1GOJKIPT7NYoRe3timqwuvNo59cNJ1Fc1-rF5SWWChqsr1daktfJS1MISMeP3dzhMYv8-0pFEnQQkHxOPPQwflDCfSG1W48KVXabP5IJ2h3ggrgtt_j_zbY4tIgOwu7hW-HK_VfdD7ag9d8miqpcG1vT0swmsO7vkF2MdZAeiP8zwc--n3CaW1KAX8_n3nyceN65olG1JpwMR5mioR5wUN2DADoFUybag0dlH0kJ3xA5THzwVsTTtOQAPoLDSasPnBvjNo" 
-              alt="Clinical botanical extraction process in laboratory" 
+              src="/multi-millet-health-mix.jpeg" 
+              alt="Mahizham Multi Millet Health Mix packaging showing natural grains and roasted nuts" 
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s] ease-in-out"
             />
             <div className="absolute inset-0 bg-primary/5 group-hover:bg-transparent transition-colors duration-700" />
@@ -35,10 +35,10 @@ export default function Sourcing() {
             
             <div className="space-y-6 text-on-surface-variant font-body text-base leading-relaxed">
               <p>
-                True efficacy begins at the source. Our rigorous selection process involves direct partnerships with cultivators who employ regenerative farming practices, ensuring the highest concentration of bioactive compounds.
+                True efficacy begins at the source. Our rigorous selection process involves direct partnerships with traditional farmers across India who cultivate native crops like Shikakai, Aavaram Senna, and Amla using chemical-free, pesticide-free methods.
               </p>
               <p>
-                Every botanical is subjected to advanced high-performance liquid chromatography (HPLC) to verify purity and potency before it enters our laboratory. We do not compromise on clinical integrity.
+                Every leaf, pod, and flower is carefully hand-sorted, sun-dried, and finely pulverized to preserve their raw potency. We guarantee 100% natural, whole-ingredient composition with absolutely zero synthetic fillers, sulfates, or chemical preservatives.
               </p>
             </div>
 
