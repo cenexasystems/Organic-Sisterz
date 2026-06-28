@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ProductCatalog from './components/ProductCatalog';
@@ -15,10 +16,44 @@ import Preloader from './components/Preloader';
 import ConsultationQuiz from './components/ConsultationQuiz';
 import AdminPortal from './components/AdminPortal';
 
+function Storefront() {
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const navigate = useNavigate();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1, ease: "easeOut" }}
+      className="min-h-screen bg-background text-on-background selection:bg-secondary-container selection:text-on-secondary-container font-body antialiased"
+    >
+      <Navbar 
+        onConsultationClick={() => setIsQuizOpen(true)} 
+        onAdminClick={() => navigate('/admin')}
+      />
+      
+      <main>
+        <Hero onConsultationClick={() => setIsQuizOpen(true)} />
+        <ProductCatalog />
+        <BeforeAfter />
+        <Herbarium />
+        <ComparisonTable />
+        <Sourcing />
+        <Efficacy />
+        <Testimonials />
+        <FaqAccordion />
+      </main>
+      
+      <Footer onAdminClick={() => navigate('/admin')} />
+
+      {/* Diagnostic consultation quiz overlay */}
+      <ConsultationQuiz isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
+    </motion.div>
+  );
+}
+
 export default function App() {
   const [isPreloaderActive, setIsPreloaderActive] = useState(true);
-  const [isQuizOpen, setIsQuizOpen] = useState(false);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   return (
     <>
@@ -27,37 +62,12 @@ export default function App() {
 
       <AnimatePresence>
         {!isPreloaderActive && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="min-h-screen bg-background text-on-background selection:bg-secondary-container selection:text-on-secondary-container font-body antialiased"
-          >
-            <Navbar 
-              onConsultationClick={() => setIsQuizOpen(true)} 
-              onAdminClick={() => setIsAdminOpen(true)}
-            />
-            
-            <main>
-              <Hero onConsultationClick={() => setIsQuizOpen(true)} />
-              <ProductCatalog />
-              <BeforeAfter />
-              <Herbarium />
-              <ComparisonTable />
-              <Sourcing />
-              <Efficacy />
-              <Testimonials />
-              <FaqAccordion />
-            </main>
-            
-            <Footer onAdminClick={() => setIsAdminOpen(true)} />
-
-            {/* Diagnostic consultation quiz overlay */}
-            <ConsultationQuiz isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
-
-            {/* Admin Management console */}
-            <AdminPortal isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
-          </motion.div>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Storefront />} />
+              <Route path="/admin" element={<AdminPortal />} />
+            </Routes>
+          </BrowserRouter>
         )}
       </AnimatePresence>
     </>
