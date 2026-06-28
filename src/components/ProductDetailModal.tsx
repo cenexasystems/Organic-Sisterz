@@ -1,26 +1,13 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Heart, Shield, Leaf, Sparkles, ChevronDown, ShoppingBag } from 'lucide-react';
-import { useState } from 'react';
-
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  sizeOption1: string;
-  sizeOption2: string;
-  priceOption1: number;
-  priceOption2: number;
-  image: string;
-  herbs: string;
-  benefits: string[];
-}
+import { useState, useEffect } from 'react';
+import type { Product } from '../utils/store';
 
 interface ProductDetailModalProps {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
-  onAddToCart: (id: string, size: 'opt1' | 'opt2') => void;
+  onAddToCart: (id: string, size: string) => void;
 }
 
 // Exact wording from the images provided
@@ -38,11 +25,14 @@ const productSpecs: Record<string, {
   'herbal-hair-oil': {
     tamilName: 'மூலிகை கூந்தல் எண்ணெய்',
     rating: '4.8',
-    details: 'MRP : 220/-\nBest before 6 months from the Mfd.\nPacked & Marketed by :\nMahizham Natural Products Pvt. Ltd., Chennai\nEmail : caremahizham@gmail.com',
-    ingredients: 'Infused with premium hair lipids and traditional Indian herbs including Bhringraj, Amla, Neem, Vetiver, Curry Leaves, and Coconut/Sesame oil.',
+    details: 'NO Chemicals\nArtificial Scents\nArtificial Flavours\n\nMRP : 220/-\nBest before 6 months from the Mfd.\nPacked & Marketed by :\nMahizham Natural Products Pvt. Ltd., Chennai\nEmail : caremahizham@gmail.com',
+    ingredients: 'Hibiscus, Rosemary, Rose Petals, Jatamansi Flax Seeds, Bhringraj, Amla, Alovera, Henna, Avuri, Fenugreek with unique & rare herbs.',
     benefitsList: [
-      'Apply Mahizham Herbal Hair oil on your scalp and massage with finger tips its regular usage.',
-      'Apply Hair Oil to the scalp gently massage few mins soak for an hour, then wash it with shikakai or mild shampoo ensure effectiveness.'
+      '* Controls premature greying',
+      '* Boosts volume and hair growth',
+      '* Protects from UV Rays',
+      '* Reduce dandruff',
+      '* Suitable for all ages'
     ],
     usage: 'Suggested Use :\n* Apply Mahizham Herbal Hair oil on your scalp and massage with finger tips its regular usage.\n* Apply Hair Oil to the scalp gently massage few mins soak for an hour, then wash it with shikakai or mild shampoo ensure effectiveness.',
     features: [
@@ -119,9 +109,15 @@ const productSpecs: Record<string, {
 };
 
 export default function ProductDetailModal({ product, isOpen, onClose, onAddToCart }: ProductDetailModalProps) {
-  const [selectedSize, setSelectedSize] = useState<'opt1' | 'opt2'>('opt1');
+  const [selectedSize, setSelectedSize] = useState<string>('');
   const [activeAccordion, setActiveAccordion] = useState<string | null>('details');
   const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (product && product.sizes.length > 0) {
+      setSelectedSize(product.sizes[0].size);
+    }
+  }, [product]);
 
   if (!product) return null;
 
@@ -140,8 +136,9 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
     ]
   };
 
-  const currentPrice = selectedSize === 'opt1' ? product.priceOption1 : product.priceOption2;
-  const currentSizeText = selectedSize === 'opt1' ? product.sizeOption1 : product.sizeOption2;
+  const activeSizeStr = selectedSize || (product.sizes[0]?.size || '');
+  const sizeObj = product.sizes.find(s => s.size === activeSizeStr) || product.sizes[0];
+  const currentPrice = sizeObj ? sizeObj.price : 0;
 
   const toggleAccordion = (section: string) => {
     setActiveAccordion(activeAccordion === section ? null : section);
@@ -288,30 +285,23 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                     </button>
                   </div>
                   
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setSelectedSize('opt1')}
-                      className={`px-5 py-3.5 rounded-xl font-body text-sm font-bold border transition-all duration-300 ${
-                        selectedSize === 'opt1'
-                          ? 'bg-primary text-white border-primary shadow-md'
-                          : 'bg-white text-primary border-outline-variant/30 hover:border-secondary'
-                      }`}
-                    >
-                      {product.sizeOption1}
-                    </button>
-                    <button
-                      onClick={() => setSelectedSize('opt2')}
-                      className={`px-5 py-3.5 rounded-xl font-body text-sm font-bold border transition-all duration-300 ${
-                        selectedSize === 'opt2'
-                          ? 'bg-primary text-white border-primary shadow-md'
-                          : 'bg-white text-primary border-outline-variant/30 hover:border-secondary'
-                      }`}
-                    >
-                      {product.sizeOption2}
-                    </button>
+                  <div className="flex flex-wrap gap-3">
+                    {product.sizes.map((sObj, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedSize(sObj.size)}
+                        className={`px-5 py-3.5 rounded-xl font-body text-sm font-bold border transition-all duration-300 ${
+                          activeSizeStr === sObj.size
+                            ? 'bg-primary text-white border-primary shadow-md'
+                            : 'bg-white text-primary border-outline-variant/30 hover:border-secondary'
+                        }`}
+                      >
+                        {sObj.size}
+                      </button>
+                    ))}
                   </div>
                   <p className="font-body text-[10px] text-on-surface-variant/80">
-                    Net Weight: {currentSizeText} • Total price: ₹{currentPrice}
+                    Net Weight: {activeSizeStr} • Total price: ₹{currentPrice}
                   </p>
                 </div>
 
@@ -356,13 +346,36 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                             <div className="whitespace-pre-line bg-surface-container-low p-3 rounded-xl border border-outline-variant/10 text-on-surface-variant/90 font-semibold mb-2">
                               {spec.details}
                             </div>
-                            <div>
-                              <span className="font-bold text-primary block mb-1">Ingredients :</span>
-                              <p className="italic bg-surface-container-low p-3 rounded-xl border border-outline-variant/10 text-on-surface-variant/90">{spec.ingredients}</p>
-                            </div>
                             {spec.fssai && (
                               <p className="text-[10px] font-bold text-secondary">fssai {spec.fssai}</p>
                             )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Dedicated Ingredients Accordion */}
+                  <div className="border-b border-outline-variant/20 pb-3">
+                    <button
+                      onClick={() => toggleAccordion('ingredients')}
+                      className="w-full flex justify-between items-center py-2.5 font-display text-sm font-bold text-primary hover:text-secondary transition-colors"
+                    >
+                      <span>INGREDIENTS</span>
+                      <ChevronDown className={`w-4 h-4 text-on-surface-variant transition-transform duration-300 ${activeAccordion === 'ingredients' ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {activeAccordion === 'ingredients' && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="pt-2 pb-3 text-xs text-on-surface-variant font-body leading-relaxed">
+                            <div className="italic bg-surface-container-low p-3 rounded-xl border border-outline-variant/10 text-on-surface-variant/90">
+                              {spec.ingredients}
+                            </div>
                           </div>
                         </motion.div>
                       )}
@@ -477,7 +490,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                 </div>
                 <button
                   onClick={() => {
-                    onAddToCart(product.id, selectedSize);
+                    onAddToCart(product.id, activeSizeStr);
                     onClose();
                   }}
                   className="w-full sm:w-auto bg-primary hover:bg-primary-container text-on-primary font-body text-xs font-bold tracking-widest uppercase px-12 py-4 rounded-full flex items-center justify-center gap-2 shadow-lg transition-all duration-300 cursor-pointer"

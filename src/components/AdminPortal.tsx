@@ -9,6 +9,16 @@ import { useNavigate } from 'react-router-dom';
 import { getStoredProducts, saveStoredProducts, getStoredOrders, saveStoredOrders } from '../utils/store';
 import type { Product, Order } from '../utils/store';
 
+export interface Coupon {
+  code: string;
+  discount: number;
+  minOrder: number;
+  expiryDate?: string;
+  usageLimit?: number;
+  usedCount: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
 export default function AdminPortal() {
   const navigate = useNavigate();
   const [passcode, setPasscode] = useState('');
@@ -55,11 +65,22 @@ export default function AdminPortal() {
   // Filter state for dashboard/whatsapp center
   const [periodFilter, setPeriodFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
 
+  // Filters for Orders Hub tab (Bills)
+  const [ordersSourceFilter, setOrdersSourceFilter] = useState<'ALL' | 'OFFLINE' | 'ONLINE' | 'MANUAL'>('ALL');
+  const [ordersDateFilter, setOrdersDateFilter] = useState<'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'CUSTOM'>('ALL');
+  const [ordersSearchInvoice, setOrdersSearchInvoice] = useState('');
+  const [ordersSearchName, setOrdersSearchName] = useState('');
+  const [ordersSearchPhone, setOrdersSearchPhone] = useState('');
+  const [ordersStartDate, setOrdersStartDate] = useState('');
+  const [ordersEndDate, setOrdersEndDate] = useState('');
+
   // Category and Coupon list state
   const [categories, setCategories] = useState<string[]>(['Hair Care', 'Skin Care', 'Nutrition', 'Pooja Items']);
-  const [coupons, setCoupons] = useState<{ code: string; discount: number }[]>([
-    { code: 'MAHIZHAM10', discount: 10 },
-    { code: 'WELCOME5', discount: 5 }
+  const [coupons, setCoupons] = useState<Coupon[]>([
+    { code: 'VILLAGES', discount: 15, minOrder: 1, expiryDate: '2026-06-19', usageLimit: 20, usedCount: 0, status: 'ACTIVE' },
+    { code: 'MNMKL', discount: 10, minOrder: 1, expiryDate: '2026-07-31', usageLimit: 100, usedCount: 0, status: 'ACTIVE' },
+    { code: 'WELCOME', discount: 10, minOrder: 10, expiryDate: '2026-12-31', usageLimit: 50, usedCount: 1, status: 'ACTIVE' },
+    { code: 'SAVE10', discount: 10, minOrder: 1, expiryDate: '', usageLimit: 0, usedCount: 0, status: 'ACTIVE' }
   ]);
   const [adminUsers, setAdminUsers] = useState<{ name: string; role: string }[]>([
     { name: 'Anand Sivaram', role: 'System Owner' },
@@ -70,6 +91,10 @@ export default function AdminPortal() {
   const [newCatName, setNewCatName] = useState('');
   const [newCouponCode, setNewCouponCode] = useState('');
   const [newCouponDiscount, setNewCouponDiscount] = useState<number>(10);
+  const [newCouponMinOrder, setNewCouponMinOrder] = useState<number>(1);
+  const [newCouponExpiryDate, setNewCouponExpiryDate] = useState('');
+  const [newCouponUsageLimit, setNewCouponUsageLimit] = useState<number>(20);
+  const [editingCouponCode, setEditingCouponCode] = useState<string | null>(null);
 
   useEffect(() => {
     setProducts(getStoredProducts());
@@ -248,16 +273,86 @@ export default function AdminPortal() {
   const addCoupon = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCouponCode.trim() || newCouponDiscount <= 0) return;
-    if (coupons.some(c => c.code.toLowerCase() === newCouponCode.trim().toLowerCase())) {
-      alert('Coupon code already exists.');
-      return;
+    
+    const formattedCode = newCouponCode.trim().toUpperCase();
+    
+    if (editingCouponCode) {
+      // Update existing coupon
+      setCoupons(prev => prev.map(c => c.code === editingCouponCode ? {
+        ...c,
+        code: formattedCode,
+        discount: newCouponDiscount,
+        minOrder: newCouponMinOrder,
+        expiryDate: newCouponExpiryDate,
+        usageLimit: newCouponUsageLimit
+      } : c));
+      setEditingCouponCode(null);
+    } else {
+      // Create new coupon
+      if (coupons.some(c => c.code.toUpperCase() === formattedCode)) {
+        alert('Coupon code already exists.');
+        return;
+      }
+      const newCp: Coupon = {
+        code: formattedCode,
+        discount: newCouponDiscount,
+        minOrder: newCouponMinOrder,
+        expiryDate: newCouponExpiryDate,
+        usageLimit: newCouponUsageLimit,
+        usedCount: 0,
+        status: 'ACTIVE'
+      };
+      setCoupons([...coupons, newCp]);
     }
-    setCoupons([...coupons, { code: newCouponCode.trim().toUpperCase(), discount: newCouponDiscount }]);
+    
+    // Reset form states
     setNewCouponCode('');
+    setNewCouponDiscount(10);
+    setNewCouponMinOrder(1);
+    setNewCouponExpiryDate('');
+    setNewCouponUsageLimit(20);
+  };
+
+  const startEditCoupon = (cp: Coupon) => {
+    setEditingCouponCode(cp.code);
+    setNewCouponCode(cp.code);
+    setNewCouponDiscount(cp.discount);
+    setNewCouponMinOrder(cp.minOrder);
+    setNewCouponExpiryDate(cp.expiryDate || '');
+    setNewCouponUsageLimit(cp.usageLimit || 0);
   };
 
   const deleteCoupon = (code: string) => {
     setCoupons(coupons.filter(c => c.code !== code));
+  };
+
+  const toggleCouponStatus = (code: string) => {
+    setCoupons(prev => prev.map(c => c.code === code ? { ...c, status: c.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' } : c));
+  };
+
+  const formatCouponExpiry = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  };
+
+  const isCouponExpired = (dateStr?: string) => {
+    if (!dateStr) return false;
+    const expiry = new Date(dateStr);
+    if (isNaN(expiry.getTime())) return false;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return expiry < today;
+  };
+
+  const handleGenerateCouponCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setNewCouponCode(code);
   };
 
   // WhatsApp message builder and dynamic formatter matching the screenshot
@@ -339,6 +434,31 @@ export default function AdminPortal() {
     }
   };
 
+  const generateNextInvoiceId = (currentOrders: Order[]) => {
+    const year = new Date().getFullYear();
+    const prefix = `INV-${year}-`;
+    
+    // Find all orders starting with the current prefix or the legacy POS- prefix
+    const invoiceNumbers = currentOrders
+      .filter(o => o.id.startsWith(prefix) || o.id.startsWith('POS-'))
+      .map(o => {
+        // If it starts with legacy prefix, treat as 0 or attempt to parse last part
+        if (o.id.startsWith('POS-')) {
+          const numPart = o.id.replace('POS-', '');
+          const parsed = parseInt(numPart.slice(-5), 10);
+          return isNaN(parsed) ? 0 : parsed;
+        }
+        const numPart = o.id.replace(prefix, '');
+        const parsed = parseInt(numPart, 10);
+        return isNaN(parsed) ? 0 : parsed;
+      });
+      
+    const maxNum = invoiceNumbers.length > 0 ? Math.max(...invoiceNumbers) : 0;
+    const nextNum = maxNum + 1;
+    const paddedNum = String(nextNum).padStart(5, '0');
+    return `${prefix}${paddedNum}`;
+  };
+
   const handleCheckoutPOS = () => {
     const subtotal = getSubtotal();
     const couponDisc = getCouponDiscount(subtotal);
@@ -346,13 +466,18 @@ export default function AdminPortal() {
     const grandTotal = getGrandTotal();
     const balance = billingAmountReceived >= grandTotal ? billingAmountReceived - grandTotal : 0;
 
+    const nextInvoiceId = generateNextInvoiceId(orders);
+
     // Create the order object to append to stored orders database
     const newOrder: Order = {
-      id: `POS-${Date.now()}`,
+      id: nextInvoiceId,
       customerName: billingCustomerName || 'Walk-in Customer',
       customerPhone: billingCustomerPhone || '7904199050',
       customerEmail: '', // Not required for offline POS checkout
       customerAddress: billingSource === 'OFFLINE' ? 'Offline POS Shop' : 'Online Shipping Address',
+      source: billingSource === 'OFFLINE'
+        ? (billingItems.some(it => it.isCustom) ? 'MANUAL' : 'OFFLINE')
+        : 'ONLINE',
       items: billingItems.map(it => ({
         productId: it.isCustom ? 'custom' : 'catalog',
         name: it.name || 'Unnamed Item',
@@ -381,11 +506,10 @@ export default function AdminPortal() {
     const manualDiscText = manualDisc > 0 ? `💸 *Discount:* -₹${manualDisc.toFixed(2)}\n` : '';
     const deliveryText = billingDeliveryFee > 0 ? `🚚 *Delivery:* ₹${billingDeliveryFee.toFixed(2)}\n` : '';
 
-    const invoiceMessage = `🌿 *POS BILLING INVOICE - MAHIZHAM*\n----------------------------------\n👤 *Customer:* ${billingCustomerName || 'Walk-in Customer'}\n📞 *Phone:* ${billingCustomerPhone || '-'}\n🛒 *Type:* ${billingSource}\n📅 *Date:* ${dateStr}\n\n📦 *Items:*\n${itemsText}\n\n💵 *Subtotal:* ₹${subtotal.toFixed(2)}\n${discountText}${manualDiscText}${deliveryText}----------------------------------\n💰 *GRAND TOTAL:* ₹${grandTotal.toFixed(2)}\n----------------------------------\n💵 *Cash Paid:* ₹${billingAmountReceived.toFixed(2)}\n🔄 *Change Return:* ₹${balance.toFixed(2)}\n\nThank you for shopping at Mahizham Natural Products! 🌿`;
+    const invoiceMessage = `🌿 *POS BILLING INVOICE - ORGANIC SISTERZ*\n----------------------------------\n👤 *Customer:* ${billingCustomerName || 'Walk-in Customer'}\n📞 *Phone:* ${billingCustomerPhone || '-'}\n🛒 *Type:* ${billingSource}\n📅 *Date:* ${dateStr}\n\n📦 *Items:*\n${itemsText}\n\n💵 *Subtotal:* ₹${subtotal.toFixed(2)}\n${discountText}${manualDiscText}${deliveryText}----------------------------------\n💰 *GRAND TOTAL:* ₹${grandTotal.toFixed(2)}\n----------------------------------\n💵 *Cash Paid:* ₹${billingAmountReceived.toFixed(2)}\n🔄 *Change Return:* ₹${balance.toFixed(2)}\n\nThank you for shopping at Organic Sisterz! 🌿`;
 
     // Copy to clipboard
     navigator.clipboard.writeText(invoiceMessage);
-    alert('POS Checkout successful! Invoice message copied to clipboard.');
 
     // Open WhatsApp Web targeting 7904199050 as requested
     window.open(`https://wa.me/917904199050?text=${encodeURIComponent(invoiceMessage)}`, '_blank');
@@ -400,10 +524,12 @@ export default function AdminPortal() {
     setBillingAmountReceived(0);
   };
 
-  // Filter orders by time period
+  // Filter storefront orders (WhatsApp requests) by time period
   const getFilteredOrders = () => {
     const now = new Date();
-    return orders.filter(o => {
+    // Only show storefront requests (ID starting with ORD-)
+    const storefrontOrders = orders.filter(o => o.id.startsWith('ORD-'));
+    return storefrontOrders.filter(o => {
       const oDate = new Date(o.createdAt);
       if (periodFilter === 'today') {
         return oDate.toDateString() === now.toDateString();
@@ -421,17 +547,71 @@ export default function AdminPortal() {
 
   const filteredOrdersList = getFilteredOrders();
 
-  // Calculated stats metrics
+  // Helper for filtering POS Bills in the Orders Hub tab
+  const getFilteredBills = () => {
+    // 1. Only show POS bills (ID starting with POS-)
+    let list = orders.filter(o => o.id.startsWith('POS-'));
+
+    // 2. Filter by source (OFFLINE, ONLINE, MANUAL)
+    if (ordersSourceFilter !== 'ALL') {
+      list = list.filter(o => {
+        const src = o.source || (o.items.some(it => it.productId === 'custom') ? 'MANUAL' : (o.customerAddress.includes('Offline') ? 'OFFLINE' : 'ONLINE'));
+        return src === ordersSourceFilter;
+      });
+    }
+
+    // 3. Filter by Date range
+    const now = new Date();
+    if (ordersDateFilter === 'TODAY') {
+      list = list.filter(o => new Date(o.createdAt).toDateString() === now.toDateString());
+    } else if (ordersDateFilter === 'WEEK') {
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      list = list.filter(o => new Date(o.createdAt) >= oneWeekAgo);
+    } else if (ordersDateFilter === 'MONTH') {
+      list = list.filter(o => {
+        const oDate = new Date(o.createdAt);
+        return oDate.getMonth() === now.getMonth() && oDate.getFullYear() === now.getFullYear();
+      });
+    } else if (ordersDateFilter === 'CUSTOM') {
+      if (ordersStartDate) {
+        const start = new Date(ordersStartDate);
+        start.setHours(0, 0, 0, 0);
+        list = list.filter(o => new Date(o.createdAt) >= start);
+      }
+      if (ordersEndDate) {
+        const end = new Date(ordersEndDate);
+        end.setHours(23, 59, 59, 999);
+        list = list.filter(o => new Date(o.createdAt) <= end);
+      }
+    }
+
+    // 4. Search text matches
+    if (ordersSearchInvoice) {
+      list = list.filter(o => o.id.toLowerCase().includes(ordersSearchInvoice.toLowerCase()));
+    }
+    if (ordersSearchName) {
+      list = list.filter(o => o.customerName.toLowerCase().includes(ordersSearchName.toLowerCase()));
+    }
+    if (ordersSearchPhone) {
+      list = list.filter(o => o.customerPhone.toLowerCase().includes(ordersSearchPhone.toLowerCase()));
+    }
+
+    return list;
+  };
+
+  const filteredBills = getFilteredBills();
+
+  // Calculated stats metrics for WhatsApp center (storefront ORD- orders only)
   const totalRevenue = orders
-    .filter(o => o.status === 'Completed')
+    .filter(o => o.id.startsWith('ORD-') && o.status === 'Completed')
     .reduce((sum, o) => sum + o.totalPrice, 0);
-  const totalRequestsCount = orders.length;
-  const pendingOrdersCount = orders.filter(o => o.status === 'Pending').length;
-  const contactedOrdersCount = orders.filter(o => o.status === 'Processing').length;
-  const completedOrdersCount = orders.filter(o => o.status === 'Completed').length;
+  const totalRequestsCount = orders.filter(o => o.id.startsWith('ORD-')).length;
+  const pendingOrdersCount = orders.filter(o => o.id.startsWith('ORD-') && o.status === 'Pending').length;
+  const contactedOrdersCount = orders.filter(o => o.id.startsWith('ORD-') && o.status === 'Processing').length;
+  const completedOrdersCount = orders.filter(o => o.id.startsWith('ORD-') && o.status === 'Completed').length;
 
   return (
-    <div className="min-h-screen bg-[#FAF9F5] flex flex-col md:flex-row font-poppins text-primary antialiased">
+    <div className="min-h-screen md:h-screen bg-[#FAF9F5] flex flex-col md:flex-row font-poppins text-primary antialiased md:overflow-hidden">
       
       {/* AUTHENTICATION VIEW */}
       {!isAuthenticated ? (
@@ -446,7 +626,7 @@ export default function AdminPortal() {
             </div>
             <h3 className="font-display text-2xl font-bold text-primary tracking-tight">Passcode Verification</h3>
             <p className="text-sm text-on-surface-variant leading-relaxed px-2">
-              Access to the Mahizham admin ERP portal requires authentication. Please input your passcode to enter.
+              Access to the Organic Sisterz admin ERP portal requires authentication. Please input your passcode to enter.
             </p>
             <form onSubmit={handleLogin} className="space-y-6">
               <input
@@ -481,7 +661,7 @@ export default function AdminPortal() {
       ) : (
         <>
           {/* LEFT SIDEBAR NAVIGATION */}
-          <div className="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-outline-variant/25 flex flex-col p-8 shrink-0 shadow-sm justify-between">
+          <div className="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-outline-variant/25 flex flex-col p-8 shrink-0 shadow-sm justify-between md:h-full">
             <div>
               {/* Branding Section */}
               <div className="flex items-center gap-3.5 mb-10 pb-6 border-b border-outline-variant/10">
@@ -490,7 +670,7 @@ export default function AdminPortal() {
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-primary tracking-wide">Business ERP</h2>
-                  <span className="text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold block">Mahizham Store</span>
+                  <span className="text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold block">Organic Sisterz</span>
                 </div>
               </div>
 
@@ -635,7 +815,7 @@ export default function AdminPortal() {
           </div>
 
           {/* MAIN DASHBOARD CONTENT AREA */}
-          <div className="flex-grow p-8 md:p-12 overflow-y-auto w-full">
+          <div className="flex-grow pt-5 px-6 pb-6 md:pt-6 md:px-10 md:pb-8 overflow-y-auto w-full">
             
             {/* TAB 1: WHATSAPP CENTER (Matches Vercel Screenshot layout) */}
             {activeTab === 'whatsapp' && (
@@ -869,11 +1049,11 @@ export default function AdminPortal() {
 
             {/* TAB: POS BILLING PANEL */}
             {activeTab === 'pos_billing' && (
-              <div className="space-y-8 text-left">
+              <div className="space-y-6 text-left">
                 {/* Header Title Controls */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-outline-variant/15">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-4 border-b border-outline-variant/15">
                   <div className="flex items-center gap-3">
-                    <div className="border-l-4 border-red-600 pl-3">
+                    <div className="border-l-4 border-[#2B3E2F] pl-3">
                       <h1 className="text-3xl font-extrabold tracking-tight text-primary font-poppins">POS Billing Panel</h1>
                       <p className="text-xs text-on-surface-variant font-medium mt-1">
                         Quick invoice generator & database synced checkout
@@ -887,18 +1067,18 @@ export default function AdminPortal() {
                       onClick={() => setBillingSource('OFFLINE')}
                       className={`text-xs font-bold py-2.5 px-5 rounded-full transition-all cursor-pointer flex items-center gap-2 ${
                         billingSource === 'OFFLINE'
-                          ? 'bg-[#1F2937] text-white shadow-sm'
+                          ? 'bg-[#2B3E2F] text-white shadow-sm'
                           : 'text-[#4B5563] hover:text-primary'
                       }`}
                     >
-                      <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
                       OFFLINE (POS)
                     </button>
                     <button
                       onClick={() => setBillingSource('ONLINE')}
                       className={`text-xs font-bold py-2.5 px-5 rounded-full transition-all cursor-pointer flex items-center gap-2 ${
                         billingSource === 'ONLINE'
-                          ? 'bg-[#1D4ED8] text-white shadow-sm'
+                          ? 'bg-[#C27D38] text-white shadow-sm'
                           : 'text-[#4B5563] hover:text-primary'
                       }`}
                     >
@@ -908,19 +1088,19 @@ export default function AdminPortal() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Left Column - Details and items (2/3 width) */}
-                  <div className="lg:col-span-2 space-y-8">
+                  <div className="lg:col-span-2 space-y-6">
                     
                     {/* Customer Details Card */}
-                    <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm space-y-6">
+                    <div className="bg-white border border-outline-variant/20 rounded-2xl p-5 shadow-sm space-y-4">
                       <div className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-wider">
-                        <Users className="w-4.5 h-4.5 text-red-500" />
+                        <Users className="w-4.5 h-4.5 text-[#2B3E2F]" />
                         <span>Customer Details</span>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
                           <label className="block text-[11px] font-bold text-[#4B5563] uppercase tracking-wider">Customer Name</label>
                           <input
                             type="text"
@@ -930,7 +1110,7 @@ export default function AdminPortal() {
                             className="w-full bg-[#FAF9F6] border border-outline-variant/35 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all text-[#1F2937] font-semibold"
                           />
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                           <label className="block text-[11px] font-bold text-[#4B5563] uppercase tracking-wider">Mobile Number (WhatsApp)</label>
                           <input
                             type="tel"
@@ -944,10 +1124,10 @@ export default function AdminPortal() {
                     </div>
 
                     {/* Order Items Card */}
-                    <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm space-y-6">
-                      <div className="flex items-center justify-between pb-4 border-b border-outline-variant/10">
+                    <div className="bg-white border border-outline-variant/20 rounded-2xl p-5 shadow-sm space-y-4">
+                      <div className="flex items-center justify-between pb-3 border-b border-outline-variant/10">
                         <div className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-wider">
-                          <Receipt className="w-4.5 h-4.5 text-red-500" />
+                          <Receipt className="w-4.5 h-4.5 text-[#2B3E2F]" />
                           <span>Order Items</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -959,7 +1139,7 @@ export default function AdminPortal() {
                           </button>
                           <button
                             onClick={addCustomItem}
-                            className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
+                            className="bg-white hover:bg-[#2B3E2F] hover:text-white text-[#2B3E2F] border border-[#2B3E2F]/20 font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
                           >
                             + Add Custom Item
                           </button>
@@ -967,7 +1147,7 @@ export default function AdminPortal() {
                       </div>
 
                       {/* Items List Rows */}
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         {billingItems.length === 0 ? (
                           <div className="text-center py-10 text-on-surface-variant text-sm italic">
                             No items added to this bill. Add custom items or select from catalog.
@@ -993,7 +1173,7 @@ export default function AdminPortal() {
                                     }}
                                     className="bg-white border border-outline-variant/30 hover:bg-[#FAF9F6] text-primary font-bold text-[10px] uppercase px-3 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer whitespace-nowrap"
                                   >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#2B3E2F]"></span>
                                     Catalog
                                   </button>
                                 </div>
@@ -1048,15 +1228,17 @@ export default function AdminPortal() {
                   </div>
 
                   {/* Right Column - Invoice Receipt Box (1/3 width) */}
-                  <div className="space-y-8">
-                    <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-md space-y-6 flex flex-col justify-between h-full">
+                  <div className="space-y-6">
+                    <div className="bg-white border border-outline-variant/20 rounded-2xl p-5 shadow-sm space-y-4 flex flex-col justify-between h-full">
                       
                       {/* Receipt Header details block */}
                       <div className="border border-outline-variant/30 rounded-xl p-4 bg-[#FAF9F6]/40 space-y-3">
                         <div className="flex justify-between items-center text-[10px] font-extrabold uppercase tracking-widest text-[#4B5563]">
                           <span>Source</span>
-                          <span className={`px-2 py-0.5 rounded-md font-bold text-[9px] ${
-                            billingSource === 'OFFLINE' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                          <span className={`px-2.5 py-0.5 rounded-md font-bold text-[9px] ${
+                            billingSource === 'OFFLINE' 
+                              ? 'bg-[#FAF9F5] text-[#2B3E2F] border border-[#2B3E2F]/20' 
+                              : 'bg-amber-50 text-amber-800 border border-amber-200'
                           }`}>
                             {billingSource}
                           </span>
@@ -1072,13 +1254,13 @@ export default function AdminPortal() {
                       </div>
 
                       {/* Receipt Items scrollable breakdown */}
-                      <div className="flex-grow min-h-[140px] border-b border-dashed border-outline-variant/30 py-3">
+                      <div className="flex-grow min-h-[120px] border-b border-dashed border-outline-variant/30 py-3">
                         {billingItems.length === 0 ? (
-                          <div className="text-center py-12 text-[#9CA3AF] text-xs font-semibold">
+                          <div className="text-center py-10 text-[#9CA3AF] text-xs font-semibold">
                             No items added yet
                           </div>
                         ) : (
-                          <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                          <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
                             {billingItems.map((item, idx) => (
                               <div key={idx} className="flex justify-between text-xs font-semibold text-primary">
                                 <span>
@@ -1094,7 +1276,7 @@ export default function AdminPortal() {
                       </div>
 
                       {/* Form calculations (Discounts, Coupons, Delivery, Total) */}
-                      <div className="space-y-4 pt-2">
+                      <div className="space-y-4 pt-1">
                         
                         {/* Coupon Selection */}
                         <div className="space-y-1.5">
@@ -1174,7 +1356,7 @@ export default function AdminPortal() {
                         </div>
 
                         {/* Cash Amount Received & Change Balance */}
-                        <div className="border border-outline-variant/30 rounded-xl p-4 bg-[#FAF9F6]/40 space-y-3 mt-4">
+                        <div className="border border-outline-variant/30 rounded-xl p-4 bg-[#FAF9F6]/40 space-y-3 mt-3">
                           <span className="block text-[10px] font-extrabold uppercase tracking-widest text-[#4B5563]">Cash Payment</span>
                           <div className="space-y-1.5">
                             <label className="block text-[10px] font-bold text-[#4B5563] uppercase tracking-wider">Amount Received (₹)</label>
@@ -1201,7 +1383,7 @@ export default function AdminPortal() {
                           className={`w-full font-bold text-xs py-4 px-6 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
                             billingItems.length === 0
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-[#10B981] hover:bg-[#059669] text-white'
+                              : 'bg-[#2B3E2F] hover:bg-[#1E2B21] text-white'
                           }`}
                         >
                           <MessageSquare className="w-4 h-4" />
@@ -1218,7 +1400,7 @@ export default function AdminPortal() {
                     <div className="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-6 shadow-2xl">
                       <div className="flex justify-between items-center pb-3 border-b border-outline-variant/15">
                         <div className="flex items-center gap-2">
-                          <Package className="w-5 h-5 text-red-500" />
+                          <Package className="w-5 h-5 text-[#2B3E2F]" />
                           <h3 className="text-lg font-bold text-primary uppercase tracking-wider font-poppins">Select Product Variant</h3>
                         </div>
                         <button
@@ -1410,61 +1592,201 @@ export default function AdminPortal() {
             {activeTab === 'orders' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Orders List */}
-                <div className="lg:col-span-7 space-y-4">
+                <div className="lg:col-span-7 space-y-5">
                   <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-primary">Orders Hub</h1>
-                    <p className="text-sm text-on-surface-variant mt-1">Review shipping details, address logs, and print invoices.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-primary font-poppins">Billing & Invoice Hub</h1>
+                    <p className="text-sm text-on-surface-variant mt-1 font-medium">
+                      Filter POS sales records, track offline/online sources, and manage transactions.
+                    </p>
                   </div>
+
+                  {/* Filter controls row 1: Source classification */}
+                  <div className="flex flex-wrap gap-2">
+                    {(['ALL', 'OFFLINE', 'ONLINE', 'MANUAL'] as const).map(src => (
+                      <button
+                        key={src}
+                        onClick={() => setOrdersSourceFilter(src)}
+                        className={`text-xs font-bold py-2 px-4 rounded-full transition-all cursor-pointer ${
+                          ordersSourceFilter === src
+                            ? 'bg-[#2B3E2F] text-white shadow-sm'
+                            : 'bg-white border border-outline-variant/35 text-primary hover:bg-[#FAF9F5]'
+                        }`}
+                      >
+                        {src === 'ALL' ? 'All Bills' : src === 'OFFLINE' ? 'Offline' : src === 'ONLINE' ? 'Online' : 'Manual'}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Filter controls row 2: Date presets */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {(['TODAY', 'WEEK', 'MONTH', 'CUSTOM'] as const).map(dt => (
+                      <button
+                        key={dt}
+                        onClick={() => setOrdersDateFilter(dt)}
+                        className={`text-xs font-bold py-2 px-4 rounded-full transition-all cursor-pointer ${
+                          ordersDateFilter === dt
+                            ? 'bg-[#2B3E2F] text-white shadow-sm'
+                            : 'bg-white border border-outline-variant/35 text-primary hover:bg-[#FAF9F5]'
+                        }`}
+                      >
+                        {dt === 'TODAY' ? 'Today' : dt === 'WEEK' ? 'This Week' : dt === 'MONTH' ? 'This Month' : 'Custom Range'}
+                      </button>
+                    ))}
+                    
+                    {(ordersDateFilter !== 'ALL' || ordersStartDate || ordersEndDate || ordersSearchInvoice || ordersSearchName || ordersSearchPhone) && (
+                      <button
+                        onClick={() => {
+                          setOrdersSourceFilter('ALL');
+                          setOrdersDateFilter('ALL');
+                          setOrdersSearchInvoice('');
+                          setOrdersSearchName('');
+                          setOrdersSearchPhone('');
+                          setOrdersStartDate('');
+                          setOrdersEndDate('');
+                        }}
+                        className="text-xs font-bold text-red-600 hover:text-red-800 transition-colors cursor-pointer ml-2"
+                      >
+                        Clear Dates
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Filter controls row 3: Search inputs & Date pickers */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-[#FAF9F6]/40 p-4 rounded-2xl border border-outline-variant/15">
+                    {/* Invoice/Bill No */}
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">Invoice / Bill No</label>
+                      <input
+                        type="text"
+                        placeholder="Invoice / Bill No"
+                        value={ordersSearchInvoice}
+                        onChange={(e) => setOrdersSearchInvoice(e.target.value)}
+                        className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-primary transition-all text-[#1F2937] font-semibold"
+                      />
+                    </div>
+                    
+                    {/* Customer Name */}
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">Customer Name</label>
+                      <input
+                        type="text"
+                        placeholder="Customer Name"
+                        value={ordersSearchName}
+                        onChange={(e) => setOrdersSearchName(e.target.value)}
+                        className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-primary transition-all text-[#1F2937] font-semibold"
+                      />
+                    </div>
+
+                    {/* Mobile Number */}
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">Mobile Number</label>
+                      <input
+                        type="text"
+                        placeholder="Mobile Number"
+                        value={ordersSearchPhone}
+                        onChange={(e) => setOrdersSearchPhone(e.target.value)}
+                        className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-primary transition-all text-[#1F2937] font-semibold"
+                      />
+                    </div>
+
+                    {/* Custom range start date */}
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">Start Date</label>
+                      <input
+                        type="date"
+                        value={ordersStartDate}
+                        onChange={(e) => {
+                          setOrdersStartDate(e.target.value);
+                          setOrdersDateFilter('CUSTOM');
+                        }}
+                        className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-1.5 text-xs text-primary font-semibold focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Custom range end date picker */}
+                  {(ordersDateFilter === 'CUSTOM' || ordersStartDate) && (
+                    <div className="w-full sm:w-1/2 md:w-1/4 bg-[#FAF9F6]/40 p-4 rounded-2xl border border-outline-variant/15 mt-2">
+                      <div className="space-y-1">
+                        <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">End Date</label>
+                        <input
+                          type="date"
+                          value={ordersEndDate}
+                          onChange={(e) => {
+                            setOrdersEndDate(e.target.value);
+                            setOrdersDateFilter('CUSTOM');
+                          }}
+                          className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-1.5 text-xs text-primary font-semibold focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                    </div>
+                  )}
                   
+                  {/* Bills List Table */}
                   <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
-                    {orders.length === 0 ? (
-                      <div className="p-8 text-center text-on-surface-variant text-sm">
-                        No orders placed yet.
+                    {filteredBills.length === 0 ? (
+                      <div className="p-12 text-center text-on-surface-variant text-sm italic">
+                        No billing records found matching the active filters.
                       </div>
                     ) : (
                       <table className="w-full text-left text-sm">
                         <thead>
                           <tr className="bg-surface-container-low text-primary font-bold border-b border-outline-variant/25">
-                            <th className="px-6 py-4">Order ID</th>
+                            <th className="px-6 py-4">Bill ID</th>
                             <th className="px-6 py-4">Customer</th>
+                            <th className="px-6 py-4">Source</th>
                             <th className="px-6 py-4">Total</th>
                             <th className="px-6 py-4">Status</th>
                             <th className="px-6 py-4 text-right">Action</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-outline-variant/10">
-                          {orders.map(o => (
-                            <tr 
-                              key={o.id} 
-                              className={`hover:bg-[#FAF9F5]/40 transition-colors cursor-pointer ${
-                                selectedOrder && selectedOrder.id === o.id ? 'bg-[#2B3E2F]/5' : ''
-                              }`}
-                              onClick={() => setSelectedOrder(o)}
-                            >
-                              <td className="px-6 py-4 font-bold text-primary">{o.id}</td>
-                              <td className="px-6 py-4">
-                                <div className="font-semibold">{o.customerName}</div>
-                                <div className="text-xs text-on-surface-variant mt-0.5">{o.customerPhone}</div>
-                              </td>
-                              <td className="px-6 py-4 font-bold text-primary">₹{o.totalPrice}</td>
-                              <td className="px-6 py-4">
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase border ${
-                                  o.status === 'Completed'
-                                    ? 'bg-green-50 text-green-700 border-green-200'
-                                    : o.status === 'Processing'
-                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                    : o.status === 'Cancelled'
-                                    ? 'bg-red-50 text-red-700 border-red-200'
-                                    : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                }`}>
-                                  {o.status}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                <Eye className="w-5 h-5 text-on-surface-variant hover:text-primary ml-auto transition-colors" />
-                              </td>
-                            </tr>
-                          ))}
+                          {filteredBills.map(o => {
+                            const src = o.source || (o.items.some(it => it.productId === 'custom') ? 'MANUAL' : (o.customerAddress.includes('Offline') ? 'OFFLINE' : 'ONLINE'));
+                            return (
+                              <tr 
+                                key={o.id} 
+                                className={`hover:bg-[#FAF9F5]/40 transition-colors cursor-pointer ${
+                                  selectedOrder && selectedOrder.id === o.id ? 'bg-[#2B3E2F]/5' : ''
+                                }`}
+                                onClick={() => setSelectedOrder(o)}
+                              >
+                                <td className="px-6 py-4 font-bold text-primary">{o.id}</td>
+                                <td className="px-6 py-4">
+                                  <div className="font-semibold">{o.customerName}</div>
+                                  <div className="text-xs text-on-surface-variant mt-0.5">{o.customerPhone}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                    src === 'MANUAL' 
+                                      ? 'bg-purple-50 text-purple-700 border border-purple-200' 
+                                      : src === 'OFFLINE' 
+                                      ? 'bg-[#FAF9F5] text-[#2B3E2F] border border-[#2B3E2F]/20' 
+                                      : 'bg-amber-50 text-amber-800 border border-amber-200'
+                                  }`}>
+                                    {src}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 font-bold text-primary">₹{o.totalPrice}</td>
+                                <td className="px-6 py-4">
+                                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase border ${
+                                    o.status === 'Completed'
+                                      ? 'bg-green-50 text-green-700 border-green-200'
+                                      : o.status === 'Processing'
+                                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                      : o.status === 'Cancelled'
+                                      ? 'bg-red-50 text-red-700 border-red-200'
+                                      : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                  }`}>
+                                    {o.status}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <Eye className="w-5 h-5 text-on-surface-variant hover:text-primary ml-auto transition-colors" />
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     )}
@@ -1852,60 +2174,217 @@ export default function AdminPortal() {
 
             {/* TAB 7: COUPONS MANAGER */}
             {activeTab === 'coupons' && (
-              <div className="space-y-8 max-w-3xl">
+              <div className="space-y-6 max-w-6xl">
                 <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-primary">Discount Coupons</h1>
-                  <p className="text-sm text-on-surface-variant mt-1">Configure active promotional codes for storefront checkouts.</p>
+                  <h1 className="text-3xl font-bold tracking-tight text-primary font-poppins">Coupon Management</h1>
                 </div>
 
-                <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm space-y-6">
-                  <form onSubmit={addCoupon} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <input
-                      type="text"
-                      placeholder="CODE (e.g. EXTRA15)"
-                      value={newCouponCode}
-                      onChange={(e) => setNewCouponCode(e.target.value)}
-                      className="border border-outline-variant/40 rounded-xl py-3 px-4 text-xs text-primary focus:outline-none focus:border-secondary uppercase"
-                      required
-                    />
-                    <input
-                      type="number"
-                      placeholder="Discount Percentage"
-                      value={newCouponDiscount || ''}
-                      onChange={(e) => setNewCouponDiscount(Number(e.target.value))}
-                      className="border border-outline-variant/40 rounded-xl py-3 px-4 text-xs text-primary focus:outline-none focus:border-secondary"
-                      min={1}
-                      max={100}
-                      required
-                    />
-                    <button
-                      type="submit"
-                      className="bg-primary hover:bg-primary-container text-on-primary text-xs font-bold py-3 rounded-xl uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" /> Add Coupon
-                    </button>
-                  </form>
+                {/* Top Alert banner */}
+                <div className="bg-[#EBF5FF] text-[#1E40AF] border border-[#BFDBFE] px-5 py-3 rounded-xl text-xs font-semibold">
+                  Coupon discount applies to product subtotal only — not delivery charge.
+                </div>
 
-                  <div className="space-y-3">
-                    <span className="block text-xs font-bold text-primary uppercase tracking-wider">Active Coupons</span>
-                    <div className="divide-y divide-outline-variant/10">
-                      {coupons.map((cp, i) => (
-                        <div key={i} className="py-3.5 flex justify-between items-center">
-                          <div>
-                            <span className="font-bold text-secondary text-sm block">{cp.code}</span>
-                            <span className="text-xs text-on-surface-variant mt-0.5">{cp.discount}% Off checkout totals</span>
-                          </div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  
+                  {/* Left Column: + New Coupon Form */}
+                  <div className="lg:col-span-5 bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm space-y-6">
+                    <h3 className="text-sm font-bold text-primary uppercase tracking-wider font-poppins">
+                      {editingCouponCode ? 'Edit Coupon' : '+ New Coupon'}
+                    </h3>
+                    
+                    <form onSubmit={addCoupon} className="space-y-4">
+                      {/* Coupon Code Input and Generate Button */}
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-bold text-[#4B5563] uppercase tracking-wider">Coupon Code *</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="e.g. PILLOW"
+                            value={newCouponCode}
+                            onChange={(e) => setNewCouponCode(e.target.value.toUpperCase())}
+                            className="flex-grow border border-outline-variant/35 rounded-xl py-3 px-4 text-xs text-primary focus:outline-none focus:border-primary uppercase font-bold"
+                            required
+                          />
                           <button
-                            onClick={() => deleteCoupon(cp.code)}
-                            className="text-on-surface-variant hover:text-error transition-colors cursor-pointer"
-                            title="Delete Coupon"
+                            type="button"
+                            onClick={handleGenerateCouponCode}
+                            className="bg-[#2B3E2F] hover:bg-[#1E2B21] text-white text-[10px] font-bold px-4 py-3 rounded-xl uppercase tracking-wider transition-colors cursor-pointer"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            Generate
                           </button>
                         </div>
-                      ))}
+                      </div>
+
+                      {/* Discount % and Min Order in 2 columns */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-bold text-[#4B5563] uppercase tracking-wider">Discount % *</label>
+                          <input
+                            type="number"
+                            value={newCouponDiscount || ''}
+                            onChange={(e) => setNewCouponDiscount(Number(e.target.value))}
+                            className="w-full border border-outline-variant/35 rounded-xl py-3 px-4 text-xs text-primary focus:outline-none focus:border-primary font-semibold"
+                            min={1}
+                            max={100}
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-bold text-[#4B5563] uppercase tracking-wider">Min Order (₹)</label>
+                          <input
+                            type="number"
+                            value={newCouponMinOrder || ''}
+                            onChange={(e) => setNewCouponMinOrder(Number(e.target.value))}
+                            className="w-full border border-outline-variant/35 rounded-xl py-3 px-4 text-xs text-primary focus:outline-none focus:border-primary font-semibold"
+                            min={0}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Expiry Date and Usage Limit in 2 columns */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-bold text-[#4B5563] uppercase tracking-wider">Expiry Date</label>
+                          <input
+                            type="date"
+                            value={newCouponExpiryDate}
+                            onChange={(e) => setNewCouponExpiryDate(e.target.value)}
+                            className="w-full border border-outline-variant/35 rounded-xl py-2.5 px-4 text-xs text-primary focus:outline-none focus:border-primary font-semibold"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-[10px] font-bold text-[#4B5563] uppercase tracking-wider">Usage Limit</label>
+                          <input
+                            type="number"
+                            value={newCouponUsageLimit || ''}
+                            onChange={(e) => setNewCouponUsageLimit(Number(e.target.value))}
+                            className="w-full border border-outline-variant/35 rounded-xl py-3 px-4 text-xs text-primary focus:outline-none focus:border-primary font-semibold"
+                            min={0}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="pt-2 flex gap-3">
+                        {editingCouponCode && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCouponCode(null);
+                              setNewCouponCode('');
+                              setNewCouponDiscount(10);
+                              setNewCouponMinOrder(1);
+                              setNewCouponExpiryDate('');
+                              setNewCouponUsageLimit(20);
+                            }}
+                            className="w-1/3 border border-outline-variant/40 hover:bg-[#FAF9F5] text-primary text-[10px] font-bold py-3 rounded-xl uppercase tracking-wider transition-colors cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                        <button
+                          type="submit"
+                          className={`bg-[#2B3E2F] hover:bg-[#1E2B21] text-white text-[10px] font-bold py-3.5 rounded-xl uppercase tracking-wider transition-colors cursor-pointer ${
+                            editingCouponCode ? 'w-2/3' : 'w-full'
+                          }`}
+                        >
+                          {editingCouponCode ? 'Update Coupon' : 'Create Coupon'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Right Column: All Coupons List */}
+                  <div className="lg:col-span-7 bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm space-y-4">
+                    <div className="flex justify-between items-center pb-2 border-b border-outline-variant/10">
+                      <h3 className="text-sm font-bold text-primary uppercase tracking-wider font-poppins">
+                        All Coupons ({coupons.length})
+                      </h3>
+                      <button
+                        onClick={handleRefresh}
+                        className="text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 cursor-pointer font-bold"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                      </button>
+                    </div>
+
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                      {coupons.length === 0 ? (
+                        <div className="p-8 text-center text-on-surface-variant text-xs italic">
+                          No coupons configured yet.
+                        </div>
+                      ) : (
+                        coupons.map((cp) => {
+                          const expired = isCouponExpired(cp.expiryDate);
+                          return (
+                            <div
+                              key={cp.code}
+                              className="bg-[#FAF9F6]/50 border border-outline-variant/15 rounded-xl p-4 space-y-2 flex flex-col justify-between hover:bg-[#FAF9F6] transition-colors relative"
+                            >
+                              {/* Header info */}
+                              <div className="flex justify-between items-start">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-primary text-base tracking-wide font-poppins">{cp.code}</span>
+                                  <span 
+                                    onClick={() => toggleCouponStatus(cp.code)}
+                                    className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider cursor-pointer border ${
+                                      cp.status === 'ACTIVE'
+                                        ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
+                                        : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                                    }`}
+                                  >
+                                    {cp.status}
+                                  </span>
+                                </div>
+                                <div className="flex gap-3 text-[10px] font-bold">
+                                  <button
+                                    onClick={() => startEditCoupon(cp)}
+                                    className="text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => deleteCoupon(cp.code)}
+                                    className="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
+                                  >
+                                    Del
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Details */}
+                              <div className="space-y-1">
+                                <div className="text-xs font-semibold text-primary">
+                                  {cp.discount}% off <span className="text-on-surface-variant/70 font-medium">· min ₹{cp.minOrder}</span>
+                                </div>
+                                <div className="text-[11px] text-on-surface-variant flex flex-wrap items-center gap-1.5 font-medium">
+                                  <span>Used {cp.usedCount} times</span>
+                                  {cp.expiryDate && (
+                                    <>
+                                      <span>•</span>
+                                      <span>expires {formatCouponExpiry(cp.expiryDate)}</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Expired badge */}
+                              {expired && (
+                                <div className="text-[10px] font-bold text-red-600 uppercase tracking-wider mt-1">
+                                  Expired
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
+
                 </div>
               </div>
             )}

@@ -1,64 +1,41 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { ShoppingBag, ArrowRight, Heart } from 'lucide-react';
-
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  price50ml: number;
-  price100ml: number;
-  image: string;
-}
-
-const products: Product[] = [
-  {
-    id: 'hair-oil',
-    name: 'Clinical Botanical Hair & Scalp Oil',
-    category: 'Hair Treatment',
-    description: 'Proprietary formulation of sage extract, cold-pressed bhringraj, and botanical lipids to accelerate thickness and soothe irritation.',
-    price50ml: 45,
-    price100ml: 78,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDi8gtIvyu44eI0wdsqxbA3swpU1w3pmT32gR3aeELcR8HMw9Lqu1ePVaCnJd5mOiUfUQfglThoYVm_jprlrJXCCo9hGtXPDOOlfAP7v7R9HYgr2Lv-Bvpus9JkSO8IPXhZY0r5mt_u9W6kCxVxUaMJpVKzrlj9f4I1WcbmTDPBOETdysU2-8ImOe2GUIJR6cU60OtKvhfe_jcVfw2znUvNGeOxv0dzktdVBpHWEU4tILo8VB9Pkx4MWk72XaEbD9pmncIGI9DGZoE'
-  },
-  {
-    id: 'follicle-serum',
-    name: 'Follicle Active Restoration Serum',
-    category: 'Scalp Care',
-    description: 'Lightweight water-soluble serum containing dense peptides and adaptogenic ginseng to awaken root activity and block DHT topically.',
-    price50ml: 52,
-    price100ml: 88,
-    image: 'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=600'
-  },
-  {
-    id: 'scalp-scrub',
-    name: 'Rosemary & Sea Salt Scalp Scrub',
-    category: 'Exfoliation',
-    description: 'Invigorating pre-wash exfoliator designed to clear sebum build-up, remove flakes, and increase blood circulation to follicles.',
-    price50ml: 38,
-    price100ml: 64,
-    image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&q=80&w=600'
-  }
-];
+import { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
+import { ArrowRight, Heart, ShieldCheck } from 'lucide-react';
+import ProductDetailModal from './ProductDetailModal';
+import { getStoredProducts } from '../utils/store';
+import type { Product } from '../utils/store';
 
 export default function ProductCatalog() {
-  const [selectedSizes, setSelectedSizes] = useState<Record<string, '50ml' | '100ml'>>({
-    'hair-oil': '100ml',
-    'follicle-serum': '50ml',
-    'scalp-scrub': '100ml'
-  });
-
+  const [products, setProducts] = useState<Product[]>([]);
   const [addedProduct, setAddedProduct] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleSizeChange = (id: string, size: '50ml' | '100ml') => {
-    setSelectedSizes(prev => ({ ...prev, [id]: size }));
+  useEffect(() => {
+    const updateProducts = () => {
+      const stored = getStoredProducts();
+      setProducts(stored);
+    };
+
+    updateProducts();
+    window.addEventListener('mahizham_products_updated', updateProducts);
+    return () => window.removeEventListener('mahizham_products_updated', updateProducts);
+  }, []);
+
+  const handleOpenModal = (product: Product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
   };
 
-  const handleAddToCart = (id: string) => {
+  const handleAddToCart = (id: string, size?: string) => {
     setAddedProduct(id);
     setTimeout(() => setAddedProduct(null), 2000);
+
+    const event = new CustomEvent('mahizham_add_to_cart_triggered', {
+      detail: { productId: id, size: size || '' }
+    });
+    window.dispatchEvent(event);
   };
 
   const toggleFavorite = (id: string) => {
@@ -66,7 +43,7 @@ export default function ProductCatalog() {
   };
 
   return (
-    <section className="py-24 md:py-32 bg-surface-container-low relative overflow-hidden">
+    <section id="products-catalog" className="py-24 md:py-32 bg-[#FAF9F5] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
         {/* Header */}
@@ -99,11 +76,10 @@ export default function ProductCatalog() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((product, index) => {
-            const size = selectedSizes[product.id];
-            const price = size === '50ml' ? product.price50ml : product.price100ml;
-            const isAdded = addedProduct === product.id;
+            const prices = product.sizes.map(s => s.price);
+            const lowestPrice = prices.length > 0 ? Math.min(...prices) : 0;
             const isFav = !!favorites[product.id];
 
             return (
@@ -112,114 +88,91 @@ export default function ProductCatalog() {
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.8, delay: index * 0.15, ease: "easeOut" }}
+                transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
                 className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/20 hover:border-secondary/40 hover:shadow-lg transition-all duration-500"
               >
                 {/* Image Section */}
-                <div className="relative aspect-[4/5] overflow-hidden bg-surface-container-high">
+                <div 
+                  onClick={() => handleOpenModal(product)}
+                  className="relative aspect-[4/5] overflow-hidden bg-surface-container-high cursor-pointer flex items-center justify-center p-4 bg-[#FAF9F5]"
+                >
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
+                    className="max-h-full max-w-full object-contain transition-transform duration-[2s] group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  <div className="absolute inset-0 bg-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                   
                   {/* Floating Action Buttons */}
                   <div className="absolute top-4 right-4 flex flex-col gap-2">
                     <button 
-                      onClick={() => toggleFavorite(product.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(product.id);
+                      }}
                       className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
                         isFav 
                           ? 'bg-secondary text-white' 
-                          : 'bg-white/80 text-primary hover:bg-white'
+                          : 'bg-white/80 text-primary hover:bg-white border border-outline-variant/20'
                       }`}
                     >
                       <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
                     </button>
                   </div>
                   
-                  <div className="absolute top-4 left-4 bg-white/85 backdrop-blur-md px-3 py-1.5 rounded-full">
+                  <div className="absolute top-4 left-4 bg-white/85 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1 border border-outline-variant/10">
                     <span className="font-body text-[10px] font-bold tracking-widest uppercase text-on-surface-variant">
                       {product.category}
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-4 left-4 bg-primary/80 backdrop-blur-md px-2.5 py-1 rounded-md text-on-primary">
+                    <span className="font-body text-[9px] font-semibold tracking-wider uppercase flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3 text-secondary-container" /> {product.herbs}
                     </span>
                   </div>
                 </div>
 
                 {/* Info Section */}
-                <div className="p-8 flex flex-col flex-grow space-y-6">
-                  <div className="space-y-2">
-                    <h3 className="font-display text-2xl text-primary font-medium group-hover:text-secondary transition-colors duration-300 leading-tight">
+                <div className="p-6 flex flex-col flex-grow space-y-5">
+                  <div 
+                    onClick={() => handleOpenModal(product)}
+                    className="space-y-2 cursor-pointer group/title"
+                  >
+                    <h3 className="font-display text-xl text-primary font-medium group-hover/title:text-secondary transition-colors duration-300 leading-snug">
                       {product.name}
                     </h3>
-                    <p className="font-body text-sm text-on-surface-variant leading-relaxed">
+                    <p className="font-body text-xs text-on-surface-variant leading-relaxed line-clamp-3">
                       {product.description}
                     </p>
                   </div>
 
-                  {/* Size Selector */}
-                  <div className="flex items-center gap-4">
-                    <span className="font-body text-[11px] font-semibold text-on-surface-variant tracking-wider uppercase">
-                      Volume:
-                    </span>
-                    <div className="flex gap-2 bg-surface-container-low p-1 rounded-full border border-outline-variant/20">
-                      {(['50ml', '100ml'] as const).map(vol => (
-                        <button
-                          key={vol}
-                          onClick={() => handleSizeChange(product.id, vol)}
-                          className={`relative px-4 py-1.5 rounded-full font-body text-[10px] font-semibold tracking-wider uppercase transition-colors duration-300 ${
-                            size === vol
-                              ? 'bg-primary text-on-primary shadow-sm'
-                              : 'text-on-surface-variant hover:text-primary'
-                          }`}
-                        >
-                          {vol}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {/* Bullet Benefits */}
+                  <ul className="space-y-1.5 border-t border-b border-outline-variant/10 py-3 mt-auto">
+                    {product.benefits.slice(0, 3).map((benefit, bIndex) => (
+                      <li key={bIndex} className="font-body text-[10px] text-on-surface-variant flex items-start gap-1">
+                        <span className="text-secondary font-bold">✓</span>
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                  {/* Pricing and Add to Cart */}
-                  <div className="flex items-center justify-between pt-4 border-t border-outline-variant/30 mt-auto">
+                  {/* Pricing and Select Options */}
+                  <div className="flex items-center justify-between pt-2">
                     <div>
-                      <span className="font-body text-[10px] text-on-surface-variant uppercase tracking-widest block opacity-75">
-                        Price ({size})
+                      <span className="font-body text-[9px] text-on-surface-variant uppercase tracking-widest block opacity-75">
+                        Starting at
                       </span>
-                      <span className="font-display text-2xl font-semibold text-primary">
-                        ${price}.00
+                      <span className="font-display text-xl font-bold text-primary">
+                        ₹{lowestPrice}.00
                       </span>
                     </div>
 
                     <button
-                      onClick={() => handleAddToCart(product.id)}
-                      className={`relative overflow-hidden font-body text-xs font-semibold tracking-widest uppercase px-6 py-3.5 rounded-full flex items-center gap-2 transition-all duration-500 select-none ${
-                        isAdded
-                          ? 'bg-secondary text-white'
-                          : 'bg-primary text-on-primary hover:bg-primary-container'
-                      }`}
+                      onClick={() => handleOpenModal(product)}
+                      className="font-body text-[10px] font-semibold tracking-widest uppercase px-5 py-3 rounded-full flex items-center gap-1.5 bg-primary text-on-primary hover:bg-primary-container transition-all duration-300 select-none cursor-pointer"
                     >
-                      <AnimatePresence mode="wait">
-                        {isAdded ? (
-                          <motion.span
-                            key="added"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="flex items-center gap-1"
-                          >
-                            Added <span className="text-secondary-fixed">✓</span>
-                          </motion.span>
-                        ) : (
-                          <motion.span
-                            key="add"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="flex items-center gap-2"
-                          >
-                            Add to Cart <ShoppingBag className="w-3.5 h-3.5" />
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
+                      Select Options <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -229,6 +182,15 @@ export default function ProductCatalog() {
         </div>
 
       </div>
+
+      <ProductDetailModal
+        product={selectedProduct}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddToCart={(id, size) => {
+          handleAddToCart(id, size);
+        }}
+      />
     </section>
   );
 }
