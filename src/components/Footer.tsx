@@ -1,4 +1,8 @@
-export default function Footer() {
+interface FooterProps {
+  onAdminClick?: () => void;
+}
+
+export default function Footer({ onAdminClick }: FooterProps) {
   return (
     <footer className="bg-primary pt-24 pb-12 px-6 lg:px-8 border-t border-primary-container">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8">
@@ -40,6 +44,14 @@ export default function Footer() {
           <a href="#" className="text-outline-variant hover:text-white font-body text-base hover:translate-x-1 transition-transform duration-300">
             Contact
           </a>
+          {onAdminClick && (
+            <button 
+              onClick={onAdminClick}
+              className="text-left text-outline-variant hover:text-white font-body text-base hover:translate-x-1 transition-transform duration-300 cursor-pointer"
+            >
+              Admin Console
+            </button>
+          )}
         </div>
 
       </div>

@@ -13,10 +13,12 @@ import FaqAccordion from './components/FaqAccordion';
 import Footer from './components/Footer';
 import Preloader from './components/Preloader';
 import ConsultationQuiz from './components/ConsultationQuiz';
+import AdminPortal from './components/AdminPortal';
 
 export default function App() {
   const [isPreloaderActive, setIsPreloaderActive] = useState(true);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   return (
     <>
@@ -31,7 +33,10 @@ export default function App() {
             transition={{ duration: 1, ease: "easeOut" }}
             className="min-h-screen bg-background text-on-background selection:bg-secondary-container selection:text-on-secondary-container font-body antialiased"
           >
-            <Navbar onConsultationClick={() => setIsQuizOpen(true)} />
+            <Navbar 
+              onConsultationClick={() => setIsQuizOpen(true)} 
+              onAdminClick={() => setIsAdminOpen(true)}
+            />
             
             <main>
               <Hero onConsultationClick={() => setIsQuizOpen(true)} />
@@ -45,10 +50,13 @@ export default function App() {
               <FaqAccordion />
             </main>
             
-            <Footer />
+            <Footer onAdminClick={() => setIsAdminOpen(true)} />
 
             {/* Diagnostic consultation quiz overlay */}
             <ConsultationQuiz isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
+
+            {/* Admin Management console */}
+            <AdminPortal isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
           </motion.div>
         )}
       </AnimatePresence>
