@@ -94,7 +94,7 @@ export default function Hero({ onConsultationClick }: HeroProps) {
       >
         <img 
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuDi8gtIvyu44eI0wdsqxbA3swpU1w3pmT32gR3aeELcR8HMw9Lqu1ePVaCnJd5mOiUfUQfglThoYVm_jprlrJXCCo9hGtXPDOOlfAP7v7R9HYgr2Lv-Bvpus9JkSO8IPXhZY0r5mt_u9W6kCxVxUaMJpVKzrlj9f4I1WcbmTDPBOETdysU2-8ImOe2GUIJR6cU60OtKvhfe_jcVfw2znUvNGeOxv0dzktdVBpHWEU4tILo8VB9Pkx4MWk72XaEbD9pmncIGI9DGZoE" 
-          alt="Organic Sistez Herbal Hair Oil bottle on travertine stone" 
+          alt="Organic Sisterz Mahizham Herbal Hair Oil bottle on travertine stone" 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
         />
         <div className="absolute inset-0 bg-black/3 group-hover:opacity-0 transition-opacity" />
@@ -128,7 +128,7 @@ export default function Hero({ onConsultationClick }: HeroProps) {
           className="space-y-4 flex flex-col items-center"
         >
           <span className="font-body text-xs font-semibold text-secondary tracking-[0.25em] uppercase">
-            Clinical Botanical
+            Mahizham by Organic Sisterz
           </span>
           <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-primary leading-[1.1] font-medium tracking-tight max-w-3xl flex flex-wrap justify-center">
             {titleWords.map((word, i) => (
@@ -151,7 +151,7 @@ export default function Hero({ onConsultationClick }: HeroProps) {
           transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
           className="font-body text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed"
         >
-          Meticulously sourced, scientifically validated. We bridge the gap between ancient herbal wisdom and modern clinical efficacy.
+          Handcrafted, chemical-free hair, skin, and wellness formulations. Revitalizing your hair growth, scalp health, and skin radiance naturally with up to 50 active traditional herbs.
         </motion.p>
         
         <motion.div 

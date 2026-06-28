@@ -23,7 +23,7 @@ interface ProductDetailModalProps {
   onAddToCart: (id: string, size: 'opt1' | 'opt2') => void;
 }
 
-// Custom specifications matching the exact packaging images provided by the user
+// Exact wording from the images provided
 const productSpecs: Record<string, {
   tamilName: string;
   rating: string;
@@ -38,83 +38,82 @@ const productSpecs: Record<string, {
   'herbal-hair-oil': {
     tamilName: 'மூலிகை கூந்தல் எண்ணெய்',
     rating: '4.8',
-    details: 'Mahizham Herbal Hair Oil is compiled using traditional cold-pressed sesame and coconut oil lipids infused with 40 premium whole-plant botanicals, keeping the scalp cool and roots nourished.',
-    ingredients: 'Cold pressed coconut oil, Sesame oil, Amla (Nellikai), Bhringraj (Karisalankanni), Vetiver (Ramacham), Neem leaves, Hibiscus flowers, Curry leaves, Aloe vera, and unique rare herbs.',
+    details: 'MRP : 220/-\nBest before 6 months from the Mfd.\nPacked & Marketed by :\nMahizham Natural Products Pvt. Ltd., Chennai\nEmail : caremahizham@gmail.com',
+    ingredients: 'Infused with premium hair lipids and traditional Indian herbs including Bhringraj, Amla, Neem, Vetiver, Curry Leaves, and Coconut/Sesame oil.',
     benefitsList: [
-      'Controls active hair fall and strengthens follicles from the root.',
-      'Cools the scalp, relieves headaches, and reduces stress/body heat.',
-      'Prevents premature hair greying and combats itchy dandruff conditions.'
+      'Apply Mahizham Herbal Hair oil on your scalp and massage with finger tips its regular usage.',
+      'Apply Hair Oil to the scalp gently massage few mins soak for an hour, then wash it with shikakai or mild shampoo ensure effectiveness.'
     ],
-    usage: 'Apply Mahizham Herbal Hair oil on your scalp and massage gently with fingertips regularly. For deep conditioning, apply to the scalp, massage for a few minutes, soak for an hour, then wash it with Mahizham Shikakai or a mild chemical-free shampoo.',
+    usage: 'Suggested Use :\n* Apply Mahizham Herbal Hair oil on your scalp and massage with finger tips its regular usage.\n* Apply Hair Oil to the scalp gently massage few mins soak for an hour, then wash it with shikakai or mild shampoo ensure effectiveness.',
     features: [
-      { icon: 'leaf', title: '100% Natural', subtitle: 'Raw Herbs & Oils' },
-      { icon: 'sparkles', title: 'Double Infused', subtitle: '40 Herbs' },
-      { icon: 'plant', title: 'Scalp Cooling', subtitle: 'Stress Relief' },
-      { icon: 'shield', title: 'Zero Chemicals', subtitle: 'No Mineral Oil' }
+      { icon: 'leaf', title: '100% Natural', subtitle: 'Pure & Handpicked' },
+      { icon: 'sparkles', title: 'Fresh & Fragrant', subtitle: 'Daily Selection' },
+      { icon: 'plant', title: 'Pooja Ready', subtitle: 'Temple Quality' },
+      { icon: 'shield', title: 'Safe Packaging', subtitle: 'Hygienically Packed' }
     ]
   },
   'shikakai-powder': {
     tamilName: 'சிகைக்காய் பொடி',
     rating: '4.7',
-    details: 'A traditional bio-cleanser prepared with 40 wild-harvested herbs, acting as a complete daily alternative to chemical shampoos. Gently washes hair while preserving natural sebum layers.',
-    ingredients: 'Shikakai, Methi (Fenugreek), Reetha (Soapnut), Avuri (Indigo), Hibiscus, Green Gram, Vetiver, Aloe vera, Curry Leaves, Bringaraj, Neem, Amla, Kadukkai (Haritaki), Poolankizhangu (White Turmeric), Avaram Flower, Rose Flower, Henna, Karisalankanni, with unique and rare herbs.',
+    details: 'Net Weight : 100 gm\nMRP : 140/-\nPacked & Marketed by :\nMahizham Natural Products\nEmail : caremahizham@gmail.com\nBest before 6 months from the date of packing',
+    ingredients: 'Shitakai, Methi Reetha, Avuri, Hibiscus, Green Garam, Vetiver, Aloe, Curry Leaves, Bringaraj, Neem,Amla, Kadukkai, Poolankizhangu, Avaram Flower,Rose Flower, Henna, Karisalankani With Unique and rare Herbs.',
     benefitsList: [
-      'Strengthens hair roots and promotes a healthy scalp environment.',
-      'Prevents hair loss and controls premature greying.',
-      'Acts as a powerful, non-drying natural anti-dandruff agent.'
+      '*Strengthens hair root and healthy scalp.',
+      '* Prevents hair loss and pre-mature greying.',
+      '* Act as a anti-dandruff agent.'
     ],
-    usage: 'Daily Bio Wash: Take a small quantity of Shikakai Powder, mix with water to form a smooth paste, apply to wet hair and scalp, massage gently and rinse thoroughly.\n\nHair Pack: Apply the paste to hair, leave it on for 10 minutes to let the 40 herbs absorb, and rinse off completely with clean water.',
+    usage: 'Usage :\nTake Little Quantity of Shikakai Powder Mix with water apply to hair & wash it or\nHair Pack : Apply with your hair Leave it with 10 minutes then rinse off with water',
     features: [
       { icon: 'leaf', title: '100% Natural', subtitle: 'Pure & Handpicked' },
-      { icon: 'sparkles', title: 'Fresh & Herbaceous', subtitle: 'Traditional Aroma' },
-      { icon: 'plant', title: 'Foaming Herbs', subtitle: 'Reetha & Shikakai' },
-      { icon: 'shield', title: 'Safe Hair Wash', subtitle: 'Hygienically Packed' }
+      { icon: 'sparkles', title: 'Fresh & Fragrant', subtitle: 'Daily Selection' },
+      { icon: 'plant', title: 'Pooja Ready', subtitle: 'Temple Quality' },
+      { icon: 'shield', title: 'Safe Packaging', subtitle: 'Hygienically Packed' }
     ]
   },
   'face-pack-bath-powder': {
     tamilName: 'குளியல் பொடி & ஃபேஸ் பேக்',
     rating: '4.9',
-    details: 'A luxury skin-toning daily bath powder formulated with 50 herbs designed to cleanse, exfoliate, and protect both male and female skin barriers without chemical surfactants.',
-    ingredients: 'Green Gram, Urad dhal, Wheat, Rosemary, Hibiscus, Manjista, Dhriviya Pattai, Neeradi Muthu, Badham, Kadukaai, Mahizham Flower, Shenbaga Flower, Dry Aloevera, Red Sandal, Beetroot Dry, and rare herbs.',
+    details: 'Net Weight : 100gm\nMRP : 180/-\nPacked & Marketed by :\nMahizham Natural Products Pvt. Ltd., Chennai\nEmail : caremahizham@gmail.com\nBest before 6 months from the date of packing',
+    ingredients: 'Green Gram, Uraddhal, Wheat, Rosemary, Hibiscus,Manjista, Dhriviya Pattai, Neeradi Muthu, Badham, Kadukaai, Mahizham Flower, Shenbaga Flower, Dry Aloevera, Red Sandal, Beetroot Dry with unique & rare herbs.',
     benefitsList: [
-      'Controls active acne, pimples, and unsightly blackheads.',
-      'Removes dead skin cells, clears sunburn/tan, and softens skin texture.',
-      'Improves skin tone and complexion while preventing scaling, germs, and skin rashes.'
+      '* Controls Acne Pimples, Blackheads.',
+      '* Removes dead Skin, Sunburn, Tan and softness skin.',
+      '* Improves skin complexion.',
+      '* Ideal for daily usage instead of soap.',
+      '* Prevents white scaling, germs and rashes in the skin.'
     ],
-    usage: 'Bath Powder (Soap Alternate): Apply a few drops of coconut oil or ghee to your skin, mix the required amount of Bath Powder with water to form a paste, apply to face and body, scrub gently, and rinse off.\n\nFace Pack: Apply the paste directly to the face, leave it to dry for 10 minutes, and rinse off with cool water.',
+    usage: 'Usage :\nBath Powder : Apply Coconut oil or Ghee & take the required amount of Bath Powder mixed with water to form a paste. Apply For Face and entire body, Scrub well & wash it\n\nFace Pack : Apply the paste and leave it to dry or 10 minutes and rinse off.',
     features: [
-      { icon: 'leaf', title: '100% Organic', subtitle: '50 Pure Herbs' },
-      { icon: 'sparkles', title: 'Brightening', subtitle: 'Red Sandal & Turmeric' },
-      { icon: 'plant', title: 'Soap Alternate', subtitle: 'Daily Body Scrub' },
-      { icon: 'shield', title: 'Acne Control', subtitle: 'Anti-Bacterial' }
+      { icon: 'leaf', title: '100% Natural', subtitle: 'Pure & Handpicked' },
+      { icon: 'sparkles', title: 'Fresh & Fragrant', subtitle: 'Daily Selection' },
+      { icon: 'plant', title: 'Pooja Ready', subtitle: 'Temple Quality' },
+      { icon: 'shield', title: 'Safe Packaging', subtitle: 'Hygienically Packed' }
     ]
   },
   'multi-millet-mix': {
     tamilName: 'சத்து மாவு',
     rating: '4.8',
-    details: 'A premium nutrient-dense energy drink mix crafted with 45 traditional grains, nuts, and roasted millets. Highly digestible and perfect for nourishing both kids and adults.',
-    ingredients: 'Moongil Rice, Raagi, Red Rice, Thooyamalli Rice, Naattu Kambu, Saamai, Thinai, Kaatu Yanam, Mappillai Samba, Black Kavuni, Navara Rice, Kuthiraivaali, Moongdhal, Black Urad Dhal, Kuzhiadichan Rice, Kadaikani Rice, Panivaragu, Samba Wheat, Badham, Pista, Cashew, Black Channa, White Channa, Rajma, Kollu, Red Aval, Red Corn, Red Karamani, Makka Cholam, Elachi, Sukku, Fried Gram, Varagu, Barley, Javarasi, Flax Seed, Poongaar Rice, Karunkuravai Rice, Neelam Zamba, Pumpkin Seed, Kullakaar Rice, Soya Beans, Valan Zamba, Double Beans, Kudavazhai Rice.',
+    details: 'MRP : 220/-\nNET WEIGHT : 250gm\nBEST BEFORE : 6 Months\nBATCH NO. 13.06.2026\nPacked & Marketed by :\nMahizham Natural Products\nChennai\nContact : 87783 11671 / 98406 23527\nSTORAGE INSTRUCTION : Transfer the contents Into a clean dry airtight container & Refrigerate.',
+    ingredients: 'Moongil Rice, Raagi, Red Rice, Thooyamalli Rice, Naattu Kambu, Saamai, Thinai, Kaatu Yanam, Mappillai Samba, Black Kavuni , Navara Rice, Kuthiraivaali, Moongdhal, Black Urad Dhal, Kuzhiadichan Rice, Kadaikani Rice, Panivaragu, Samba Wheat, Badham, Pista, Cashew, Black Channa, White Channa, Rajma,Kollu, Red Aval, Red Corn,Red Karamani, Makka Cholam, Elachi, Sukku, Fried Gram, Varagu, Barley, Javarasi, Flax Seed, Poongaar Rice, Karunkuravai Rice,Neelam Zamba, Pumpkin Seed, Kullakaar Rice, Soya Beans, Valan Zamba, Double Beans, Kudavazhai Rice',
     benefitsList: [
-      'Packed with natural dietary fiber, plant proteins, and essential minerals.',
-      'Provides sustained energy and keeps the digestive system clean.',
-      '100% free of preservatives, chemical sweeteners, or synthetic colors.'
+      'Note : You can also use this Powder to make Yummy Ladoo, Dosa & Adai.'
     ],
-    usage: 'Health Drink: Mix a spoonful of Wellness Mix with a little water to form a lump-free paste. Boil a glass of water, add the mixture, and cook for 10 minutes on a medium flame while stirring. Turn off the flame and add milk & jaggery (or buttermilk & salt).\n\nOther Uses: Can also be used to prepare nutritious Ladoos, high-fiber Dosas, and traditional Adais.',
+    usage: 'HOW TO PREPARE ?\n* Add Little water to a Spoonful of Mahizham Multi Millet Health Mix\n* Boil a Glass of Water. Add the mixture & cook for 10 mins on a medium flame.\n* Turn off flame. add Required milk & Jaggery Powder (or) buttermilk & salt.',
     nutritionalInfo: [
       { label: 'Energy', value: '431 Kcal' },
       { label: 'Carbohydrates', value: '63.9 g' },
       { label: 'Total Fat', value: '13.3 g' },
       { label: 'Protein', value: '13.8 g' },
       { label: 'Dietary Fiber', value: '9.80 g' },
-      { label: 'Total Sugars', value: 'BDL (Below Detection Limit)' },
+      { label: 'Total Sugars', value: 'BDL' },
       { label: 'Sodium', value: '74.9 mg' }
     ],
     fssai: '22424524000080',
     features: [
-      { icon: 'leaf', title: '45 Grains & Nuts', subtitle: '100% Whole Food' },
-      { icon: 'sparkles', title: 'Nutrient Rich', subtitle: 'High Protein & Fiber' },
-      { icon: 'plant', title: 'FSSAI Approved', subtitle: 'Lic: 22424524000080' },
-      { icon: 'shield', title: 'Preservative Free', subtitle: 'No Artificial Additives' }
+      { icon: 'leaf', title: '100% Natural', subtitle: 'Pure & Handpicked' },
+      { icon: 'sparkles', title: 'Fresh & Fragrant', subtitle: 'Daily Selection' },
+      { icon: 'plant', title: 'Pooja Ready', subtitle: 'Temple Quality' },
+      { icon: 'shield', title: 'Safe Packaging', subtitle: 'Hygienically Packed' }
     ]
   }
 };
@@ -134,8 +133,10 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
     benefitsList: product.benefits,
     usage: 'Apply as directed on the label.',
     features: [
-      { icon: 'leaf', title: '100% Natural', subtitle: 'Pure Botanical' },
-      { icon: 'shield', title: 'Safe Purity', subtitle: 'Hygienically Packed' }
+      { icon: 'leaf', title: '100% Natural', subtitle: 'Pure & Handpicked' },
+      { icon: 'sparkles', title: 'Fresh & Fragrant', subtitle: 'Daily Selection' },
+      { icon: 'plant', title: 'Pooja Ready', subtitle: 'Temple Quality' },
+      { icon: 'shield', title: 'Safe Packaging', subtitle: 'Hygienically Packed' }
     ]
   };
 
@@ -352,13 +353,15 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                           className="overflow-hidden"
                         >
                           <div className="pt-2 pb-3 text-xs text-on-surface-variant font-body leading-relaxed space-y-3">
-                            <p>{spec.details}</p>
+                            <div className="whitespace-pre-line bg-surface-container-low p-3 rounded-xl border border-outline-variant/10 text-on-surface-variant/90 font-semibold mb-2">
+                              {spec.details}
+                            </div>
                             <div>
-                              <span className="font-bold text-primary block mb-1">Ingredients:</span>
+                              <span className="font-bold text-primary block mb-1">Ingredients :</span>
                               <p className="italic bg-surface-container-low p-3 rounded-xl border border-outline-variant/10 text-on-surface-variant/90">{spec.ingredients}</p>
                             </div>
                             {spec.fssai && (
-                              <p className="text-[10px] font-bold text-secondary">FSSAI Licence No: {spec.fssai}</p>
+                              <p className="text-[10px] font-bold text-secondary">fssai {spec.fssai}</p>
                             )}
                           </div>
                         </motion.div>
@@ -372,7 +375,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                       onClick={() => toggleAccordion('benefits')}
                       className="w-full flex justify-between items-center py-2.5 font-display text-sm font-bold text-primary hover:text-secondary transition-colors"
                     >
-                      <span>BENEFITS & CLAIMS</span>
+                      <span>BENEFITS</span>
                       <ChevronDown className={`w-4 h-4 text-on-surface-variant transition-transform duration-300 ${activeAccordion === 'benefits' ? 'rotate-180' : ''}`} />
                     </button>
                     <AnimatePresence>
@@ -384,11 +387,10 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                           className="overflow-hidden"
                         >
                           <div className="pt-2 pb-3 text-xs text-on-surface-variant font-body leading-relaxed">
-                            <ul className="space-y-2">
+                            <ul className="space-y-2 bg-surface-container-low p-3 rounded-xl border border-outline-variant/10">
                               {spec.benefitsList.map((ben, idx) => (
-                                <li key={idx} className="flex gap-2 items-start">
-                                  <span className="text-secondary font-bold text-sm leading-none">✓</span>
-                                  <span>{ben}</span>
+                                <li key={idx} className="text-on-surface-variant">
+                                  {ben}
                                 </li>
                               ))}
                             </ul>
