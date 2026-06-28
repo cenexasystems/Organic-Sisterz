@@ -9,20 +9,20 @@ interface FAQItem {
 
 const faqs: FAQItem[] = [
   {
-    question: "What is HPLC Chromatography and why does it matter?",
-    answer: "High-Performance Liquid Chromatography (HPLC) is a scientific method we use to separate and measure every chemical compound in our botanical extracts. This guarantees that each bottle contains precisely 1.8% wedelolactone and 2.5% carnosic acid for clinical efficacy, with absolute zero synthetic fillers or pesticides."
+    question: "How do I prepare and use the Herbal Shikakai Powder as a bio hair wash?",
+    answer: "Take a small quantity of Shikakai powder and mix it with water in a bowl to form a smooth, medium-thick paste. Wet your hair thoroughly, apply the paste to your scalp and strands, massage gently, leave on for 10 minutes to allow the 40 herbs to activate, and rinse completely with water. There is no need to use chemical shampoo afterwards."
   },
   {
-    question: "How long does it take to see visible results?",
-    answer: "Clinical trials indicate an increase in hair density and a 42% acceleration in cellular turnover within 28 days of consistent application. For structural follicle strengthening and hair shaft elasticity, we recommend a 3-month continuous regimen."
+    question: "How long does it take to see visible reduction in hair fall?",
+    answer: "Most users experience a significant reduction in active hair fall and improved scalp cooling within 3 to 4 weeks of consistent use (applying the Herbal Hair Oil twice weekly and washing with the Shikakai Bio Wash). For new hair density and follicle restoration, we recommend completing the full 12-week organic regimen."
   },
   {
-    question: "Are your formulations safe for colored or chemically-treated hair?",
-    answer: "Yes, our formulations are 100% color-safe. Because we use vacuum centrifugation and avoid synthetic sulfates, parabens, or silicones, our oils and serums reinforce the hair's natural keratin bonds rather than stripping color or creating build-up."
+    question: "Can I use the Face Pack & Bath Powder daily instead of soap?",
+    answer: "Yes, absolutely. Our Face Pack & Bath Powder is formulated with 50 traditional herbs like Aavaram Senna and Wild Turmeric. It is 100% chemical-free and contains no sulfate or artificial foaming agents. It gently lifts dead skin, clears sunburn/tan, and prevents acne while keeping the skin barrier soft, making it an excellent daily soap replacement."
   },
   {
-    question: "How often should I use the Hair & Scalp Oil?",
-    answer: "We recommend applying the Hair & Scalp Oil 2-3 times per week. Gently massage 4-5 drops into your scalp, focus on areas of thinning, and leave it on for at least 45 minutes before rinsing with a mild shampoo. For deep nourishment, it can be left on overnight."
+    question: "How should I store these organic formulations?",
+    answer: "Since our powders and oils are 100% natural and contain zero synthetic preservatives, it is important to store them in a cool, dry place away from direct sunlight. Ensure the zipper pouch is sealed tightly after every use, and avoid using wet spoons or letting water get inside the bags. Best used within 6 months from the date of packing."
   }
 ];
 

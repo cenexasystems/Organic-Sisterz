@@ -16,48 +16,48 @@ interface Ingredient {
 
 const ingredients: Ingredient[] = [
   {
-    id: 'bhringraj',
-    name: 'Bhringraj',
-    scientificName: 'Eclipta Prostrata',
-    extraction: 'Supercritical CO2 Extraction',
-    activeCompound: 'Wedelolactone (1.8%)',
-    bioavailability: '98%',
-    clinicalBenefit: 'Promotes follicular density and shifts hair cycle from telogen (resting) to anagen (active growth).',
+    id: 'shikakai',
+    name: 'Shikakai',
+    scientificName: 'Acacia Concinna',
+    extraction: 'Traditional Sun-Drying & Pulverization',
+    activeCompound: 'Saponins (Natural Foaming Glycosides)',
+    bioavailability: '96%',
+    clinicalBenefit: 'Mild natural surfactant that cleanses scalp build-up while preserving healthy follicle lipids.',
     image: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&q=80&w=600',
-    details: 'Bhringraj has been revered in Ayurvedic science for centuries. Our clinical-grade extraction delivers a highly concentrated yield of wedelolactone, which acts topically to stimulate dermal papilla cells, increasing vascularization and oxygen delivery directly to the root.'
+    details: 'Shikakai (literally meaning "fruit for hair") has been India\'s premier hair wash for centuries. The bark and pods contain natural saponins which lather mildly when mixed with water. It dissolves sebum, prevents dandruff, and conditions the cuticle without stripping the scalp\'s delicate acid mantle.'
   },
   {
-    id: 'rosemary',
-    name: 'Rosemary Leaf',
-    scientificName: 'Salvia Rosmarinus',
-    extraction: 'Steam Distillation & Filtration',
-    activeCompound: 'Carnisic Acid (2.5%)',
-    bioavailability: '95%',
-    clinicalBenefit: 'Enhances scalp microcirculation and inhibits local DHT activity, reducing thinning.',
+    id: 'aavaram-senna',
+    name: 'Aavaram Senna',
+    scientificName: 'Senna Auriculata',
+    extraction: 'Low-Temp Vacuum Preservation',
+    activeCompound: 'Polyphenols & Flavonoids',
+    bioavailability: '94%',
+    clinicalBenefit: 'Soothes sunburn, eliminates dark spots, and reduces skin pigmentation naturally.',
     image: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&q=80&w=600',
-    details: 'Rosemary leaf extract is standardized to contain high amounts of carnosic acid. Clinical comparative trials indicate that rosemary extract produces hair regrowth results equivalent to minoxidil 2% after 6 months of continuous application, without common synthetic side effects.'
+    details: 'Aavaram Senna (Aavarampoo) is a brilliant golden-yellow flower celebrated for its skin hydrating properties. Our low-temperature vacuum milling ensures its polyphenolic antioxidants remain stable, allowing them to treat acne, prevent body odor, and clear facial tan when used daily.'
   },
   {
     id: 'amla',
     name: 'Amla Fruit',
     scientificName: 'Phyllanthus Emblica',
-    extraction: 'Cold Press / Vacuum Centrifugation',
-    activeCompound: 'Hydrolyzable Tannins (3.2%)',
-    bioavailability: '99%',
-    clinicalBenefit: 'Strengthens the follicular sheath, preventing premature breakage and locking in melanin.',
+    extraction: 'Cold-Press & Centrifugation',
+    activeCompound: 'Ascorbic Acid (Vitamin C)',
+    bioavailability: '98%',
+    clinicalBenefit: 'Neutralizes root oxidative stress, delaying premature greying and strengthening the keratin sheath.',
     image: 'https://images.unsplash.com/photo-1626015276681-2b446c6a22b7?auto=format&fit=crop&q=80&w=600',
-    details: 'Our cold-pressed Amla is rich in low-molecular-weight tannins that bind directly to keratin, reinforcing the hair shaft integrity. It neutralizes oxidative stress that leads to follicular aging and premature greying.'
+    details: 'Amla is a powerful organic source of Vitamin C. It strengthens hair follicles from within by promoting collagen synthesis, helping to keep hair roots firmly anchored while maintaining natural dark pigment cells.'
   },
   {
-    id: 'sage',
-    name: 'Clary Sage',
-    scientificName: 'Salvia Sclarea',
-    extraction: 'Fractional Distillation',
-    activeCompound: 'Linalyl Acetate (4.0%)',
+    id: 'kasthuri-manjal',
+    name: 'Kasthuri Manjal',
+    scientificName: 'Curcuma Aromatica',
+    extraction: 'Superfine Pulverization & Triple Sifting',
+    activeCompound: 'Curcuminoids (3.5%) & Essential Oils',
     bioavailability: '92%',
-    clinicalBenefit: 'Regulates sebum production, maintaining an optimal microbiome environment on the scalp.',
+    clinicalBenefit: 'Regulates skin sebum, suppresses acne-causing pathogens, and brightens complexion.',
     image: 'https://images.unsplash.com/photo-1608248597481-496100c80836?auto=format&fit=crop&q=80&w=600',
-    details: 'Clary Sage balances local pH levels. Excessive sebum creates a breeding ground for yeast, leading to micro-inflammation and shedding. Sage purifies the follicle opening, allowing active bio-nutrients to absorb without obstruction.'
+    details: 'Wild Turmeric (Kasthuri Manjal) is renowned for its cosmetic efficacy. Unlike cooking turmeric, it does not stain the skin yellow. It acts as a powerful natural antibiotic and anti-inflammatory, resolving deep acne and protecting the skin barrier.'
   }
 ];
 

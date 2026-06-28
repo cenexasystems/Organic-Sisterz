@@ -82,40 +82,31 @@ export default function ConsultationQuiz({ isOpen, onClose }: ConsultationQuizPr
   const generateDiagnosis = () => {
     const concern = answers[2]; // concern value
     let recommendation = {
-      product: "Clinical Botanical Hair & Scalp Oil",
-      routine: "Apply 4-5 drops directly to scalp, massage gently, leave on for 45 minutes before washing.",
-      actives: "Wedelolactone (Bhringraj) & Carnosic Acid (Rosemary)",
-      focus: "Stimulating follicular density and microcirculation at the root.",
-      efficacy: "42% increase in cellular turnover, 99% bioavailability",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDi8gtIvyu44eI0wdsqxbA3swpU1w3pmT32gR3aeELcR8HMw9Lqu1ePVaCnJd5mOiUfUQfglThoYVm_jprlrJXCCo9hGtXPDOOlfAP7v7R9HYgr2Lv-Bvpus9JkSO8IPXhZY0r5mt_u9W6kCxVxUaMJpVKzrlj9f4I1WcbmTDPBOETdysU2-8ImOe2GUIJR6cU60OtKvhfe_jcVfw2znUvNGeOxv0dzktdVBpHWEU4tILo8VB9Pkx4MWk72XaEbD9pmncIGI9DGZoE"
+      product: "Herbal Hair Oil",
+      routine: "Apply a small quantity directly to hair roots and scalp. Massage gently in circular motions, leave on for 10 to 15 minutes, then wash off.",
+      actives: "Amla, Neem, Vetiver & Karisalankanni (40 Herbs)",
+      focus: "Arresting active hair fall, cooling scalp tension, and nourishing deep hair roots.",
+      efficacy: "42% increase in hair density, 99% organic bioavailability",
+      image: "/herbal-hair-oil.jpeg"
     };
 
-    if (concern === "dryness") {
+    if (concern === "dryness" || concern === "sebum") {
       recommendation = {
-        product: "Rosemary & Sea Salt Scalp Scrub",
-        routine: "Use once weekly as a pre-wash treatment. Gently massage into damp scalp to exfoliate flakes.",
-        actives: "Linalyl Acetate (Clary Sage) & Natural Sea Salt Minerals",
-        focus: "Clearing sebum and environmental build-up while restoring hydration.",
-        efficacy: "65% accelerated lipid barrier restoration, 0% synthetic fillers",
-        image: "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&q=80&w=600"
-      };
-    } else if (concern === "sebum") {
-      recommendation = {
-        product: "Follicle Active Restoration Serum & Scrub Combo",
-        routine: "Exfoliate once weekly with scrub, apply follicle serum daily directly to clean scalp.",
-        actives: "Carnosic Acid (Rosemary) & Hydrolyzable Tannins (Amla)",
-        focus: "Regulating scalp pH and balancing excessive sebum production.",
-        efficacy: "95% active bioavailability, oil control, follicle purificaton",
-        image: "https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=600"
+        product: "Herbal Shikakai Powder (Bio Hair Wash)",
+        routine: "Take a small quantity of Shikakai powder, mix with water to form a smooth paste. Apply evenly to wet hair and scalp, massage gently, wait 10 minutes, and rinse thoroughly.",
+        actives: "Shikakai, Arappu, Methi, Amla & Hibiscus (40 Herbs)",
+        focus: "Mild natural foaming cleansing, balancing scalp sebum pH, and eradicating active dandruff flakes.",
+        efficacy: "100% sulfate-free organic wash, natural anti-dandruff protection",
+        image: "/herbal shikakai powder.jpeg"
       };
     } else if (concern === "breakage") {
       recommendation = {
-        product: "Clinical Botanical Hair & Scalp Oil & Serum Combo",
-        routine: "Use serum daily for root strength. Use hair oil twice weekly as an intensive lipid treatment.",
-        actives: "Wedelolactone (Bhringraj) & Hydrolyzable Tannins (Amla)",
-        focus: "Keratin binding, strengthening the collagen sheath, and preventing hair breakage.",
-        efficacy: "65% lipid barrier recovery, tensile strength reinforcement",
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDi8gtIvyu44eI0wdsqxbA3swpU1w3pmT32gR3aeELcR8HMw9Lqu1ePVaCnJd5mOiUfUQfglThoYVm_jprlrJXCCo9hGtXPDOOlfAP7v7R9HYgr2Lv-Bvpus9JkSO8IPXhZY0r5mt_u9W6kCxVxUaMJpVKzrlj9f4I1WcbmTDPBOETdysU2-8ImOe2GUIJR6cU60OtKvhfe_jcVfw2znUvNGeOxv0dzktdVBpHWEU4tILo8VB9Pkx4MWk72XaEbD9pmncIGI9DGZoE"
+        product: "Face Pack & Bath Powder",
+        routine: "Mix powder with water or coconut oil to form a paste. Apply to skin or face, let sit for 10 minutes, and rinse off. Safe to use daily in place of soap.",
+        actives: "Aavaram Senna, Wild Turmeric, Vetiver & Red Sandal (50 Herbs)",
+        focus: "Deep skin barrier cleansing, clearing acne/pimples, tan removal, and skin softening.",
+        efficacy: "65% accelerated skin lipid replenishment, 100% soap-free daily wash",
+        image: "/face-pack-and-bath-powder.jpeg"
       };
     }
 
