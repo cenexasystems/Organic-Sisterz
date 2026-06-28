@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-background: #f8faf8;
+  --color-on-background: #191c1b;
+  --color-primary: #061b0e;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #1b3022;
+  --color-on-primary-container: #819986;
+  --color-inverse-primary: #b4cdb8;
+  --color-secondary: #4f644c;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #cee6c9;
+  --color-on-secondary-container: #536850;
+  --color-tertiary: #281100;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #462200;
+  --color-on-tertiary-container: #dc790a;
+  --color-surface: #f8faf8;
+  --color-surface-dim: #d8dad9;
+  --color-surface-bright: #f8faf8;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f4f2;
+  --color-surface-container: #eceeec;
+  --color-surface-container-high: #e6e9e7;
+  --color-surface-container-highest: #e1e3e1;
+  --color-on-surface: #191c1b;
+  --color-on-surface-variant: #434843;
+  --color-inverse-surface: #2e3130;
+  --color-inverse-on-surface: #eff1ef;
+  --color-outline: #737973;
+  --color-outline-variant: #c3c8c1;
+  --color-surface-tint: #4d6453;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #d0e9d4;
+  --color-primary-fixed-dim: #b4cdb8;
+  --color-on-primary-fixed: #0b2013;
+  --color-on-primary-fixed-variant: #364c3c;
+  --color-secondary-fixed: #d1e9cb;
+  --color-secondary-fixed-dim: #b5cdb0;
+  --color-on-secondary-fixed: #0d200d;
+  --color-on-secondary-fixed-variant: #374c36;
+  --color-tertiary-fixed: #ffdcc3;
+  --color-tertiary-fixed-dim: #ffb77d;
+  --color-on-tertiary-fixed: #2f1500;
+  --color-on-tertiary-fixed-variant: #6e3900;
+
+  --font-display: "EB Garamond", serif;
+  --font-body: "Hanken Grotesk", sans-serif;
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-white/40;
+  }
+}
