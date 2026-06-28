@@ -5,7 +5,7 @@ export default function Footer() {
         
         <div className="col-span-1 md:col-span-6 lg:col-span-4 space-y-6">
           <div className="font-display text-3xl font-medium text-on-primary">
-            Organic Sistez
+            Organic Sisterz
           </div>
           <p className="text-inverse-on-surface font-body text-base opacity-80 max-w-sm leading-relaxed">
             Clinical Botanical Excellence. Bridging the gap between earth and science.
@@ -46,7 +46,7 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto mt-24 pt-8 border-t border-primary-container/50">
         <p className="text-inverse-on-surface font-body text-sm opacity-50">
-          © {new Date().getFullYear()} Organic Sistez. Clinical Botanical Excellence.
+          © {new Date().getFullYear()} Organic Sisterz. Clinical Botanical Excellence.
         </p>
       </div>
     </footer>
