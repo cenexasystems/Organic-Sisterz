@@ -4,40 +4,40 @@ import { Check, X, ShieldCheck } from 'lucide-react';
 interface ComparisonFeature {
   feature: string;
   organicSistez: string | boolean;
-  drugstoreOils: string | boolean;
-  synthetics: string | boolean;
+  commercialOils: string | boolean;
+  chemicalShampoos: string | boolean;
 }
 
 const comparisonData: ComparisonFeature[] = [
   {
     feature: "Active Bioavailability",
     organicSistez: "99% (Low Molecular Lipids)",
-    drugstoreOils: "<15% (Heavy Surface Coating)",
-    synthetics: "45% (Water Soluble Synthetic)"
+    commercialOils: "<15% (Heavy Surface Coating)",
+    chemicalShampoos: "45% (Water Soluble Synthetic)"
   },
   {
     feature: "HPLC Purity Certified",
     organicSistez: true,
-    drugstoreOils: false,
-    synthetics: false
+    commercialOils: false,
+    chemicalShampoos: false
   },
   {
     feature: "Follicle-Clogging Fillers",
     organicSistez: "0% (Non-Comedogenic)",
-    drugstoreOils: "High (Mineral Oils / Silicones)",
-    synthetics: "Medium (Propylene Glycol / Alcohol)"
+    commercialOils: "High (Mineral Oils / Silicones)",
+    chemicalShampoos: "Medium (Propylene Glycol / Alcohol)"
   },
   {
     feature: "Sourcing Transparency",
     organicSistez: "Regenerative Indian Cooperatives",
-    drugstoreOils: "Mass Industrial Import",
-    synthetics: "Chemical Laboratory Synthesis"
+    commercialOils: "Mass Industrial Import",
+    chemicalShampoos: "Chemical Laboratory Synthesis"
   },
   {
     feature: "Scalp irritation risk",
     organicSistez: "Extremely Low (Adaptogenic)",
-    drugstoreOils: "Medium (Fragrances / Fillers)",
-    synthetics: "High (Chemical shedding / Dryness)"
+    commercialOils: "Medium (Fragrances / Fillers)",
+    chemicalShampoos: "High (Chemical shedding / Dryness)"
   }
 ];
 
@@ -71,9 +71,9 @@ export default function ComparisonTable() {
             <thead>
               <tr className="bg-primary text-on-primary font-body text-xs font-semibold tracking-widest uppercase border-b border-primary-container">
                 <th className="py-6 px-8">Formulation Criteria</th>
-                <th className="py-6 px-8 bg-primary-container text-on-secondary-fixed">Organic Sistez</th>
-                <th className="py-6 px-8 opacity-80">Drugstore Oils</th>
-                <th className="py-6 px-8 opacity-80">Synthetic Treatments</th>
+                <th className="py-6 px-8 bg-primary-container text-on-secondary-fixed">Mahizham (Organic Sisterz)</th>
+                <th className="py-6 px-8 opacity-80">Commercial Oils</th>
+                <th className="py-6 px-8 opacity-80">Chemical Shampoos</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/20 font-body text-sm text-on-surface-variant">
@@ -97,10 +97,10 @@ export default function ComparisonTable() {
                     )}
                   </td>
 
-                  {/* Drugstore Oils */}
+                  {/* Commercial Oils */}
                   <td className="py-5 px-8">
-                    {typeof row.drugstoreOils === 'boolean' ? (
-                      row.drugstoreOils ? (
+                    {typeof row.commercialOils === 'boolean' ? (
+                      row.commercialOils ? (
                         <Check className="w-4.5 h-4.5 text-secondary" />
                       ) : (
                         <span className="flex items-center gap-2 text-on-surface-variant/60">
@@ -108,14 +108,14 @@ export default function ComparisonTable() {
                         </span>
                       )
                     ) : (
-                      row.drugstoreOils
+                      row.commercialOils
                     )}
                   </td>
 
-                  {/* Synthetics */}
+                  {/* Chemical Shampoos */}
                   <td className="py-5 px-8">
-                    {typeof row.synthetics === 'boolean' ? (
-                      row.synthetics ? (
+                    {typeof row.chemicalShampoos === 'boolean' ? (
+                      row.chemicalShampoos ? (
                         <Check className="w-4.5 h-4.5 text-secondary" />
                       ) : (
                         <span className="flex items-center gap-2 text-on-surface-variant/60">
@@ -123,7 +123,7 @@ export default function ComparisonTable() {
                         </span>
                       )
                     ) : (
-                      row.synthetics
+                      row.chemicalShampoos
                     )}
                   </td>
                 </tr>

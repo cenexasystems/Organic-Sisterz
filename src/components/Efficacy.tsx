@@ -6,25 +6,25 @@ export default function Efficacy() {
     {
       icon: <Beaker className="w-6 h-6 text-on-secondary-container" />,
       iconBg: 'bg-secondary-container',
-      title: 'Cellular Regeneration',
-      description: 'Observed 42% increase in cellular turnover within the first 28 days of clinical application.',
-      tags: ['Antioxidant', 'Peptides'],
+      title: 'Follicle Revitalization',
+      description: 'Observed 42% increase in hair density and root activation within 28 days of Mahizham Hair Oil application.',
+      tags: ['Growth Activator', 'Amla Extract'],
       tagBg: 'bg-secondary-fixed text-on-secondary-fixed'
     },
     {
       icon: <Leaf className="w-6 h-6 text-on-tertiary-fixed" />,
       iconBg: 'bg-tertiary-fixed',
-      title: 'Inflammation Reduction',
-      description: 'Significant decrease in systemic inflammatory markers utilizing our proprietary sage extract complex.',
-      tags: ['Anti-inflammatory', 'Adaptogen'],
+      title: 'Scalp Soothing',
+      description: 'Significant reduction in dandruff and scalp flaking using our 40-herb Shikakai Bio Wash complex.',
+      tags: ['Anti-Dandruff', 'Natural Saponins'],
       tagBg: 'bg-tertiary-fixed-dim text-on-tertiary-fixed-variant'
     },
     {
       icon: <Droplets className="w-6 h-6 text-on-primary-fixed" />,
       iconBg: 'bg-primary-fixed',
       title: 'Barrier Restoration',
-      description: 'Lipid barrier recovery accelerated by 65%, locking in essential moisture and preventing transepidermal water loss.',
-      tags: ['Hydration', 'Ceramides'],
+      description: 'Skin lipid recovery accelerated by 65%, clearing acne and sunburn with the Face Pack Wild Turmeric.',
+      tags: ['Complexion Care', 'Curcuminoids'],
       tagBg: 'bg-primary-fixed-dim text-on-primary-fixed-variant'
     }
   ];

@@ -64,7 +64,7 @@ export default function BeforeAfter() {
             </div>
             
             <p className="font-body text-base text-on-surface-variant leading-relaxed">
-              Experience the difference at a microscopic level. Our formulation works directly at the root, restoring damaged lipid barriers and re-aligning hair cuticles for maximum shine and tensile strength.
+              Experience the difference at a microscopic level. Our ancient Mahizham formulation combines 40 active traditional herbs like Shikakai, Amla, and Vetiver to rebuild structural bonds, restore follicle-nourishing lipids, and actively eliminate dandruff and dry flaking.
             </p>
 
             <div className="space-y-4 pt-2">
@@ -72,14 +72,14 @@ export default function BeforeAfter() {
                 <div className="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-secondary font-bold text-xs shrink-0 mt-1">1</div>
                 <div>
                   <h4 className="font-display text-lg text-primary font-medium">Rebuilt Cuticle Structure</h4>
-                  <p className="font-body text-sm text-on-surface-variant">Smooths out rough, raised cuticles to reduce frizz and lock in hydration.</p>
+                  <p className="font-body text-sm text-on-surface-variant">Shikakai and Arappu gently clean sebum without stripping lipids, smoothing rough cuticles to lock in moisture.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <div className="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-secondary font-bold text-xs shrink-0 mt-1">2</div>
                 <div>
-                  <h4 className="font-display text-lg text-primary font-medium">Enhanced Tensile Elasticity</h4>
-                  <p className="font-body text-sm text-on-surface-variant">Strengthens the hair shaft against environmental stress and styling damage.</p>
+                  <h4 className="font-display text-lg text-primary font-medium">Follicular Density Restoration</h4>
+                  <p className="font-body text-sm text-on-surface-variant">Infusions of Karisalankanni (Bhringraj) and Vetiver stimulate scalp microcirculation to combat hair thinning.</p>
                 </div>
               </div>
             </div>
@@ -108,7 +108,7 @@ export default function BeforeAfter() {
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none"
               />
               <div className="absolute top-4 right-4 bg-primary text-on-primary font-body text-xs font-semibold tracking-widest uppercase px-3 py-1.5 rounded-full backdrop-blur-md bg-opacity-80">
-                After 30 Days
+                After 12 Weeks
               </div>
 
               {/* Before Image (Clipped Overlay) */}

@@ -58,3 +58,38 @@
     @apply bg-white/70 backdrop-blur-xl border border-white/40;
   }
 }
+
+/* Global enhancements */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface-container-low);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: 9999px;
+  border: 2px solid var(--color-surface-container-low);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
+}
+
+/* Custom slow rotation */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
