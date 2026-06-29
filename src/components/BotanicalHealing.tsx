@@ -1,14 +1,46 @@
-import { motion } from 'motion/react';
+import { motion, useMotionValue, useTransform } from 'motion/react';
 import { Leaf, ShieldCheck, Sparkles, Star } from 'lucide-react';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 
 export default function BotanicalHealing() {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const handleMouseMove = ({ clientX, clientY, currentTarget }: MouseEvent) => {
+    const { left, top, width, height } = currentTarget.getBoundingClientRect();
+    const x = (clientX - left - width / 2) / (width / 2);
+    const y = (clientY - top - height / 2) / (height / 2);
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    // Smoothly reset back to center
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  // Subtle 2D Parallax for the center arch
+  const x0 = useTransform(mouseX, [-1, 1], [-25, 25]);
+  const y0 = useTransform(mouseY, [-1, 1], [-25, 25]);
+
+  // Subtle Parallax float for the side columns
+  const x1 = useTransform(mouseX, [-1, 1], [-15, 15]);
+  const y1 = useTransform(mouseY, [-1, 1], [-15, 15]);
+  const x2 = useTransform(mouseX, [-1, 1], [15, -15]);
+  const y2 = useTransform(mouseY, [-1, 1], [15, -15]);
+
   return (
-    <section id="before-after" className="py-24 bg-background relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <section 
+      id="before-after" 
+      className="py-24 bg-background relative overflow-hidden"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 pointer-events-none">
         
         {/* Header */}
-        <div className="text-center mb-24">
+        <div className="text-center mb-24 pointer-events-auto">
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="h-px w-8 bg-on-surface-variant/30" />
             <span className="font-body text-[10px] font-bold tracking-[0.25em] text-on-surface-variant uppercase">
@@ -26,10 +58,13 @@ export default function BotanicalHealing() {
         </div>
 
         {/* 3-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-8 lg:gap-12 items-center max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-8 lg:gap-12 items-center max-w-6xl mx-auto pointer-events-auto">
           
           {/* Left Column */}
-          <div className="flex flex-col gap-6 order-2 lg:order-1">
+          <motion.div 
+            style={{ x: x1, y: y1 }}
+            className="flex flex-col gap-6 order-2 lg:order-1 transition-transform duration-200 ease-out"
+          >
             <FeatureCard 
               icon={<Leaf className="w-4 h-4 text-secondary" />}
               title="Active Rosemary"
@@ -42,7 +77,7 @@ export default function BotanicalHealing() {
               desc="Handcrafted formulation without sulfates, parabens, or synthetic fragrance."
               delay={0.2}
             />
-          </div>
+          </motion.div>
 
           {/* Center Column - Arched Product */}
           <div className="order-1 lg:order-2 flex justify-center relative px-8 py-4">
@@ -55,15 +90,17 @@ export default function BotanicalHealing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="relative bg-[#FAF9F5] w-64 h-[350px] rounded-t-[140px] shadow-sm border border-outline-variant/30 flex flex-col items-center justify-end"
+              style={{ x: x0, y: y0 }}
+              className="relative bg-[#FAF9F5] w-64 h-[350px] rounded-t-[140px] shadow-sm border border-outline-variant/30 flex flex-col items-center justify-end transition-transform duration-200 ease-out"
             >
               {/* Concentric subtle rings like in the design */}
               <div className="absolute inset-2 border border-outline-variant/10 rounded-t-[130px] pointer-events-none" />
               
-              <img 
+              {/* Product Image */}
+              <motion.img 
                 src="/mahizham_hair_oil.png" 
                 alt="Mahizham Hair Oil"
-                className="w-52 absolute bottom-6 z-10 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+                className="w-52 absolute bottom-6 z-10 object-contain drop-shadow-2xl"
               />
               
               {/* Floating Badge */}
@@ -72,7 +109,7 @@ export default function BotanicalHealing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.4 }}
-                className="absolute -bottom-6 w-[115%] bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-outline-variant/15 p-4 text-center z-20"
+                className="absolute -bottom-6 w-[115%] bg-white rounded-2xl shadow-[0_12px_40px_rgb(0,0,0,0.1)] border border-outline-variant/15 p-4 text-center z-20"
               >
                 <span className="block font-body text-[9px] font-extrabold tracking-widest text-secondary uppercase mb-1.5">
                   Flagship Product
@@ -85,7 +122,10 @@ export default function BotanicalHealing() {
           </div>
 
           {/* Right Column */}
-          <div className="flex flex-col gap-6 order-3 lg:order-3">
+          <motion.div 
+            style={{ x: x2, y: y2 }}
+            className="flex flex-col gap-6 order-3 lg:order-3 transition-transform duration-200 ease-out"
+          >
             <FeatureCard 
               icon={<Sparkles className="w-4 h-4 text-secondary" />}
               title="Herbal Actives"
@@ -98,7 +138,7 @@ export default function BotanicalHealing() {
               desc="Clinically balanced formula designed to restore texture and soothe scalps rapidly."
               delay={0.4}
             />
-          </div>
+          </motion.div>
 
         </div>
       </div>

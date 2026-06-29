@@ -39,6 +39,8 @@ export interface Order {
   deliveryCharge?: number;
   cashReceived?: number;
   changeReturned?: number;
+  isGift?: boolean;
+  giftMessage?: string;
 }
 
 // Exact product details and text from the packaging labels, plus the handwritten pricing
