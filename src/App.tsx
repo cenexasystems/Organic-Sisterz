@@ -9,7 +9,6 @@ import ProductCatalog from './components/ProductCatalog';
 import BeforeAfter from './components/BeforeAfter';
 import BlendCustomizer from './components/BlendCustomizer';
 import Herbarium from './components/Herbarium';
-import ComparisonTable from './components/ComparisonTable';
 import Sourcing from './components/Sourcing';
 import Efficacy from './components/Efficacy';
 import Testimonials from './components/Testimonials';
@@ -64,7 +63,6 @@ function Storefront() {
         <BeforeAfter />
         <BlendCustomizer />
         <Herbarium />
-        <ComparisonTable />
         <Sourcing />
         <Efficacy />
         <Testimonials />

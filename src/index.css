@@ -52,6 +52,17 @@
   --font-display: "EB Garamond", serif;
   --font-body: "Hanken Grotesk", sans-serif;
   --font-poppins: "Poppins", sans-serif;
+
+  --animate-marquee: marquee 45s linear infinite;
+
+  @keyframes marquee {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
 }
 
 @layer utilities {
@@ -62,7 +73,7 @@
 
 /* Global enhancements */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 /* Custom premium scrollbar */
