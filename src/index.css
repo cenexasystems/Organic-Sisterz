@@ -49,9 +49,9 @@
   --color-on-tertiary-fixed: #2f1500;
   --color-on-tertiary-fixed-variant: #6e3900;
 
-  --font-display: "EB Garamond", serif;
-  --font-body: "Hanken Grotesk", sans-serif;
-  --font-poppins: "Poppins", sans-serif;
+  --font-display: "Poppins", sans-serif;
+  --font-body: "Poppins", sans-serif;
+  --font-accent: "EB Garamond", serif;
 
   --animate-marquee: marquee 45s linear infinite;
   --animate-gradient-flow: gradient-flow 18s ease infinite;

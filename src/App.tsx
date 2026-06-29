@@ -12,11 +12,14 @@ import Herbarium from "./components/Herbarium";
 import Sourcing from "./components/Sourcing";
 import Efficacy from "./components/Efficacy";
 import Testimonials from "./components/Testimonials";
+import LocationMap from "./components/LocationMap";
 import FaqAccordion from "./components/FaqAccordion";
 import Footer from "./components/Footer";
 import Preloader from "./components/Preloader";
 import ConsultationQuiz from "./components/ConsultationQuiz";
 import AdminPortal from "./components/AdminPortal";
+import GiftCustomization from "./components/GiftCustomization";
+import Login from "./components/Login";
 
 function Storefront() {
   const [isQuizOpen, setIsQuizOpen] = useState(false);
@@ -54,6 +57,7 @@ function Storefront() {
       <Navbar
         onConsultationClick={() => setIsQuizOpen(true)}
         onAdminClick={() => navigate("/admin")}
+        onGiftClick={() => window.scrollTo(0, 0) || navigate("/gift")}
       />
 
       <main>
@@ -65,6 +69,7 @@ function Storefront() {
         <Sourcing />
         <Efficacy />
         <Testimonials />
+        <LocationMap />
         <FaqAccordion />
       </main>
 
@@ -93,6 +98,8 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Storefront />} />
               <Route path="/admin" element={<AdminPortal />} />
+              <Route path="/gift" element={<GiftCustomization />} />
+              <Route path="/login" element={<Login />} />
             </Routes>
           </BrowserRouter>
         )}

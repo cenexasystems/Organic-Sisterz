@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Beaker, Check, HelpCircle, AlertCircle } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Sparkles, Check, AlertCircle } from 'lucide-react';
 
 interface Concern {
   id: string;
@@ -20,37 +20,32 @@ interface HerbRatio {
   color: string;
   basePercent: number;
   boostedPercent: number;
-  description: string;
 }
 
 const herbData: Record<string, HerbRatio> = {
   bringaraj: {
     name: 'Bringaraj (False Daisy)',
-    color: 'bg-emerald-800',
+    color: 'bg-[#064e3b]', // Dark Green
     basePercent: 25,
     boostedPercent: 45,
-    description: 'Increases follicle stimulation, prevents hair fall, and stimulates thick growth.'
   },
   amla: {
     name: 'Amla (Gooseberry)',
-    color: 'bg-amber-600',
+    color: 'bg-[#d97706]', // Amber/Orange
     basePercent: 25,
     boostedPercent: 45,
-    description: 'Rich in Vitamin C, synthesizes collagen, and prevents premature greying.'
   },
   rosemary: {
     name: 'Rosemary Active Extract',
-    color: 'bg-emerald-600',
+    color: 'bg-[#059669]', // Green
     basePercent: 25,
     boostedPercent: 40,
-    description: 'Improves blood circulation in the scalp and stimulates cell division.'
   },
   hibiscus: {
     name: 'Hibiscus Flower Infusion',
-    color: 'bg-red-700',
+    color: 'bg-[#b91c1c]', // Red
     basePercent: 25,
     boostedPercent: 40,
-    description: 'Acts as a natural conditioner, seals cuticles, and smooths split ends.'
   }
 };
 
@@ -60,7 +55,6 @@ export default function BlendCustomizer() {
   const toggleConcern = (id: string) => {
     setSelectedConcerns(prev => {
       if (prev.includes(id)) {
-        // Keep at least one concern selected to show ratios
         if (prev.length === 1) return prev;
         return prev.filter(c => c !== id);
       }
@@ -68,7 +62,6 @@ export default function BlendCustomizer() {
     });
   };
 
-  // Calculate customized ratios based on selected concerns
   const getRatios = () => {
     let ratios = { bringaraj: 25, amla: 25, rosemary: 25, hibiscus: 25 };
 
@@ -87,7 +80,6 @@ export default function BlendCustomizer() {
       ratios.amla = herbData.amla.boostedPercent;
     }
 
-    // Normalize so that sum = 100%
     const sum = ratios.bringaraj + ratios.amla + ratios.rosemary + ratios.hibiscus;
     return {
       bringaraj: Math.round((ratios.bringaraj / sum) * 100),
@@ -113,60 +105,43 @@ export default function BlendCustomizer() {
   };
 
   return (
-    <section className="py-24 md:py-32 bg-[#FAF9F5] border-t border-b border-outline-variant/20 relative overflow-hidden">
-      {/* Decorative styling */}
-      <div className="absolute top-1/3 left-5 w-[300px] h-[300px] bg-secondary-container/10 rounded-full blur-3xl -z-10" />
-      <div className="absolute bottom-1/3 right-5 w-[300px] h-[300px] bg-primary-fixed-dim/15 rounded-full blur-3xl -z-10" />
-
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <section className="py-24 bg-[#FAF9F5] border-t border-b border-outline-variant/20 relative">
+      <div className="max-w-[1300px] mx-auto px-6 lg:px-8">
         
-        {/* Section Header */}
-        <div className="max-w-3xl mx-auto text-center space-y-6 mb-20">
-          <span className="font-body text-xs font-semibold text-secondary tracking-[0.2em] uppercase flex items-center justify-center gap-2">
-            <Beaker className="w-4 h-4 text-secondary animate-pulse" /> Botanical Lab
-          </span>
-          <h2 className="font-display text-4xl md:text-5xl text-primary font-medium tracking-tight">
-            Compound Your Custom Elixir
-          </h2>
-          <p className="font-body text-base text-on-surface-variant max-w-xl mx-auto leading-relaxed">
-            Select your specific hair concerns below and watch our clinical wood-pressed botanical ratios adjust in real-time inside the compounding flask.
-          </p>
-        </div>
-
-        {/* Customizer Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
           
-          {/* Left Column: Concern Selectors */}
-          <div className="col-span-1 lg:col-span-6 space-y-5 text-left">
-            <h3 className="font-display text-2xl text-primary font-medium mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-secondary" /> Step 1: Tell us about your hair
+          {/* LEFT COLUMN: Quiz & Analysis */}
+          <div className="col-span-1 lg:col-span-5 flex flex-col gap-6">
+            <h3 className="font-display text-[28px] text-primary font-medium flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-secondary" /> Step 1: Tell us about your hair
             </h3>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
               {concerns.map((concern) => {
                 const isSelected = selectedConcerns.includes(concern.id);
                 return (
                   <button
                     key={concern.id}
                     onClick={() => toggleConcern(concern.id)}
-                    className={`p-5 rounded-2xl border text-left transition-all duration-300 flex flex-col justify-between h-36 cursor-pointer ${
+                    className={`p-5 rounded-[20px] border text-left transition-all duration-300 flex flex-col justify-between min-h-[140px] cursor-pointer ${
                       isSelected 
-                        ? 'bg-primary border-primary text-white shadow-md' 
+                        ? 'bg-[#0C1E14] border-[#0C1E14] text-white shadow-md' 
                         : 'bg-white border-outline-variant/35 text-primary hover:border-secondary/45 hover:shadow-sm'
                     }`}
                   >
                     <div className="flex justify-between items-start w-full">
-                      <span className="font-display text-lg font-medium leading-tight">{concern.label}</span>
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${
+                      <span className="font-display text-[17px] font-bold leading-tight">{concern.label}</span>
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all shrink-0 ${
                         isSelected 
-                          ? 'bg-secondary border-secondary text-white' 
+                          ? 'bg-[#3E5247] border-[#4A5D52] text-[#A7F3D0]' 
                           : 'border-outline-variant/40 bg-transparent text-transparent'
                       }`}>
-                        <Check className="w-3 h-3 stroke-[3]" />
+                        {isSelected ? <Check className="w-3 h-3 stroke-[3]" /> : <div className="w-3 h-3" />}
                       </div>
                     </div>
-                    <p className={`font-body text-xs leading-relaxed mt-2 ${
-                      isSelected ? 'text-white/80' : 'text-on-surface-variant'
+                    <p className={`font-body text-[13px] leading-relaxed mt-4 opacity-90 ${
+                      isSelected ? 'text-[#A0AAB2]' : 'text-[#6B7280]'
                     }`}>
                       {concern.desc}
                     </p>
@@ -175,163 +150,158 @@ export default function BlendCustomizer() {
               })}
             </div>
 
-            {/* Dynamic Clinical Summary */}
-            <div className="mt-8 bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-secondary shrink-0 mt-0.5">
-                <AlertCircle className="w-5 h-5 text-emerald-600" />
+            {/* Formulation Analysis Box */}
+            <div className="mt-2 bg-white border border-[#E5E7EB] rounded-[20px] p-6 shadow-sm flex items-start gap-4">
+              <div className="w-8 h-8 rounded-full bg-[#ECFDF5] border border-[#D1FAE5] flex items-center justify-center shrink-0 mt-0.5">
+                <AlertCircle className="w-4 h-4 text-[#059669]" />
               </div>
-              <div>
-                <span className="block font-body text-xs font-bold text-secondary uppercase tracking-widest mb-1">Formulation Analysis</span>
-                <p className="font-body text-sm text-[#4B5563] leading-relaxed">
+              <div className="flex flex-col gap-1.5">
+                <span className="font-body text-[11px] font-bold text-[#6B7280] uppercase tracking-[0.15em]">
+                  Formulation Analysis
+                </span>
+                <p className="font-body text-[14px] text-[#4B5563] leading-relaxed">
                   {getDynamicMessage()}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Right Column: Dynamic Compounding Flask */}
-          <div className="col-span-1 lg:col-span-6 flex flex-col md:flex-row items-center gap-10 md:gap-16 justify-center">
-            
-            {/* Visual Glass Flask */}
-            <div className="relative w-64 h-96 flex flex-col justify-end items-center bg-[#FDFDFD] border border-outline-variant/30 rounded-t-[100px] rounded-b-[40px] shadow-2xl p-4 overflow-hidden">
-              {/* Bottle Neck Details */}
-              <div className="absolute top-0 w-24 h-12 border-b border-outline-variant/30 bg-transparent -mt-6 rounded-b-xl" />
+          {/* CENTER COLUMN: Liquid Pill */}
+          <div className="col-span-1 lg:col-span-3 flex justify-center lg:mt-10">
+            <div className="relative w-64 h-[450px] bg-white rounded-[100px] shadow-[0_10px_40px_rgba(0,0,0,0.08)] flex justify-center items-center overflow-hidden p-3 border border-outline-variant/20">
               
-              {/* Liquid Layers */}
-              <div className="w-full h-full flex flex-col justify-end overflow-hidden rounded-b-3xl">
+              {/* Inner Liquid Container */}
+              <div className="w-full h-full rounded-[85px] overflow-hidden flex flex-col justify-end relative">
                 
-                {/* Hibiscus Layer (soft crimson) */}
+                {/* Measurement lines */}
+                <div className="absolute left-4 top-16 bottom-16 w-3 border-l border-white/30 flex flex-col justify-between py-2 text-[10px] font-bold text-white/50 z-20">
+                  <span>100ml</span>
+                  <span>80ml</span>
+                  <span>60ml</span>
+                  <span>40ml</span>
+                  <span>20ml</span>
+                </div>
+
+                {/* Hibiscus Layer */}
                 <motion.div 
                   animate={{ height: `${ratios.hibiscus}%` }}
                   transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className={`${herbData.hibiscus.color} w-full flex items-center justify-center relative min-h-[5px]`}
+                  className={`${herbData.hibiscus.color} w-full flex flex-col justify-center items-center relative z-10`}
                 >
-                  <span className="text-[10px] font-bold text-white/70 absolute">Hibiscus {ratios.hibiscus}%</span>
+                  <span className="text-[11px] font-bold text-white block pl-8">Hibiscus {ratios.hibiscus}%</span>
                 </motion.div>
 
-                {/* Amla Layer (amber) */}
+                {/* Amla Layer */}
                 <motion.div 
                   animate={{ height: `${ratios.amla}%` }}
                   transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className={`${herbData.amla.color} w-full flex items-center justify-center relative min-h-[5px]`}
+                  className={`${herbData.amla.color} w-full flex flex-col justify-center items-center relative z-10`}
                 >
-                  <span className="text-[10px] font-bold text-white/70 absolute">Amla {ratios.amla}%</span>
+                  <span className="text-[11px] font-bold text-white block pl-8">Amla {ratios.amla}%</span>
                 </motion.div>
 
-                {/* Rosemary Layer (pale green) */}
+                {/* Rosemary Layer */}
                 <motion.div 
                   animate={{ height: `${ratios.rosemary}%` }}
                   transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className={`${herbData.rosemary.color} w-full flex items-center justify-center relative min-h-[5px]`}
+                  className={`${herbData.rosemary.color} w-full flex flex-col justify-center items-center relative z-10`}
                 >
-                  <span className="text-[10px] font-bold text-white/70 absolute">Rosemary {ratios.rosemary}%</span>
+                  <span className="text-[11px] font-bold text-white block pl-8">Rosemary {ratios.rosemary}%</span>
                 </motion.div>
 
-                {/* Bringaraj Layer (deep green) */}
+                {/* Bringaraj Layer */}
                 <motion.div 
                   animate={{ height: `${ratios.bringaraj}%` }}
                   transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className={`${herbData.bringaraj.color} w-full flex items-center justify-center relative min-h-[5px]`}
+                  className={`${herbData.bringaraj.color} w-full flex flex-col justify-center items-center relative z-10`}
                 >
-                  <span className="text-[10px] font-bold text-white/70 absolute font-body">Bhringraj {ratios.bringaraj}%</span>
+                  <span className="text-[11px] font-bold text-white block pl-8">Bhringraj {ratios.bringaraj}%</span>
                 </motion.div>
+              </div>
 
-              </div>
-              
-              {/* Measurement lines */}
-              <div className="absolute left-6 top-24 bottom-16 w-3 border-l border-primary/20 flex flex-col justify-between py-2 text-[9px] font-semibold text-primary/30">
-                <span>100ml</span>
-                <span>80ml</span>
-                <span>60ml</span>
-                <span>40ml</span>
-                <span>20ml</span>
-              </div>
             </div>
-
-            {/* Custom Formula Ingredients Progress Details */}
-            <div className="flex-grow w-full max-w-sm space-y-5 text-left">
-              <h4 className="font-body text-xs font-bold text-[#6B7280] uppercase tracking-widest border-b border-outline-variant/20 pb-2">
-                Active Recipe ratios
-              </h4>
-              
-              <div className="space-y-4">
-                {/* Bringaraj Detail */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-primary">{herbData.bringaraj.name}</span>
-                    <span className="text-secondary">{ratios.bringaraj}%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                    <motion.div 
-                      animate={{ width: `${ratios.bringaraj}%` }}
-                      transition={{ duration: 0.8 }}
-                      className={`h-full ${herbData.bringaraj.color}`} 
-                    />
-                  </div>
-                </div>
-
-                {/* Rosemary Detail */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-primary">{herbData.rosemary.name}</span>
-                    <span className="text-secondary">{ratios.rosemary}%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                    <motion.div 
-                      animate={{ width: `${ratios.rosemary}%` }}
-                      transition={{ duration: 0.8 }}
-                      className={`h-full ${herbData.rosemary.color}`} 
-                    />
-                  </div>
-                </div>
-
-                {/* Amla Detail */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-primary">{herbData.amla.name}</span>
-                    <span className="text-secondary">{ratios.amla}%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                    <motion.div 
-                      animate={{ width: `${ratios.amla}%` }}
-                      transition={{ duration: 0.8 }}
-                      className={`h-full ${herbData.amla.color}`} 
-                    />
-                  </div>
-                </div>
-
-                {/* Hibiscus Detail */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-primary">{herbData.hibiscus.name}</span>
-                    <span className="text-secondary">{ratios.hibiscus}%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                    <motion.div 
-                      animate={{ width: `${ratios.hibiscus}%` }}
-                      transition={{ duration: 0.8 }}
-                      className={`h-full ${herbData.hibiscus.color}`} 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Order Button */}
-              <button 
-                onClick={() => {
-                  const target = document.getElementById('products-catalog');
-                  if (target) target.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="w-full bg-primary text-on-primary font-body text-xs font-bold tracking-[0.1em] uppercase py-4 rounded-full shadow-md hover:shadow-lg hover:bg-primary-container transition-all cursor-pointer text-center block mt-6"
-              >
-                View Curated Hair Catalog
-              </button>
-            </div>
-
           </div>
 
-        </div>
+          {/* RIGHT COLUMN: Ratios & Button */}
+          <div className="col-span-1 lg:col-span-4 flex flex-col justify-center lg:mt-16 gap-8">
+            <h4 className="font-body text-[11px] font-bold text-[#6B7280] uppercase tracking-[0.15em] border-b border-outline-variant/30 pb-3">
+              Active Recipe ratios
+            </h4>
+            
+            <div className="flex flex-col gap-6">
+              {/* Bringaraj Detail */}
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between font-display text-[14px] font-bold text-[#111827]">
+                  <span>{herbData.bringaraj.name}</span>
+                  <span>{ratios.bringaraj}%</span>
+                </div>
+                <div className="h-2 w-full bg-[#F3F4F6] rounded-full overflow-hidden">
+                  <motion.div 
+                    animate={{ width: `${ratios.bringaraj}%` }}
+                    transition={{ duration: 0.8 }}
+                    className={`h-full ${herbData.bringaraj.color}`} 
+                  />
+                </div>
+              </div>
 
+              {/* Rosemary Detail */}
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between font-display text-[14px] font-bold text-[#111827]">
+                  <span>{herbData.rosemary.name}</span>
+                  <span>{ratios.rosemary}%</span>
+                </div>
+                <div className="h-2 w-full bg-[#F3F4F6] rounded-full overflow-hidden">
+                  <motion.div 
+                    animate={{ width: `${ratios.rosemary}%` }}
+                    transition={{ duration: 0.8 }}
+                    className={`h-full ${herbData.rosemary.color}`} 
+                  />
+                </div>
+              </div>
+
+              {/* Amla Detail */}
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between font-display text-[14px] font-bold text-[#111827]">
+                  <span>{herbData.amla.name}</span>
+                  <span>{ratios.amla}%</span>
+                </div>
+                <div className="h-2 w-full bg-[#F3F4F6] rounded-full overflow-hidden">
+                  <motion.div 
+                    animate={{ width: `${ratios.amla}%` }}
+                    transition={{ duration: 0.8 }}
+                    className={`h-full ${herbData.amla.color}`} 
+                  />
+                </div>
+              </div>
+
+              {/* Hibiscus Detail */}
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between font-display text-[14px] font-bold text-[#111827]">
+                  <span>{herbData.hibiscus.name}</span>
+                  <span>{ratios.hibiscus}%</span>
+                </div>
+                <div className="h-2 w-full bg-[#F3F4F6] rounded-full overflow-hidden">
+                  <motion.div 
+                    animate={{ width: `${ratios.hibiscus}%` }}
+                    transition={{ duration: 0.8 }}
+                    className={`h-full ${herbData.hibiscus.color}`} 
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <button 
+              onClick={() => {
+                const target = document.getElementById('products-catalog');
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="mt-4 w-full bg-[#0C1E14] text-white font-body text-[11px] font-bold tracking-[0.15em] uppercase py-5 rounded-full shadow-[0_10px_20px_rgba(12,30,20,0.2)] hover:bg-[#1A3123] hover:shadow-[0_15px_30px_rgba(12,30,20,0.3)] transition-all duration-300 cursor-pointer text-center"
+            >
+              View Curated Hair Catalog
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   );
