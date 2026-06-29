@@ -103,8 +103,8 @@ export default function BeforeAfter() {
             >
               {/* After Image (Full Background) */}
               <img 
-                src="https://images.unsplash.com/photo-1608248597481-496100c80836?auto=format&fit=crop&q=80&w=1200" 
-                alt="After clinical formulation treatment" 
+                src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=1200" 
+                alt="After clinical formulation treatment: Shiny, silky, healthy hair" 
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none"
               />
               <div className="absolute top-4 right-4 bg-primary text-on-primary font-body text-xs font-semibold tracking-widest uppercase px-3 py-1.5 rounded-full backdrop-blur-md bg-opacity-80">
@@ -117,8 +117,8 @@ export default function BeforeAfter() {
                 style={{ width: `${sliderPosition}%` }}
               >
                 <img 
-                  src="https://images.unsplash.com/photo-1626015276681-2b446c6a22b7?auto=format&fit=crop&q=80&w=1200" 
-                  alt="Before treatment" 
+                  src="https://images.unsplash.com/photo-1620331311520-246422fd82f9?auto=format&fit=crop&q=80&w=1200" 
+                  alt="Before treatment: Dry, frizzy hair texture" 
                   className="absolute inset-0 w-full h-full object-cover max-w-none"
                   style={{ width: containerRef.current?.offsetWidth || '100%' }}
                 />
