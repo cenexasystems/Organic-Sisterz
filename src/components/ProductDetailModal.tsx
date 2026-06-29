@@ -36,10 +36,10 @@ const productSpecs: Record<string, {
     ],
     usage: 'Suggested Use :\n* Apply Mahizham Herbal Hair oil on your scalp and massage with finger tips its regular usage.\n* Apply Hair Oil to the scalp gently massage few mins soak for an hour, then wash it with shikakai or mild shampoo ensure effectiveness.',
     features: [
-      { icon: 'leaf', title: '100% Natural', subtitle: 'Pure & Handpicked' },
-      { icon: 'sparkles', title: 'Fresh & Fragrant', subtitle: 'Daily Selection' },
-      { icon: 'plant', title: 'Pooja Ready', subtitle: 'Temple Quality' },
-      { icon: 'shield', title: 'Safe Packaging', subtitle: 'Hygienically Packed' }
+      { icon: 'leaf', title: '100% Organic', subtitle: 'Pure & Handcrafted' },
+      { icon: 'sparkles', title: 'Scalp Nourishing', subtitle: 'Restores Root Lipids' },
+      { icon: 'plant', title: 'Dandruff Control', subtitle: 'Anti-Microbial Herbs' },
+      { icon: 'shield', title: 'Sulfate Free', subtitle: 'Zero Mineral Oils' }
     ]
   },
   'shikakai-powder': {
@@ -54,10 +54,10 @@ const productSpecs: Record<string, {
     ],
     usage: 'Usage :\nTake Little Quantity of Shikakai Powder Mix with water apply to hair & wash it or\nHair Pack : Apply with your hair Leave it with 10 minutes then rinse off with water',
     features: [
-      { icon: 'leaf', title: '100% Natural', subtitle: 'Pure & Handpicked' },
-      { icon: 'sparkles', title: 'Fresh & Fragrant', subtitle: 'Daily Selection' },
-      { icon: 'plant', title: 'Pooja Ready', subtitle: 'Temple Quality' },
-      { icon: 'shield', title: 'Safe Packaging', subtitle: 'Hygienically Packed' }
+      { icon: 'leaf', title: '100% Botanical', subtitle: 'Pure & Sun-Dried' },
+      { icon: 'sparkles', title: 'pH Balanced', subtitle: 'Safe on Sensitive Scalps' },
+      { icon: 'plant', title: 'Natural Lather', subtitle: 'Rich in Saponins' },
+      { icon: 'shield', title: 'Zero Chemicals', subtitle: 'Sulfates & Parabens Free' }
     ]
   },
   'face-pack-bath-powder': {
@@ -74,10 +74,10 @@ const productSpecs: Record<string, {
     ],
     usage: 'Usage :\nBath Powder : Apply Coconut oil or Ghee & take the required amount of Bath Powder mixed with water to form a paste. Apply For Face and entire body, Scrub well & wash it\n\nFace Pack : Apply the paste and leave it to dry or 10 minutes and rinse off.',
     features: [
-      { icon: 'leaf', title: '100% Natural', subtitle: 'Pure & Handpicked' },
-      { icon: 'sparkles', title: 'Fresh & Fragrant', subtitle: 'Daily Selection' },
-      { icon: 'plant', title: 'Pooja Ready', subtitle: 'Temple Quality' },
-      { icon: 'shield', title: 'Safe Packaging', subtitle: 'Hygienically Packed' }
+      { icon: 'leaf', title: '100% Herbal', subtitle: 'Wild Turmeric & Senna' },
+      { icon: 'sparkles', title: 'Deep Cleansing', subtitle: 'Clear Acne & Spots' },
+      { icon: 'plant', title: 'Skin Radiance', subtitle: 'Restores Natural Glow' },
+      { icon: 'shield', title: 'Gentle Exfoliator', subtitle: 'Safe for Daily Bathing' }
     ]
   },
   'multi-millet-mix': {
@@ -100,10 +100,10 @@ const productSpecs: Record<string, {
     ],
     fssai: '22424524000080',
     features: [
-      { icon: 'leaf', title: '100% Natural', subtitle: 'Pure & Handpicked' },
-      { icon: 'sparkles', title: 'Fresh & Fragrant', subtitle: 'Daily Selection' },
-      { icon: 'plant', title: 'Pooja Ready', subtitle: 'Temple Quality' },
-      { icon: 'shield', title: 'Safe Packaging', subtitle: 'Hygienically Packed' }
+      { icon: 'leaf', title: '100% Nutritious', subtitle: '40+ Ancient Grains' },
+      { icon: 'sparkles', title: 'Rich in Fiber', subtitle: 'Supports Healthy Gut' },
+      { icon: 'plant', title: 'High Protein', subtitle: 'Naturally Energizing' },
+      { icon: 'shield', title: 'Lab Tested', subtitle: 'Certified Food Standards' }
     ]
   }
 };
@@ -118,6 +118,20 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
       setSelectedSize(product.sizes[0].size);
     }
   }, [product]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [isOpen]);
 
   if (!product) return null;
 
@@ -176,6 +190,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+            data-lenis-prevent
             className="relative bg-white w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh] z-10 border border-outline-variant/20"
           >
             {/* Close Button */}
@@ -187,9 +202,9 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             </button>
 
             {/* Left Column: Image Area */}
-            <div className="w-full md:w-1/2 bg-[#F9F7F0] p-6 md:p-10 flex flex-col justify-between relative overflow-y-auto border-b md:border-b-0 md:border-r border-outline-variant/20">
+            <div className="w-full md:w-1/2 bg-[#F9F7F0] p-6 md:p-10 flex flex-col justify-between relative shrink-0 md:shrink border-b md:border-b-0 md:border-r border-outline-variant/20">
               {/* Badges */}
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-4 md:mb-6">
                 <span className="font-body text-[10px] font-bold tracking-widest uppercase bg-primary/10 text-primary px-3 py-1.5 rounded-full border border-primary/20">
                   Premium Selection
                 </span>
@@ -199,7 +214,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
               </div>
 
               {/* Main Product Image Card */}
-              <div className="relative aspect-square w-full rounded-2xl overflow-hidden border border-outline-variant/35 bg-white p-6 shadow-sm flex items-center justify-center my-auto group">
+              <div className="relative h-60 sm:h-72 md:h-auto md:aspect-square w-full rounded-2xl overflow-hidden border border-outline-variant/35 bg-white p-6 shadow-sm flex items-center justify-center my-auto group">
                 <img
                   src={product.image}
                   alt={product.name}
@@ -215,16 +230,17 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
               </div>
 
               {/* Thumbnail Bar */}
-              <div className="flex gap-3 mt-6">
-                <div className="w-16 h-16 rounded-xl border-2 border-secondary bg-white p-1 overflow-hidden cursor-pointer shadow-sm">
+              <div className="flex gap-3 mt-4 md:mt-6">
+                <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl border-2 border-secondary bg-white p-1 overflow-hidden cursor-pointer shadow-sm">
                   <img src={product.image} alt={product.name} className="w-full h-full object-contain" />
                 </div>
               </div>
             </div>
 
             {/* Right Column: details and specifications */}
-            <div className="w-full md:w-1/2 p-6 md:p-10 overflow-y-auto flex flex-col justify-between">
-              <div>
+            <div className="w-full md:w-1/2 flex flex-col overflow-hidden bg-white">
+              {/* Scrolling details content */}
+              <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6">
                 {/* Green Subtitle & Title */}
                 <div className="space-y-2">
                   <span className="font-body text-xs font-bold text-secondary tracking-widest uppercase block">
@@ -247,7 +263,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                     <span>{spec.rating}</span>
                   </div>
                   <span className="font-body text-xs text-on-surface-variant/80">
-                    Trusted by 1000+ devotees & families
+                    Trusted by 1000+ customers & families
                   </span>
                 </div>
 
@@ -483,7 +499,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
               </div>
 
               {/* Bottom Sticky Action Bar */}
-              <div className="mt-10 pt-6 border-t border-outline-variant/20 flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="p-6 md:px-10 md:py-6 border-t border-outline-variant/20 flex flex-col sm:flex-row gap-4 items-center justify-between bg-[#FAF9F5]/40 backdrop-blur-sm shrink-0">
                 <div>
                   <span className="text-[10px] font-bold text-on-surface-variant/70 uppercase block">Total</span>
                   <span className="font-display text-2xl font-extrabold text-primary">₹{currentPrice}.00</span>

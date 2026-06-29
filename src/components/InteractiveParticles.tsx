@@ -32,16 +32,16 @@ export default function InteractiveParticles() {
       constructor() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = (Math.random() - 0.5) * 0.5;
-        this.radius = Math.random() * 3 + 1.5;
+        this.vx = (Math.random() - 0.5) * 0.9;
+        this.vy = (Math.random() - 0.5) * 0.9;
+        this.radius = Math.random() * 3.5 + 1.5;
         
         // Sage green, emerald, and gold colors matching the site branding
         const colors = [
-          'rgba(79, 100, 76, 0.22)',   // Muted sage green
-          'rgba(180, 205, 184, 0.28)', // Light mint green
-          'rgba(212, 175, 55, 0.18)',  // Warm botanical gold
-          'rgba(6, 27, 14, 0.08)'      // Dark green accent shadow
+          'rgba(79, 100, 76, 0.28)',   // Muted sage green
+          'rgba(180, 205, 184, 0.35)', // Light mint green
+          'rgba(212, 175, 55, 0.28)',  // Warm botanical gold
+          'rgba(6, 27, 14, 0.12)'      // Dark green accent shadow
         ];
         this.color = colors[Math.floor(Math.random() * colors.length)];
       }
@@ -65,7 +65,7 @@ export default function InteractiveParticles() {
     }
 
     // Set particle density based on screen resolution
-    const particleCount = Math.min(70, Math.floor((width * height) / 20000));
+    const particleCount = Math.min(60, Math.floor((width * height) / 22000));
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle());
@@ -103,7 +103,7 @@ export default function InteractiveParticles() {
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.strokeStyle = `rgba(79, 100, 76, ${0.12 * (1 - dist / 110)})`;
-            ctx.lineWidth = 0.7;
+            ctx.lineWidth = 0.8;
             ctx.stroke();
           }
         }
@@ -114,11 +114,11 @@ export default function InteractiveParticles() {
           const dy = particles[i].y - mouse.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 140) {
+          if (dist < 120) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(212, 175, 55, ${0.18 * (1 - dist / 140)})`;
+            ctx.strokeStyle = `rgba(212, 175, 55, ${0.15 * (1 - dist / 120)})`;
             ctx.lineWidth = 0.95;
             ctx.stroke();
           }
