@@ -1,22 +1,22 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
-import Lenis from 'lenis';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import CinematicReveal from './components/CinematicReveal';
-import ProductCatalog from './components/ProductCatalog';
-import BeforeAfter from './components/BeforeAfter';
-import BlendCustomizer from './components/BlendCustomizer';
-import Herbarium from './components/Herbarium';
-import Sourcing from './components/Sourcing';
-import Efficacy from './components/Efficacy';
-import Testimonials from './components/Testimonials';
-import FaqAccordion from './components/FaqAccordion';
-import Footer from './components/Footer';
-import Preloader from './components/Preloader';
-import ConsultationQuiz from './components/ConsultationQuiz';
-import AdminPortal from './components/AdminPortal';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import Lenis from "lenis";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import CinematicReveal from "./components/CinematicReveal";
+import ProductCatalog from "./components/ProductCatalog";
+import BotanicalHealing from "./components/BotanicalHealing";
+import BlendCustomizer from "./components/BlendCustomizer";
+import Herbarium from "./components/Herbarium";
+import Sourcing from "./components/Sourcing";
+import Efficacy from "./components/Efficacy";
+import Testimonials from "./components/Testimonials";
+import FaqAccordion from "./components/FaqAccordion";
+import Footer from "./components/Footer";
+import Preloader from "./components/Preloader";
+import ConsultationQuiz from "./components/ConsultationQuiz";
+import AdminPortal from "./components/AdminPortal";
 
 function Storefront() {
   const [isQuizOpen, setIsQuizOpen] = useState(false);
@@ -51,16 +51,15 @@ function Storefront() {
       transition={{ duration: 1, ease: "easeOut" }}
       className="min-h-screen bg-background text-on-background selection:bg-secondary-container selection:text-on-secondary-container font-body antialiased"
     >
-      <Navbar 
-        onConsultationClick={() => setIsQuizOpen(true)} 
-        onAdminClick={() => navigate('/admin')}
+      <Navbar
+        onConsultationClick={() => setIsQuizOpen(true)}
+        onAdminClick={() => navigate("/admin")}
       />
-      
+
       <main>
         <Hero onConsultationClick={() => setIsQuizOpen(true)} />
-        <CinematicReveal />
         <ProductCatalog />
-        <BeforeAfter />
+        <BotanicalHealing />
         <BlendCustomizer />
         <Herbarium />
         <Sourcing />
@@ -68,11 +67,14 @@ function Storefront() {
         <Testimonials />
         <FaqAccordion />
       </main>
-      
-      <Footer onAdminClick={() => navigate('/admin')} />
+
+      <Footer onAdminClick={() => navigate("/admin")} />
 
       {/* Diagnostic consultation quiz overlay */}
-      <ConsultationQuiz isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
+      <ConsultationQuiz
+        isOpen={isQuizOpen}
+        onClose={() => setIsQuizOpen(false)}
+      />
     </motion.div>
   );
 }

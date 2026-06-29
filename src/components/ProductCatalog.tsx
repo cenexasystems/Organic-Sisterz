@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { ArrowRight, Heart, ShieldCheck } from 'lucide-react';
-import ProductDetailModal from './ProductDetailModal';
-import { getStoredProducts } from '../utils/store';
-import type { Product } from '../utils/store';
+import { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import { ArrowRight, Heart, ShieldCheck } from "lucide-react";
+import ProductDetailModal from "./ProductDetailModal";
+import { getStoredProducts } from "../utils/store";
+import type { Product } from "../utils/store";
 
 export default function ProductCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -19,8 +19,9 @@ export default function ProductCatalog() {
     };
 
     updateProducts();
-    window.addEventListener('mahizham_products_updated', updateProducts);
-    return () => window.removeEventListener('mahizham_products_updated', updateProducts);
+    window.addEventListener("mahizham_products_updated", updateProducts);
+    return () =>
+      window.removeEventListener("mahizham_products_updated", updateProducts);
   }, []);
 
   const handleOpenModal = (product: Product) => {
@@ -32,23 +33,25 @@ export default function ProductCatalog() {
     setAddedProduct(id);
     setTimeout(() => setAddedProduct(null), 2000);
 
-    const event = new CustomEvent('mahizham_add_to_cart_triggered', {
-      detail: { productId: id, size: size || '' }
+    const event = new CustomEvent("mahizham_add_to_cart_triggered", {
+      detail: { productId: id, size: size || "" },
     });
     window.dispatchEvent(event);
   };
 
   const toggleFavorite = (id: string) => {
-    setFavorites(prev => ({ ...prev, [id]: !prev[id] }));
+    setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
-    <section id="products-catalog" className="py-24 md:py-32 bg-[#FAF9F5] relative overflow-hidden">
+    <section
+      id="products-catalog"
+      className="py-24 md:py-32 bg-[#FAF9F5] relative overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -62,15 +65,15 @@ export default function ProductCatalog() {
               Clinical Botanical Solutions
             </h2>
           </motion.div>
-          <motion.a 
+          <motion.a
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            href="#" 
+            href="#"
             className="group flex items-center gap-2 font-body text-xs font-semibold tracking-widest uppercase text-primary hover:text-secondary-container transition-colors duration-300"
           >
-            View Full Collection 
+            View Full Collection
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </motion.a>
         </div>
@@ -78,7 +81,7 @@ export default function ProductCatalog() {
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((product, index) => {
-            const prices = product.sizes.map(s => s.price);
+            const prices = product.sizes.map((s) => s.price);
             const lowestPrice = prices.length > 0 ? Math.min(...prices) : 0;
             const isFav = !!favorites[product.id];
 
@@ -88,11 +91,15 @@ export default function ProductCatalog() {
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
+                transition={{
+                  duration: 0.8,
+                  delay: index * 0.1,
+                  ease: "easeOut",
+                }}
                 className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/20 hover:border-secondary/40 hover:shadow-lg transition-all duration-500"
               >
                 {/* Image Section */}
-                <div 
+                <div
                   onClick={() => handleOpenModal(product)}
                   className="relative aspect-[4/5] overflow-hidden bg-surface-container-high cursor-pointer flex items-center justify-center p-4 bg-[#FAF9F5]"
                 >
@@ -102,24 +109,26 @@ export default function ProductCatalog() {
                     className="max-h-full max-w-full object-contain transition-transform duration-[2s] group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                  
+
                   {/* Floating Action Buttons */}
                   <div className="absolute top-4 right-4 flex flex-col gap-2">
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleFavorite(product.id);
                       }}
                       className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
-                        isFav 
-                          ? 'bg-secondary text-white' 
-                          : 'bg-white/80 text-primary hover:bg-white border border-outline-variant/20'
+                        isFav
+                          ? "bg-secondary text-white"
+                          : "bg-white/80 text-primary hover:bg-white border border-outline-variant/20"
                       }`}
                     >
-                      <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
+                      <Heart
+                        className={`w-4 h-4 ${isFav ? "fill-current" : ""}`}
+                      />
                     </button>
                   </div>
-                  
+
                   <div className="absolute top-4 left-4 bg-white/85 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1 border border-outline-variant/10">
                     <span className="font-body text-[10px] font-bold tracking-widest uppercase text-on-surface-variant">
                       {product.category}
@@ -128,14 +137,15 @@ export default function ProductCatalog() {
 
                   <div className="absolute bottom-4 left-4 bg-primary/80 backdrop-blur-md px-2.5 py-1 rounded-md text-on-primary">
                     <span className="font-body text-[9px] font-semibold tracking-wider uppercase flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3 text-secondary-container" /> {product.herbs}
+                      <ShieldCheck className="w-3 h-3 text-secondary-container" />{" "}
+                      {product.herbs}
                     </span>
                   </div>
                 </div>
 
                 {/* Info Section */}
                 <div className="p-6 flex flex-col flex-grow space-y-5">
-                  <div 
+                  <div
                     onClick={() => handleOpenModal(product)}
                     className="space-y-2 cursor-pointer group/title"
                   >
@@ -150,7 +160,10 @@ export default function ProductCatalog() {
                   {/* Bullet Benefits */}
                   <ul className="space-y-1.5 border-t border-b border-outline-variant/10 py-3 mt-auto">
                     {product.benefits.slice(0, 3).map((benefit, bIndex) => (
-                      <li key={bIndex} className="font-body text-[10px] text-on-surface-variant flex items-start gap-1">
+                      <li
+                        key={bIndex}
+                        className="font-body text-[10px] text-on-surface-variant flex items-start gap-1"
+                      >
                         <span className="text-secondary font-bold">✓</span>
                         <span>{benefit}</span>
                       </li>
@@ -180,7 +193,6 @@ export default function ProductCatalog() {
             );
           })}
         </div>
-
       </div>
 
       <ProductDetailModal
