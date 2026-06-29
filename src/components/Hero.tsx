@@ -141,10 +141,10 @@ export default function Hero({ onConsultationClick }: HeroProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col items-center justify-center p-8 sm:p-16 rounded-[3rem] bg-white/30 backdrop-blur-2xl border border-white/50 shadow-2xl max-w-4xl w-full pointer-events-auto"
+          className="flex flex-col items-center justify-center max-w-4xl w-full pointer-events-auto pt-20"
         >
           {/* Organic Sisterz Badge */}
-          <div className="flex items-center justify-center gap-2 mb-6 bg-white/60 px-5 py-2 rounded-full border border-white/80 shadow-sm">
+          <div className="flex items-center justify-center gap-2 mb-6 bg-white/60 px-5 py-2 rounded-full border border-white/80 shadow-sm backdrop-blur-md">
             <Leaf className="w-3.5 h-3.5 animate-pulse text-secondary" />
             <span className="font-body text-xs font-extrabold text-secondary tracking-[0.25em] uppercase">
               Organic Sisterz
@@ -152,32 +152,30 @@ export default function Hero({ onConsultationClick }: HeroProps) {
           </div>
 
           {/* Centered H1 Heading */}
-          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-primary font-medium tracking-tight leading-[1.05] drop-shadow-sm text-center">
-            Pure <span className="italic text-secondary font-light">Herbal</span>{" "}
+          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-primary font-bold tracking-tight leading-[1.05] drop-shadow-sm text-center">
+            Pure <span className="italic text-secondary font-light" style={{ fontFamily: 'var(--font-accent)' }}>Herbal</span>{" "}
             <br className="hidden sm:block" /> Products.
           </h1>
 
-          {/* Description */}
-          <p className="font-body text-sm sm:text-base md:text-lg text-on-surface-variant leading-relaxed max-w-xl mx-auto mt-8 font-medium text-center">
-            Try our simple, natural, and chemical-free hair and skin care
-            products. Made under sunlight with active Indian herbs to restore your
-            natural beauty.
-          </p>
+          {/* Glassmorphism Wrapper for Text and Buttons */}
+          <div className="flex flex-col items-center justify-center p-8 sm:px-12 sm:py-8 mt-10 rounded-[2.5rem] bg-gradient-to-br from-white/40 to-white/10 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.04),inset_0_0_32px_rgba(255,255,255,0.4)] max-w-3xl w-full">
+            {/* Description */}
+            <p className="font-body text-sm sm:text-base md:text-lg text-on-surface-variant leading-relaxed text-center font-medium">
+              Try our simple, natural, and chemical-free hair and skin care
+              products. Made under sunlight with active Indian herbs to restore your
+              natural beauty.
+            </p>
 
-          {/* CTA Buttons */}
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-            <button
-              onClick={handleExploreClick}
-              className="bg-primary text-on-primary font-body text-xs font-bold tracking-[0.15em] uppercase px-10 py-5 rounded-full shadow-xl hover:shadow-2xl hover:bg-primary-container transition-all cursor-pointer w-full sm:w-auto text-center"
-            >
-              Shop Now
-            </button>
-            <button
-              onClick={onConsultationClick}
-              className="bg-white/90 backdrop-blur-md border border-secondary/30 text-secondary hover:bg-secondary hover:text-white font-body text-xs font-bold tracking-[0.15em] uppercase px-10 py-5 rounded-full shadow-lg transition-all cursor-pointer w-full sm:w-auto text-center flex items-center justify-center gap-2"
-            >
-              Hair Quiz <ArrowRight className="w-4 h-4" />
-            </button>
+            {/* CTA Buttons */}
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+              <button
+                onClick={handleExploreClick}
+                className="bg-primary text-on-primary font-body text-xs font-bold tracking-[0.15em] uppercase px-10 py-5 rounded-full shadow-xl hover:shadow-2xl hover:bg-primary-container transition-all cursor-pointer w-full sm:w-auto text-center"
+              >
+                Shop Now
+              </button>
+              
+            </div>
           </div>
         </motion.div>
       </div>

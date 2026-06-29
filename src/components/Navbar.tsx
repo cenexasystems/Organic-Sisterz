@@ -10,14 +10,17 @@ import {
   Leaf,
   Sparkles,
   User,
+  Gift,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { useNavigate } from "react-router-dom";
 import { getStoredProducts, addOrder } from "../utils/store";
 
 interface NavbarProps {
   onConsultationClick: () => void;
   onAdminClick: () => void;
+  onGiftClick?: () => void;
 }
 
 interface CartItem {
@@ -29,7 +32,9 @@ interface CartItem {
 export default function Navbar({
   onConsultationClick,
   onAdminClick,
+  onGiftClick,
 }: NavbarProps) {
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -45,7 +50,6 @@ export default function Navbar({
   // Checkout Form State
   const [custName, setCustName] = useState("");
   const [custPhone, setCustPhone] = useState("");
-  const [custEmail, setCustEmail] = useState("");
   const [custAddress, setCustAddress] = useState("");
   const [placedOrderId, setPlacedOrderId] = useState("");
 
@@ -196,7 +200,7 @@ export default function Navbar({
     const orderData = {
       customerName: custName,
       customerPhone: custPhone,
-      customerEmail: custEmail,
+      customerEmail: "WhatsApp Web Order",
       customerAddress: custAddress,
       items: resolvedCartItems.map((it) => ({
         productId: it.productId,
@@ -213,10 +217,16 @@ export default function Navbar({
     setCartItems([]);
     setCheckoutStep("success");
 
+    // Format WhatsApp Message
+    const whatsappNumber = "919940088786";
+    const orderLines = resolvedCartItems.map(it => `${it.quantity}x ${it.name} (${it.size}) - ₹${it.price * it.quantity}`).join("%0A");
+    const text = `*New Store Order!* (${newOrder.id})%0A%0A*Customer:* ${custName}%0A*Phone:* ${custPhone}%0A*Address:* ${custAddress}%0A%0A*Products:*%0A${orderLines}%0A%0A*Total:* ₹${subtotal}`;
+    
+    window.open(`https://wa.me/${whatsappNumber}?text=${text}`, '_blank');
+
     // Reset Form Fields
     setCustName("");
     setCustPhone("");
-    setCustEmail("");
     setCustAddress("");
   };
 
@@ -286,6 +296,13 @@ export default function Navbar({
           {/* Actions */}
           <div className="flex items-center space-x-3 md:space-x-4">
             <button
+              onClick={onGiftClick}
+              className="hidden md:flex items-center gap-2 border border-[#2B3E2F]/20 hover:bg-[#2B3E2F]/5 text-[#2B3E2F] font-body text-[10px] font-bold tracking-[0.15em] uppercase px-5 py-2.5 rounded-full transition-all duration-300 cursor-pointer"
+            >
+              <Gift className="w-3.5 h-3.5" /> Gift a Friend
+            </button>
+            <button
+              onClick={() => navigate('/login')}
               className="hidden md:flex items-center gap-2 bg-[#2B3E2F] hover:bg-[#1b3022] text-[#FAF9F5] font-body text-[10px] font-bold tracking-[0.15em] uppercase px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
             >
               <User className="w-3.5 h-3.5" /> Login
@@ -351,11 +368,29 @@ export default function Navbar({
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
+                    navigate('/login');
+                  }}
+                  className="font-body text-sm font-semibold tracking-widest uppercase text-primary border border-outline-variant/30 rounded-xl py-3 w-full flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors"
+                >
+                  <User className="w-4 h-4" /> Login
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
                     onAdminClick();
                   }}
                   className="font-body text-sm font-semibold tracking-widest uppercase py-2 text-left text-on-surface-variant hover:text-primary"
                 >
                   Admin Console
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    if (onGiftClick) onGiftClick();
+                  }}
+                  className="font-body text-sm font-semibold tracking-widest uppercase py-2 text-left text-secondary hover:text-[#1b3022] flex items-center gap-2"
+                >
+                  <Gift className="w-4 h-4" /> Gift a Friend
                 </button>
                 <button
                   onClick={() => {
@@ -537,19 +572,6 @@ export default function Navbar({
                         onChange={(e) => setCustPhone(e.target.value)}
                         className="w-full border border-outline-variant/40 rounded-xl py-3 px-4 font-body text-xs text-primary focus:outline-none focus:border-secondary"
                         placeholder="e.g. 9940088786"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block font-body text-[10px] font-bold text-primary uppercase">
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        value={custEmail}
-                        onChange={(e) => setCustEmail(e.target.value)}
-                        className="w-full border border-outline-variant/40 rounded-xl py-3 px-4 font-body text-xs text-primary focus:outline-none focus:border-secondary"
-                        placeholder="e.g. caremahizham@gmail.com"
                         required
                       />
                     </div>
