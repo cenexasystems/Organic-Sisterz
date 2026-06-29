@@ -1,9 +1,10 @@
 import { useState, useEffect, Fragment } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  X, Lock, Plus, Trash2, Edit3, Settings, Eye, 
+  X, Lock, Plus, Trash2, Edit3, Settings, Eye, Search, Shield,
   LayoutDashboard, MessageSquare, BarChart3, ShoppingCart, Receipt, 
-  Package, FolderTree, Ticket, Users, RefreshCw 
+  Package, FolderTree, Ticket, Users, RefreshCw, Award, CheckCircle2, TrendingUp,
+  Globe, ShoppingBag
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getStoredProducts, saveStoredProducts, getStoredOrders, saveStoredOrders } from '../utils/store';
@@ -17,6 +18,14 @@ export interface Coupon {
   usageLimit?: number;
   usedCount: number;
   status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  mobile: string;
+  joinedDate: string;
+  role: 'Admin' | 'Customer';
 }
 
 export default function AdminPortal() {
@@ -74,6 +83,13 @@ export default function AdminPortal() {
   const [ordersStartDate, setOrdersStartDate] = useState('');
   const [ordersEndDate, setOrdersEndDate] = useState('');
 
+  // Analytics Period Filters
+  const [analyticsPeriodFilter, setAnalyticsPeriodFilter] = useState<'all' | 'today' | 'week' | 'month' | 'year' | 'custom'>('all');
+  const [analyticsStartDate, setAnalyticsStartDate] = useState('');
+  const [analyticsEndDate, setAnalyticsEndDate] = useState('');
+  const [analyticsSubTab, setAnalyticsSubTab] = useState<'revenue' | 'today' | 'products' | 'coupons'>('revenue');
+  const [analyticsTodaySearchPhone, setAnalyticsTodaySearchPhone] = useState('');
+
   // Category and Coupon list state
   const [categories, setCategories] = useState<string[]>(['Hair Care', 'Skin Care', 'Nutrition', 'Pooja Items']);
   const [coupons, setCoupons] = useState<Coupon[]>([
@@ -82,10 +98,18 @@ export default function AdminPortal() {
     { code: 'WELCOME', discount: 10, minOrder: 10, expiryDate: '2026-12-31', usageLimit: 50, usedCount: 1, status: 'ACTIVE' },
     { code: 'SAVE10', discount: 10, minOrder: 1, expiryDate: '', usageLimit: 0, usedCount: 0, status: 'ACTIVE' }
   ]);
-  const [adminUsers, setAdminUsers] = useState<{ name: string; role: string }[]>([
-    { name: 'Anand Sivaram', role: 'System Owner' },
-    { name: 'Organic Sisterz', role: 'Store Administrator' }
+  const [usersList, setUsersList] = useState<UserProfile[]>([
+    { name: 'Francis', email: 'gavinindiagroup@gmail.com', mobile: '9629713666', joinedDate: '2026-06-21', role: 'Customer' },
+    { name: 'kalaivani g', email: 'kalaivaniganesan01@gmail.com', mobile: '—', joinedDate: '2026-06-19', role: 'Customer' },
+    { name: 'SHIVA PRASAD', email: 'shivaprasad035@gmail.com', mobile: '9866251587', joinedDate: '2026-06-19', role: 'Customer' },
+    { name: 'Merline Sushmitha', email: 'ravikumarmerline10@gmail.com', mobile: '—', joinedDate: '2026-06-17', role: 'Customer' },
+    { name: 'karthikeyan Shanthakumar', email: 'karthik.vvip@gmail.com', mobile: '—', joinedDate: '2026-06-16', role: 'Customer' },
+    { name: 'S Dhanasekaran', email: 'dhanaonline87@gmail.com', mobile: '—', joinedDate: '2026-06-16', role: 'Customer' },
+    { name: 'Eshwar Balaji', email: 'eshwarbalaji07@gmail.com', mobile: '9884626063', joinedDate: '2026-06-15', role: 'Admin' },
+    { name: 'KAVIN G', email: 'kavingiri2006@gmail.com', mobile: '7200212576', joinedDate: '2026-06-11', role: 'Customer' },
+    { name: 'SANJANA M S 24CB1038', email: '241038.cb@rmkec.ac.in', mobile: '—', joinedDate: '2026-06-10', role: 'Customer' }
   ]);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
 
   // Form states for category/coupon
   const [newCatName, setNewCatName] = useState('');
@@ -99,7 +123,20 @@ export default function AdminPortal() {
   useEffect(() => {
     setProducts(getStoredProducts());
     setOrders(getStoredOrders());
+    const storedUsers = localStorage.getItem('organic_sisterz_users');
+    if (storedUsers) {
+      try {
+        setUsersList(JSON.parse(storedUsers));
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }, []);
+
+  const saveUsers = (newUsers: UserProfile[]) => {
+    setUsersList(newUsers);
+    localStorage.setItem('organic_sisterz_users', JSON.stringify(newUsers));
+  };
 
   const handleRefresh = () => {
     setProducts(getStoredProducts());
@@ -435,28 +472,19 @@ export default function AdminPortal() {
   };
 
   const generateNextInvoiceId = (currentOrders: Order[]) => {
-    const year = new Date().getFullYear();
-    const prefix = `INV-${year}-`;
-    
-    // Find all orders starting with the current prefix or the legacy POS- prefix
-    const invoiceNumbers = currentOrders
-      .filter(o => o.id.startsWith(prefix) || o.id.startsWith('POS-'))
-      .map(o => {
-        // If it starts with legacy prefix, treat as 0 or attempt to parse last part
-        if (o.id.startsWith('POS-')) {
-          const numPart = o.id.replace('POS-', '');
-          const parsed = parseInt(numPart.slice(-5), 10);
-          return isNaN(parsed) ? 0 : parsed;
-        }
-        const numPart = o.id.replace(prefix, '');
-        const parsed = parseInt(numPart, 10);
-        return isNaN(parsed) ? 0 : parsed;
-      });
-      
-    const maxNum = invoiceNumbers.length > 0 ? Math.max(...invoiceNumbers) : 0;
+    let maxNum = 0;
+    currentOrders.forEach(o => {
+      // Match strictly INV-2026-XXXXX to ensure exact sequential ordering
+      const matchInv = o.id.match(/^INV-2026-(\d+)/);
+      if (matchInv) {
+        const num = parseInt(matchInv[1], 10);
+        // Skip legacy test numbers in the 90000s range to start fresh from 1
+        if (!isNaN(num) && num < 90000 && num > maxNum) maxNum = num;
+      }
+    });
     const nextNum = maxNum + 1;
     const paddedNum = String(nextNum).padStart(5, '0');
-    return `${prefix}${paddedNum}`;
+    return `INV-2026-${paddedNum}`;
   };
 
   const handleCheckoutPOS = () => {
@@ -487,7 +515,13 @@ export default function AdminPortal() {
       })),
       totalPrice: grandTotal,
       status: 'Completed', // POS orders are completed immediately on checkout
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      couponCode: billingCoupon || undefined,
+      couponDiscount: couponDisc,
+      manualDiscount: manualDisc,
+      deliveryCharge: billingDeliveryFee,
+      cashReceived: billingAmountReceived,
+      changeReturned: balance
     };
 
     // Save order
@@ -511,8 +545,10 @@ export default function AdminPortal() {
     // Copy to clipboard
     navigator.clipboard.writeText(invoiceMessage);
 
-    // Open WhatsApp Web targeting 7904199050 as requested
-    window.open(`https://wa.me/917904199050?text=${encodeURIComponent(invoiceMessage)}`, '_blank');
+    // Open WhatsApp Web targeting the input customer number or default to 7904199050
+    const targetPhone = billingCustomerPhone ? billingCustomerPhone : '7904199050';
+    const formattedPhone = targetPhone.startsWith('91') && targetPhone.length > 10 ? targetPhone : `91${targetPhone}`;
+    window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(invoiceMessage)}`, '_blank');
 
     // Reset POS input fields
     setBillingCustomerName('');
@@ -549,8 +585,8 @@ export default function AdminPortal() {
 
   // Helper for filtering POS Bills in the Orders Hub tab
   const getFilteredBills = () => {
-    // 1. Only show POS bills (ID starting with POS-)
-    let list = orders.filter(o => o.id.startsWith('POS-'));
+    // 1. Only show POS bills (ID starting with POS- or INV-)
+    let list = orders.filter(o => o.id.startsWith('POS-') || o.id.startsWith('INV-'));
 
     // 2. Filter by source (OFFLINE, ONLINE, MANUAL)
     if (ordersSourceFilter !== 'ALL') {
@@ -1116,7 +1152,12 @@ export default function AdminPortal() {
                             type="tel"
                             placeholder="Enter 10-digit number"
                             value={billingCustomerPhone}
-                            onChange={(e) => setBillingCustomerPhone(e.target.value)}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              if (val.length <= 10) {
+                                setBillingCustomerPhone(val);
+                              }
+                            }}
                             className="w-full bg-[#FAF9F6] border border-outline-variant/35 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all text-[#1F2937] font-semibold"
                           />
                         </div>
@@ -1229,7 +1270,7 @@ export default function AdminPortal() {
 
                   {/* Right Column - Invoice Receipt Box (1/3 width) */}
                   <div className="space-y-6">
-                    <div className="bg-white border border-outline-variant/20 rounded-2xl p-5 shadow-sm space-y-4 flex flex-col justify-between h-full">
+                    <div className="bg-white border border-outline-variant/20 rounded-2xl p-5 shadow-sm space-y-4">
                       
                       {/* Receipt Header details block */}
                       <div className="border border-outline-variant/30 rounded-xl p-4 bg-[#FAF9F6]/40 space-y-3">
@@ -1379,9 +1420,9 @@ export default function AdminPortal() {
                         {/* Checkout Send Button */}
                         <button
                           onClick={handleCheckoutPOS}
-                          disabled={billingItems.length === 0}
+                          disabled={billingItems.length === 0 || !billingCustomerName.trim() || billingCustomerPhone.trim().length !== 10}
                           className={`w-full font-bold text-xs py-4 px-6 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
-                            billingItems.length === 0
+                            (billingItems.length === 0 || !billingCustomerName.trim() || billingCustomerPhone.trim().length !== 10)
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               : 'bg-[#2B3E2F] hover:bg-[#1E2B21] text-white'
                           }`}
@@ -1495,7 +1536,7 @@ export default function AdminPortal() {
                   </div>
                   <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm space-y-2">
                     <span className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Authorized Staff Admin Users</span>
-                    <span className="block text-3xl font-bold text-[#2563EB]">{adminUsers.length} Users</span>
+                    <span className="block text-3xl font-bold text-[#2563EB]">{usersList.filter(u => u.role === 'Admin').length} Admins</span>
                   </div>
                 </div>
 
@@ -1532,59 +1573,697 @@ export default function AdminPortal() {
 
             {/* TAB 3: POS ANALYTICS */}
             {activeTab === 'analytics' && (
-              <div className="space-y-8">
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-primary">POS Analytics</h1>
-                  <p className="text-sm text-on-surface-variant mt-1">Revenue performance analytics and charts.</p>
+              <div className="space-y-6 text-left">
+                {/* Header Title & Refresh */}
+                <div className="flex items-center justify-between pb-4 border-b border-outline-variant/15">
+                  <div>
+                    <h1 className="text-3xl font-extrabold tracking-tight text-primary font-poppins">POS Analytics</h1>
+                    <p className="text-xs text-on-surface-variant font-medium mt-1">
+                      Real-time revenue, product performance, categories breakdown, and coupon usage
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      alert('Analytics refreshed successfully!');
+                    }}
+                    className="flex items-center gap-2 border border-outline-variant/35 hover:bg-[#FAF9F5] px-4 py-2.5 rounded-xl text-xs font-bold text-primary transition-all cursor-pointer bg-white shadow-sm"
+                  >
+                    <RefreshCw className="w-4 h-4 text-primary animate-spin-slow" />
+                    <span>Refresh</span>
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm">
-                    <span className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Average Checkout Value</span>
-                    <span className="block text-3xl font-bold text-primary mt-2">
-                      ₹{orders.length > 0 ? Math.round(totalRevenue / orders.length) : 0}.00
-                    </span>
-                  </div>
-                  <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm">
-                    <span className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Completed Sales Ratio</span>
-                    <span className="block text-3xl font-bold text-primary mt-2">
-                      {orders.length > 0 ? Math.round((completedOrdersCount / orders.length) * 100) : 0}%
-                    </span>
-                  </div>
-                  <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm">
-                    <span className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Active Store Catalog SKUs</span>
-                    <span className="block text-3xl font-bold text-primary mt-2">
-                      {products.reduce((acc, curr) => acc + curr.sizes.length, 0)} SKUs
-                    </span>
+                {/* Period Selector Row */}
+                <div className="flex flex-wrap items-center gap-3 bg-[#FAF9F6]/50 p-3 rounded-2xl border border-outline-variant/15">
+                  <span className="text-[10px] font-bold text-[#4B5563] uppercase tracking-wider pl-2">Period:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(['all', 'today', 'week', 'month', 'year', 'custom'] as const).map(p => (
+                      <button
+                        key={p}
+                        onClick={() => setAnalyticsPeriodFilter(p)}
+                        className={`text-xs font-bold py-1.5 px-4 rounded-xl transition-all cursor-pointer ${
+                          analyticsPeriodFilter === p
+                            ? 'bg-[#2B3E2F] text-white shadow-sm'
+                            : 'bg-white border border-outline-variant/35 text-[#4B5563] hover:bg-[#FAF9F5]'
+                        }`}
+                      >
+                        {p === 'all' ? 'All Time' : p === 'today' ? 'Today' : p === 'week' ? 'This Week' : p === 'month' ? 'This Month' : p === 'year' ? 'This Year' : 'Custom'}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Sales Breakdown simulation */}
-                <div className="bg-white border border-outline-variant/20 rounded-3xl p-8 space-y-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-primary">Formulation-Wise Revenue Breakdown</h3>
-                  <div className="space-y-4">
-                    {products.map(p => {
-                      const prodOrders = orders.filter(o => o.items.some(i => i.productId === p.id));
-                      const prodSales = prodOrders.reduce((sum, o) => {
-                        const it = o.items.find(i => i.productId === p.id);
-                        return sum + (it ? it.price * it.quantity : 0);
-                      }, 0);
-                      const percent = totalRevenue > 0 ? Math.round((prodSales / totalRevenue) * 100) : 0;
+                {/* Custom date pickers if 'custom' is active */}
+                {analyticsPeriodFilter === 'custom' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#FAF9F6]/40 p-4 rounded-2xl border border-outline-variant/15 max-w-xl">
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">Start Date</label>
+                      <input
+                        type="date"
+                        value={analyticsStartDate}
+                        onChange={(e) => setAnalyticsStartDate(e.target.value)}
+                        className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-1.5 text-xs text-primary font-semibold focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">End Date</label>
+                      <input
+                        type="date"
+                        value={analyticsEndDate}
+                        onChange={(e) => setAnalyticsEndDate(e.target.value)}
+                        className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-1.5 text-xs text-primary font-semibold focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                )}
 
-                      return (
-                        <div key={p.id} className="space-y-2">
-                          <div className="flex justify-between text-sm font-semibold">
-                            <span>{p.name}</span>
-                            <span>₹{prodSales} ({percent}%)</span>
+                {/* Sub-tabs Row */}
+                <div className="flex border-b border-outline-variant/15 max-w-md">
+                  {(['revenue', 'today', 'products', 'coupons'] as const).map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => setAnalyticsSubTab(tab)}
+                      className={`px-4 py-2 font-bold text-xs transition-all cursor-pointer border-b-2 ${
+                        analyticsSubTab === tab
+                          ? 'border-primary text-primary'
+                          : 'border-transparent text-on-surface-variant hover:text-primary'
+                      }`}
+                    >
+                      {tab === 'revenue' ? 'REVENUE' : tab === 'today' ? "TODAY'S SALES" : tab === 'products' ? 'PRODUCTS' : 'COUPONS'}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Compute Dynamic Metrics */}
+                {(() => {
+                  const getSourceOfOrder = (o: Order) => {
+                    if (o.source) return o.source;
+                    if (o.items.some(it => it.productId === 'custom')) return 'MANUAL';
+                    if (o.customerAddress.includes('Offline')) return 'OFFLINE';
+                    return 'ONLINE';
+                  };
+
+                  // Filter POS bills based on period selection
+                  const getFilteredAnalyticsBills = () => {
+                    let list = orders.filter(o => o.id.startsWith('POS-') || o.id.startsWith('INV-'));
+                    const now = new Date();
+                    
+                    if (analyticsPeriodFilter === 'today') {
+                      list = list.filter(o => new Date(o.createdAt).toDateString() === now.toDateString());
+                    } else if (analyticsPeriodFilter === 'week') {
+                      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                      list = list.filter(o => new Date(o.createdAt) >= oneWeekAgo);
+                    } else if (analyticsPeriodFilter === 'month') {
+                      list = list.filter(o => {
+                        const oDate = new Date(o.createdAt);
+                        return oDate.getMonth() === now.getMonth() && oDate.getFullYear() === now.getFullYear();
+                      });
+                    } else if (analyticsPeriodFilter === 'year') {
+                      list = list.filter(o => new Date(o.createdAt).getFullYear() === now.getFullYear());
+                    } else if (analyticsPeriodFilter === 'custom') {
+                      if (analyticsStartDate) {
+                        const start = new Date(analyticsStartDate);
+                        start.setHours(0,0,0,0);
+                        list = list.filter(o => new Date(o.createdAt) >= start);
+                      }
+                      if (analyticsEndDate) {
+                        const end = new Date(analyticsEndDate);
+                        end.setHours(23,59,59,999);
+                        list = list.filter(o => new Date(o.createdAt) <= end);
+                      }
+                    }
+                    return list;
+                  };
+
+                  const analyticsBills = getFilteredAnalyticsBills();
+
+                  // 1. Total Revenue
+                  const totalRevVal = analyticsBills.reduce((sum, o) => sum + o.totalPrice, 0);
+
+                  // 2. Completed Bills
+                  const completedBillsCount = analyticsBills.length;
+
+                  // 3. Offline Bills
+                  const offlineBillsVal = analyticsBills
+                    .filter(o => getSourceOfOrder(o) === 'OFFLINE')
+                    .reduce((sum, o) => sum + o.totalPrice, 0);
+                  const offlineBillsCount = analyticsBills.filter(o => getSourceOfOrder(o) === 'OFFLINE').length;
+
+                  // 4. Online Bills
+                  const onlineBillsVal = analyticsBills
+                    .filter(o => getSourceOfOrder(o) === 'ONLINE')
+                    .reduce((sum, o) => sum + o.totalPrice, 0);
+                  const onlineBillsCount = analyticsBills.filter(o => getSourceOfOrder(o) === 'ONLINE').length;
+
+                  // 5. Total Items Sold
+                  const totalItemsSold = analyticsBills.reduce((sum, o) => {
+                    return sum + o.items.reduce((itemSum, it) => itemSum + it.quantity, 0);
+                  }, 0);
+
+                  // 6. Avg Order Value
+                  const avgOrderValue = completedBillsCount > 0 ? Math.round(totalRevVal / completedBillsCount) : 0;
+
+                  // 7. Top Product
+                  const productCounts: Record<string, number> = {};
+                  analyticsBills.forEach(o => {
+                    o.items.forEach(it => {
+                      productCounts[it.name] = (productCounts[it.name] || 0) + it.quantity;
+                    });
+                  });
+                  let topProduct = '—';
+                  let maxProdCount = 0;
+                  Object.entries(productCounts).forEach(([name, count]) => {
+                    if (count > maxProdCount) {
+                      maxProdCount = count;
+                      topProduct = name;
+                    }
+                  });
+
+                  // Top items list by revenue helper
+                  const getTopItemsByRevenue = (filteredOrders: Order[]) => {
+                    const itemsMap: { [name: string]: { name: string; qty: number; revenue: number } } = {};
+                    filteredOrders.forEach(o => {
+                      o.items.forEach(it => {
+                        const name = it.name;
+                        if (!itemsMap[name]) {
+                          itemsMap[name] = { name, qty: 0, revenue: 0 };
+                        }
+                        itemsMap[name].qty += it.quantity;
+                        itemsMap[name].revenue += it.price * it.quantity;
+                      });
+                    });
+                    return Object.values(itemsMap).sort((a, b) => b.revenue - a.revenue);
+                  };
+
+                  const topItemsList = getTopItemsByRevenue(analyticsBills);
+
+                  // Yearly monthly revenue calculation
+                  const getYearlyMonthlyRevenue = () => {
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const now = new Date();
+                    const currentYear = now.getFullYear();
+                    return months.map((m, idx) => {
+                      const rev = orders
+                        .filter(o => {
+                          if (!o.id.startsWith('POS-') && !o.id.startsWith('INV-')) return false;
+                          const oDate = new Date(o.createdAt);
+                          return oDate.getFullYear() === currentYear && oDate.getMonth() === idx;
+                        })
+                        .reduce((sum, o) => sum + o.totalPrice, 0);
+                      return { label: m, value: rev };
+                    });
+                  };
+
+                  const yearlyTrend = getYearlyMonthlyRevenue();
+                  const maxYearlyVal = Math.max(...yearlyTrend.map(d => d.value), 1);
+                  const totalYearlyRevenue = yearlyTrend.reduce((sum, d) => sum + d.value, 0);
+
+                  // Render Revenue subtab
+                  if (analyticsSubTab === 'revenue') {
+                    const cards = [
+                      { title: 'Total Revenue', value: `₹${totalRevVal.toLocaleString()}`, subtext: 'POS + manual combined', icon: Receipt, bg: 'bg-[#ECFDF5]', fg: 'text-[#10B981]' },
+                      { title: 'Completed Bills', value: `${completedBillsCount}`, subtext: 'POS + manual bills', icon: CheckCircle2, bg: 'bg-[#F0FDF4]', fg: 'text-[#16A34A]' },
+                      { title: 'Offline Bills', value: `₹${offlineBillsVal.toLocaleString()}`, subtext: 'Walk-in POS sales', icon: Receipt, bg: 'bg-[#EFF6FF]', fg: 'text-[#2563EB]' },
+                      { title: 'Online Bills', value: `₹${onlineBillsVal.toLocaleString()}`, subtext: 'Online POS sales', icon: Receipt, bg: 'bg-[#ECFDF5]', fg: 'text-[#059669]' },
+                      { title: 'Total Offline Bills', value: `${offlineBillsCount}`, subtext: 'Walk-in POS orders', icon: ShoppingBag, bg: 'bg-[#FFF5F5]', fg: 'text-[#FF4D4D]' },
+                      { title: 'Total Online Bills', value: `${onlineBillsCount}`, subtext: 'Online channel orders', icon: Globe, bg: 'bg-[#EFF6FF]', fg: 'text-[#2563EB]' },
+                      { title: 'Total Items Sold', value: `${totalItemsSold}`, subtext: 'From completed bills', icon: Package, bg: 'bg-[#F3E8FF]', fg: 'text-[#A855F7]' },
+                      { title: 'Avg Order Value', value: `₹${avgOrderValue.toLocaleString()}`, subtext: 'Per completed order', icon: TrendingUp, bg: 'bg-[#FFF7ED]', fg: 'text-[#EA580C]' },
+                      { title: 'Top Product', value: topProduct.length > 15 ? `${topProduct.slice(0, 15)}...` : topProduct, subtext: 'Most sold item', icon: Award, bg: 'bg-[#FFF1F2]', fg: 'text-[#E11D48]' },
+                    ];
+
+                    return (
+                      <div className="space-y-8">
+                        {/* 9 cards grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                          {cards.map((c, i) => (
+                            <div key={i} className="bg-white border border-outline-variant/20 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-3 hover:border-primary/25 transition-all">
+                              <div className="flex justify-between items-start">
+                                <div className="space-y-1">
+                                  <span className="block text-[9px] font-bold text-[#6B7280] uppercase tracking-wider">{c.title}</span>
+                                  <span className="block text-xl font-extrabold text-primary font-poppins">{c.value}</span>
+                                </div>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${c.bg}`}>
+                                  <c.icon className={`w-4 h-4 ${c.fg}`} />
+                                </div>
+                              </div>
+                              <div className="text-[10px] font-semibold text-on-surface-variant/80 border-t border-outline-variant/10 pt-2">
+                                <span>{c.subtext}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Trend & Order Details Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                          {/* Left: Revenue Trend This Year */}
+                          <div className="lg:col-span-8 bg-white border border-outline-variant/20 rounded-3xl p-6 shadow-sm space-y-6">
+                            <div className="flex justify-between items-center pb-2 border-b border-outline-variant/10">
+                              <div>
+                                <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider font-poppins">Revenue Trend This Year</h3>
+                                <div className="flex items-baseline gap-2 mt-1">
+                                  <span className="text-2xl font-extrabold text-primary">₹{totalYearlyRevenue.toLocaleString()}</span>
+                                  <span className="bg-[#FFF7ED] text-[#EA580C] px-2 py-0.5 rounded text-[10px] font-bold">Avg ₹{Math.round(totalYearlyRevenue / 12).toLocaleString()}/mo</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Bar Chart Container */}
+                            <div className="h-56 flex items-end justify-between gap-1 pt-6 px-2">
+                              {yearlyTrend.map((d, idx) => {
+                                const heightPercent = maxYearlyVal > 0 ? (d.value / maxYearlyVal) * 100 : 0;
+                                const isCurrentMonth = new Date().getMonth() === idx;
+                                return (
+                                  <div key={idx} className="flex flex-col items-center flex-grow group relative h-full justify-end">
+                                    {/* Tooltip on Hover */}
+                                    <div className="absolute -top-10 bg-primary text-white text-[10px] font-bold py-1 px-2 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                      ₹{d.value.toLocaleString()}
+                                    </div>
+                                    
+                                    {/* Optional percentage header for selected or highest value */}
+                                    {d.value > 0 && d.value === maxYearlyVal && (
+                                      <span className="text-[9px] font-bold text-[#EA580C] absolute -top-4">Max</span>
+                                    )}
+
+                                    {/* The Bar */}
+                                    <div 
+                                      className={`w-full max-w-[28px] rounded-t-lg transition-all duration-500 cursor-pointer ${
+                                        isCurrentMonth 
+                                          ? 'bg-[#881337] hover:bg-[#6b0f2b]' 
+                                          : 'bg-[#B91C1C]/15 group-hover:bg-[#B91C1C]/35'
+                                      }`}
+                                      style={{ height: `${Math.max(4, heightPercent)}%` }}
+                                    />
+
+                                    {/* Month Label */}
+                                    <span className="text-[10px] font-bold text-[#6B7280] mt-2 uppercase">{d.label}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                          <div className="w-full bg-surface-container h-3 rounded-full overflow-hidden">
-                            <div className="bg-secondary h-full rounded-full" style={{ width: `${percent}%` }} />
+
+                          {/* Right Column: Order Source & Top Items */}
+                          <div className="lg:col-span-4 space-y-6">
+                            {/* Order Source Split */}
+                            <div className="bg-white border border-outline-variant/20 rounded-3xl p-6 shadow-sm space-y-4">
+                              <div className="pb-2 border-b border-outline-variant/10">
+                                <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider">Order Source</h3>
+                              </div>
+                              <div className="space-y-4">
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-xs font-bold text-primary">
+                                    <span className="text-red-600">OFFLINE</span>
+                                    <span>{offlineBillsCount}</span>
+                                  </div>
+                                  <div className="w-full bg-[#FAF9F6] h-2 rounded-full overflow-hidden border border-outline-variant/10">
+                                    <div className="bg-red-500 h-full rounded-full" style={{ width: `${completedBillsCount > 0 ? (offlineBillsCount / completedBillsCount) * 100 : 0}%` }} />
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-xs font-bold text-primary">
+                                    <span className="text-green-600">ONLINE</span>
+                                    <span>{onlineBillsCount}</span>
+                                  </div>
+                                  <div className="w-full bg-[#FAF9F6] h-2 rounded-full overflow-hidden border border-outline-variant/10">
+                                    <div className="bg-green-500 h-full rounded-full" style={{ width: `${completedBillsCount > 0 ? (onlineBillsCount / completedBillsCount) * 100 : 0}%` }} />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Top Items by Revenue */}
+                            <div className="bg-white border border-outline-variant/20 rounded-3xl p-6 shadow-sm space-y-4">
+                              <div className="pb-2 border-b border-[#E5E7EB]">
+                                <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider">Top Items by Revenue</h3>
+                              </div>
+                              <div className="space-y-4">
+                                {topItemsList.slice(0, 3).map((item, idx) => {
+                                  const totalTopRev = topItemsList.reduce((sum, it) => sum + it.revenue, 0) || 1;
+                                  const pct = (item.revenue / totalTopRev) * 100;
+                                  return (
+                                    <div key={idx} className="space-y-1">
+                                      <div className="flex justify-between text-xs font-bold">
+                                        <div className="flex gap-2 text-primary items-center">
+                                          <span className="text-[10px] text-gray-400 font-extrabold w-4">{idx + 1}</span>
+                                          <span className="truncate max-w-[120px]">{item.name}</span>
+                                        </div>
+                                        <div className="flex gap-2 items-center">
+                                          <span className="text-primary">₹{item.revenue.toLocaleString()}</span>
+                                          <span className="text-[10px] text-gray-500 font-medium">{item.qty} pcs</span>
+                                        </div>
+                                      </div>
+                                      <div className="w-full bg-[#FAF9F6] h-1.5 rounded-full overflow-hidden border border-[#E5E7EB]">
+                                        <div className="bg-red-700 h-full rounded-full" style={{ width: `${pct}%` }} />
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                                {topItemsList.length === 0 && (
+                                  <div className="text-center text-xs text-gray-400 italic py-4">No item sales found</div>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                      </div>
+                    );
+                  }
+
+                  // Render Today's Sales subtab
+                  if (analyticsSubTab === 'today') {
+                    const todayDateStr = new Date().toDateString();
+                    const todayOrdersAll = orders.filter(o => 
+                      (o.id.startsWith('POS-') || o.id.startsWith('INV-')) && 
+                      new Date(o.createdAt).toDateString() === todayDateStr
+                    );
+                    
+                    const todaySalesVal = todayOrdersAll.reduce((sum, o) => sum + o.totalPrice, 0);
+                    const todayBillsCount = todayOrdersAll.length;
+                    const todayItemsSoldCount = todayOrdersAll.reduce((sum, o) => {
+                      return sum + o.items.reduce((itemSum, it) => itemSum + it.quantity, 0);
+                    }, 0);
+                    const todayAvgOrderValue = todayBillsCount > 0 ? Math.round(todaySalesVal / todayBillsCount) : 0;
+
+                    const todayOfflineVal = todayOrdersAll
+                      .filter(o => getSourceOfOrder(o) === 'OFFLINE')
+                      .reduce((sum, o) => sum + o.totalPrice, 0);
+                    const todayOnlineVal = todayOrdersAll
+                      .filter(o => getSourceOfOrder(o) === 'ONLINE')
+                      .reduce((sum, o) => sum + o.totalPrice, 0);
+
+                    const todayTopItems = getTopItemsByRevenue(todayOrdersAll).slice(0, 3);
+
+                    // Filtered transactions for Today's Transactions table
+                    const filteredTodayOrders = todayOrdersAll.filter(o => {
+                      if (analyticsTodaySearchPhone.trim()) {
+                        return o.customerPhone.includes(analyticsTodaySearchPhone.trim());
+                      }
+                      return true;
+                    });
+
+                    const cards = [
+                      { title: "Today's Revenue", value: `₹${todaySalesVal.toLocaleString()}`, subtext: 'Completed today', icon: Receipt, bg: 'bg-[#ECFDF5]', fg: 'text-[#10B981]' },
+                      { title: "Today's Bills", value: `${todayBillsCount}`, subtext: 'Completed today', icon: CheckCircle2, bg: 'bg-[#EFF6FF]', fg: 'text-[#3B82F6]' },
+                      { title: "Today's Items Sold", value: `${todayItemsSoldCount} pcs`, subtext: 'Quantity sold today', icon: Package, bg: 'bg-[#F3E8FF]', fg: 'text-[#A855F7]' },
+                      { title: "Today's Avg Order Value", value: `₹${todayAvgOrderValue.toLocaleString()}`, subtext: 'Per invoice today', icon: TrendingUp, bg: 'bg-[#FFF7ED]', fg: 'text-[#EA580C]' },
+                    ];
+
+                    return (
+                      <div className="space-y-8">
+                        {/* 4 cards row */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                          {cards.map((c, i) => (
+                            <div key={i} className="bg-white border border-outline-variant/20 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-3 hover:border-primary/25 transition-all">
+                              <div className="flex justify-between items-start">
+                                <div className="space-y-1">
+                                  <span className="block text-[9px] font-bold text-[#6B7280] uppercase tracking-wider">{c.title}</span>
+                                  <span className="block text-xl font-extrabold text-primary font-poppins">{c.value}</span>
+                                </div>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${c.bg}`}>
+                                  <c.icon className={`w-4 h-4 ${c.fg}`} />
+                                </div>
+                              </div>
+                              <div className="text-[10px] font-semibold text-on-surface-variant/80 border-t border-outline-variant/10 pt-2">
+                                <span>{c.subtext}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Transactions and channel split row */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                          {/* Left column: Today's Transactions */}
+                          <div className="lg:col-span-8 bg-white border border-outline-variant/20 rounded-3xl p-6 shadow-sm space-y-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-outline-variant/10">
+                              <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider font-poppins">Today's Transactions</h3>
+                              <div className="relative w-full sm:w-60">
+                                <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+                                <input
+                                  type="text"
+                                  placeholder="Search contact no..."
+                                  value={analyticsTodaySearchPhone}
+                                  onChange={(e) => setAnalyticsTodaySearchPhone(e.target.value)}
+                                  className="w-full pl-9 pr-4 py-1.5 bg-[#FAF9F6] border border-outline-variant/35 rounded-xl text-xs focus:outline-none text-[#1F2937] font-semibold"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Table */}
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs border-collapse">
+                                <thead>
+                                  <tr className="border-b border-[#E5E7EB] text-[#6B7280] uppercase font-bold text-[10px] tracking-wider bg-[#FAF9F6]/50">
+                                    <th className="py-3 px-4">Invoice ID</th>
+                                    <th className="py-3 px-4">Customer No</th>
+                                    <th className="py-3 px-4">Source</th>
+                                    <th className="py-3 px-4">Items</th>
+                                    <th className="py-3 px-4 text-right">Grand Total</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {filteredTodayOrders.map((o, idx) => {
+                                    const src = getSourceOfOrder(o);
+                                    const itemCount = o.items.reduce((sum, it) => sum + it.quantity, 0);
+                                    return (
+                                      <tr key={idx} className="border-b border-[#F3F4F6] hover:bg-[#FAF9F6]/30 font-semibold text-primary">
+                                        <td className="py-3.5 px-4 font-mono font-bold text-[#2B3E2F]">{o.id}</td>
+                                        <td className="py-3.5 px-4">{o.customerPhone}</td>
+                                        <td className="py-3.5 px-4">
+                                          <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold ${
+                                            src === 'OFFLINE' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
+                                          }`}>
+                                            {src}
+                                          </span>
+                                        </td>
+                                        <td className="py-3.5 px-4">{itemCount} pcs</td>
+                                        <td className="py-3.5 px-4 text-right font-extrabold text-[#111827]">₹{o.totalPrice.toLocaleString()}</td>
+                                      </tr>
+                                    );
+                                  })}
+                                  {filteredTodayOrders.length === 0 && (
+                                    <tr>
+                                      <td colSpan={5} className="py-10 text-center text-gray-400 italic">No transactions found for today.</td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          {/* Right column: Today's channel split & Today's top items */}
+                          <div className="lg:col-span-4 space-y-6">
+                            {/* Today's Channel Split */}
+                            <div className="bg-white border border-outline-variant/20 rounded-3xl p-6 shadow-sm space-y-4">
+                              <div className="pb-2 border-b border-outline-variant/10">
+                                <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider font-poppins">Today's Channel Split</h3>
+                              </div>
+                              <div className="space-y-4">
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-xs font-bold">
+                                    <span className="text-red-600 font-bold">OFFLINE</span>
+                                    <span className="text-primary">₹{todayOfflineVal.toLocaleString()}</span>
+                                  </div>
+                                  <div className="w-full bg-[#FAF9F6] h-2 rounded-full overflow-hidden border border-[#E5E7EB]">
+                                    <div className="bg-red-500 h-full rounded-full" style={{ width: `${todaySalesVal > 0 ? (todayOfflineVal / todaySalesVal) * 100 : 0}%` }} />
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-xs font-bold">
+                                    <span className="text-green-600 font-bold">ONLINE</span>
+                                    <span className="text-primary">₹{todayOnlineVal.toLocaleString()}</span>
+                                  </div>
+                                  <div className="w-full bg-[#FAF9F6] h-2 rounded-full overflow-hidden border border-[#E5E7EB]">
+                                    <div className="bg-green-500 h-full rounded-full" style={{ width: `${todaySalesVal > 0 ? (todayOnlineVal / todaySalesVal) * 100 : 0}%` }} />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Today's Top Items */}
+                            <div className="bg-white border border-outline-variant/20 rounded-3xl p-6 shadow-sm space-y-4">
+                              <div className="pb-2 border-b border-[#E5E7EB]">
+                                <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider font-poppins">Today's Top Items</h3>
+                              </div>
+                              <div className="space-y-4">
+                                {todayTopItems.map((item, idx) => {
+                                  const totalTodayTop = todayTopItems.reduce((sum, it) => sum + it.revenue, 0) || 1;
+                                  const pct = (item.revenue / totalTodayTop) * 100;
+                                  return (
+                                    <div key={idx} className="space-y-1">
+                                      <div className="flex justify-between text-xs font-bold">
+                                        <div className="flex gap-2 text-primary items-center">
+                                          <span className="text-[10px] text-gray-400 font-extrabold w-4">{idx + 1}</span>
+                                          <span className="truncate max-w-[120px]">{item.name}</span>
+                                        </div>
+                                        <div className="flex gap-2 items-center">
+                                          <span className="text-primary">₹{item.revenue.toLocaleString()}</span>
+                                          <span className="text-[10px] text-gray-500 font-medium">{item.qty} pcs</span>
+                                        </div>
+                                      </div>
+                                      <div className="w-full bg-[#FAF9F6] h-1.5 rounded-full overflow-hidden border border-[#E5E7EB]">
+                                        <div className="bg-red-700 h-full rounded-full" style={{ width: `${pct}%` }} />
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                                {todayTopItems.length === 0 && (
+                                  <div className="text-center text-xs text-gray-400 italic py-4">No sales recorded today</div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Render Products subtab
+                  if (analyticsSubTab === 'products') {
+                    const totalRevPeriod = topItemsList.reduce((sum, it) => sum + it.revenue, 0) || 1;
+                    return (
+                      <div className="bg-white border border-outline-variant/20 rounded-3xl p-6 shadow-sm space-y-4">
+                        <div className="pb-3 border-b border-outline-variant/10">
+                          <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider font-poppins">Product Sales Leaderboard</h3>
+                        </div>
+
+                        {/* Leaderboard Table */}
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-xs border-collapse">
+                            <thead>
+                              <tr className="border-b border-[#E5E7EB] text-[#6B7280] uppercase font-bold text-[10px] tracking-wider bg-[#FAF9F6]/50">
+                                <th className="py-3 px-4 w-16">Rank</th>
+                                <th className="py-3 px-4">Product Name</th>
+                                <th className="py-3 px-4 w-32">Qty Sold</th>
+                                <th className="py-3 px-4 w-36 text-right">Revenue</th>
+                                <th className="py-3 px-4 w-60">Market Share</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {topItemsList.map((item, idx) => {
+                                const pct = (item.revenue / totalRevPeriod) * 100;
+                                return (
+                                  <tr key={idx} className="border-b border-[#F3F4F6] hover:bg-[#FAF9F6]/30 font-semibold text-primary">
+                                    <td className="py-4 px-4 font-bold text-gray-400">{idx + 1}</td>
+                                    <td className="py-4 px-4 font-bold">{item.name}</td>
+                                    <td className="py-4 px-4">{item.qty} pcs</td>
+                                    <td className="py-4 px-4 text-right font-extrabold text-primary">₹{item.revenue.toLocaleString()}</td>
+                                    <td className="py-4 px-4">
+                                      <div className="flex items-center gap-3">
+                                        <div className="flex-grow bg-[#FAF9F6] h-2 rounded-full overflow-hidden border border-[#E5E7EB]">
+                                          <div className="bg-red-700 h-full rounded-full" style={{ width: `${pct}%` }} />
+                                        </div>
+                                        <span className="text-[10px] font-bold text-gray-500 w-10 text-right">{pct.toFixed(1)}%</span>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                              {topItemsList.length === 0 && (
+                                <tr>
+                                  <td colSpan={5} className="py-10 text-center text-gray-400 italic">No products sold in this period.</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Render Coupons subtab
+                  if (analyticsSubTab === 'coupons') {
+                    const totalDiscountsGiven = analyticsBills.reduce((sum, o) => sum + (o.couponDiscount || 0) + (o.manualDiscount || 0), 0);
+                    const discountedOrdersCount = analyticsBills.filter(o => (o.couponDiscount || 0) > 0 || (o.manualDiscount || 0) > 0).length;
+                    const avgDiscountPerOrder = discountedOrdersCount > 0 ? Math.round(totalDiscountsGiven / discountedOrdersCount) : 0;
+
+                    const promoCampaignOrders = analyticsBills.filter(o => (o.couponDiscount || 0) > 0 || (o.manualDiscount || 0) > 0);
+
+                    return (
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {/* Left column: Discount Summary */}
+                        <div className="lg:col-span-4 space-y-4">
+                          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 shadow-sm space-y-4">
+                            <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider pb-2 border-b border-[#E5E7EB] font-poppins">Discount Summary</h3>
+                            
+                            {/* Stat 1 */}
+                            <div className="bg-[#FAF9F6]/50 border border-[#E5E7EB] rounded-2xl p-4 flex flex-col justify-between space-y-2">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <span className="block text-[9px] font-bold text-[#6B7280] uppercase tracking-wider">Total Discounts Given</span>
+                                  <span className="block text-xl font-extrabold text-primary font-poppins mt-1">₹{totalDiscountsGiven.toLocaleString()}</span>
+                                </div>
+                                <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 text-sm font-bold">%</div>
+                              </div>
+                            </div>
+
+                            {/* Stat 2 */}
+                            <div className="bg-[#FAF9F6]/50 border border-[#E5E7EB] rounded-2xl p-4 flex flex-col justify-between space-y-2">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <span className="block text-[9px] font-bold text-[#6B7280] uppercase tracking-wider">Discounted Orders</span>
+                                  <span className="block text-xl font-extrabold text-primary font-poppins mt-1">{discountedOrdersCount}</span>
+                                </div>
+                                <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 text-sm font-bold">🎫</div>
+                              </div>
+                            </div>
+
+                            {/* Stat 3 */}
+                            <div className="bg-[#FAF9F6]/50 border border-[#E5E7EB] rounded-2xl p-4 flex flex-col justify-between space-y-2">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <span className="block text-[9px] font-bold text-[#6B7280] uppercase tracking-wider">Avg Discount Per Order</span>
+                                  <span className="block text-xl font-extrabold text-primary font-poppins mt-1">₹{avgDiscountPerOrder.toLocaleString()}</span>
+                                </div>
+                                <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center text-green-600 text-sm font-bold">₹</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right column: Promo Campaign Performance */}
+                        <div className="lg:col-span-8 bg-white border border-[#E5E7EB] rounded-3xl p-6 shadow-sm space-y-4">
+                          <div className="pb-3 border-b border-[#E5E7EB]">
+                            <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider font-poppins">Promo Campaign Performance</h3>
+                          </div>
+                          
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                              <thead>
+                                <tr className="border-b border-[#E5E7EB] text-[#6B7280] uppercase font-bold text-[10px] tracking-wider bg-[#FAF9F6]/50">
+                                  <th className="py-3 px-4">Transaction ID</th>
+                                  <th className="py-3 px-4">Customer</th>
+                                  <th className="py-3 px-4 text-right">Order Total</th>
+                                  <th className="py-3 px-4 text-right">Discount Applied</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {promoCampaignOrders.map((o, idx) => {
+                                  const discAmt = (o.couponDiscount || 0) + (o.manualDiscount || 0);
+                                  return (
+                                    <tr key={idx} className="border-b border-[#F3F4F6] hover:bg-[#FAF9F6]/30 font-semibold text-primary">
+                                      <td className="py-3.5 px-4 font-mono font-bold">{o.id}</td>
+                                      <td className="py-3.5 px-4">{o.customerName}</td>
+                                      <td className="py-3.5 px-4 text-right">₹{o.totalPrice.toLocaleString()}</td>
+                                      <td className="py-3.5 px-4 text-right text-red-600 font-extrabold">-₹{discAmt.toLocaleString()}</td>
+                                    </tr>
+                                  );
+                                })}
+                                {promoCampaignOrders.length === 0 && (
+                                  <tr>
+                                    <td colSpan={4} className="py-10 text-center text-gray-400 italic">No discounted orders found in this period.</td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })()}
               </div>
             )}
 
@@ -1651,8 +2330,8 @@ export default function AdminPortal() {
                     )}
                   </div>
 
-                  {/* Filter controls row 3: Search inputs & Date pickers */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-[#FAF9F6]/40 p-4 rounded-2xl border border-outline-variant/15">
+                  {/* Filter controls row 3: Search inputs */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#FAF9F6]/40 p-4 rounded-2xl border border-outline-variant/15">
                     {/* Invoice/Bill No */}
                     <div className="space-y-1">
                       <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">Invoice / Bill No</label>
@@ -1688,34 +2367,26 @@ export default function AdminPortal() {
                         className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-primary transition-all text-[#1F2937] font-semibold"
                       />
                     </div>
-
-                    {/* Custom range start date */}
-                    <div className="space-y-1">
-                      <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">Start Date</label>
-                      <input
-                        type="date"
-                        value={ordersStartDate}
-                        onChange={(e) => {
-                          setOrdersStartDate(e.target.value);
-                          setOrdersDateFilter('CUSTOM');
-                        }}
-                        className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-1.5 text-xs text-primary font-semibold focus:outline-none focus:border-primary"
-                      />
-                    </div>
                   </div>
 
-                  {/* Custom range end date picker */}
-                  {(ordersDateFilter === 'CUSTOM' || ordersStartDate) && (
-                    <div className="w-full sm:w-1/2 md:w-1/4 bg-[#FAF9F6]/40 p-4 rounded-2xl border border-outline-variant/15 mt-2">
+                  {/* Custom range date picker (shown only when CUSTOM is active) */}
+                  {ordersDateFilter === 'CUSTOM' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#FAF9F6]/40 p-4 rounded-2xl border border-outline-variant/15 mt-2">
+                      <div className="space-y-1">
+                        <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">Start Date</label>
+                        <input
+                          type="date"
+                          value={ordersStartDate}
+                          onChange={(e) => setOrdersStartDate(e.target.value)}
+                          className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-1.5 text-xs text-primary font-semibold focus:outline-none focus:border-primary"
+                        />
+                      </div>
                       <div className="space-y-1">
                         <label className="block text-[9px] font-bold text-[#4B5563] uppercase tracking-wider">End Date</label>
                         <input
                           type="date"
                           value={ordersEndDate}
-                          onChange={(e) => {
-                            setOrdersEndDate(e.target.value);
-                            setOrdersDateFilter('CUSTOM');
-                          }}
+                          onChange={(e) => setOrdersEndDate(e.target.value)}
                           className="w-full bg-white border border-outline-variant/35 rounded-xl px-3 py-1.5 text-xs text-primary font-semibold focus:outline-none focus:border-primary"
                         />
                       </div>
@@ -1811,13 +2482,6 @@ export default function AdminPortal() {
                               Placed: {new Date(selectedOrder.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                             </span>
                           </div>
-                          <button
-                            onClick={() => deleteOrder(selectedOrder.id)}
-                            className="text-on-surface-variant hover:text-error transition-colors cursor-pointer"
-                            title="Delete Order Record"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
                         </div>
 
                         {/* Status Controls */}
@@ -1873,9 +2537,58 @@ export default function AdminPortal() {
                               </div>
                             ))}
                           </div>
-                          <div className="border-t border-outline-variant/20 pt-5 flex justify-between items-center text-lg font-bold text-primary">
-                            <span>Grand Total :</span>
-                            <span>₹{selectedOrder.totalPrice}</span>
+                          <div className="border-t border-outline-variant/20 pt-5 space-y-2.5">
+                            {(() => {
+                              const subtotal = selectedOrder.items.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+                              const couponDisc = selectedOrder.couponDiscount || 0;
+                              const manualDisc = selectedOrder.manualDiscount || 0;
+                              const delivFee = selectedOrder.deliveryCharge || 0;
+                              const cashRec = selectedOrder.cashReceived || 0;
+                              const changeRet = selectedOrder.changeReturned || 0;
+
+                              return (
+                                <>
+                                  <div className="flex justify-between text-xs text-on-surface-variant font-semibold">
+                                    <span>Subtotal:</span>
+                                    <span>₹{subtotal.toFixed(2)}</span>
+                                  </div>
+                                  {(couponDisc > 0 || selectedOrder.couponCode) && (
+                                    <div className="flex justify-between text-xs text-green-700 font-bold">
+                                      <span>Coupon Discount ({selectedOrder.couponCode || 'Promo'}):</span>
+                                      <span>-₹{couponDisc.toFixed(2)}</span>
+                                    </div>
+                                  )}
+                                  {manualDisc > 0 && (
+                                    <div className="flex justify-between text-xs text-green-700 font-bold">
+                                      <span>Manual Discount:</span>
+                                      <span>-₹{manualDisc.toFixed(2)}</span>
+                                    </div>
+                                  )}
+                                  {delivFee > 0 && (
+                                    <div className="flex justify-between text-xs text-on-surface-variant font-semibold">
+                                      <span>Delivery Fee:</span>
+                                      <span>₹{delivFee.toFixed(2)}</span>
+                                    </div>
+                                  )}
+                                  <div className="border-t border-dashed border-outline-variant/20 pt-3.5 flex justify-between items-center text-base font-extrabold text-primary">
+                                    <span>Grand Total:</span>
+                                    <span>₹{selectedOrder.totalPrice.toFixed(2)}</span>
+                                  </div>
+                                  {cashRec > 0 && (
+                                    <div className="border-t border-outline-variant/10 pt-2.5 space-y-1.5 bg-[#FAF9F5] p-3 rounded-lg border border-outline-variant/10">
+                                      <div className="flex justify-between text-xs text-on-surface-variant font-semibold">
+                                        <span>Cash Paid:</span>
+                                        <span>₹{cashRec.toFixed(2)}</span>
+                                      </div>
+                                      <div className="flex justify-between text-xs text-green-700 font-extrabold">
+                                        <span>Change Return:</span>
+                                        <span>₹{changeRet.toFixed(2)}</span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       </motion.div>
@@ -2391,33 +3104,122 @@ export default function AdminPortal() {
 
             {/* TAB 8: USERS MANAGER */}
             {activeTab === 'users' && (
-              <div className="space-y-8 max-w-4xl">
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-primary">ERP User Profiles</h1>
-                  <p className="text-sm text-on-surface-variant mt-1">Authorized personnel with credentials to control inventory and fulfill sales.</p>
+              <div className="space-y-6 max-w-6xl text-left">
+                {/* Header Title & Refresh */}
+                <div className="flex items-center justify-between pb-4 border-b border-outline-variant/15">
+                  <div>
+                    <h1 className="text-3xl font-extrabold tracking-tight text-primary font-poppins">User Management</h1>
+                    <p className="text-xs text-on-surface-variant font-medium mt-1">
+                      Manage registered clients and promote store administrators
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const stored = localStorage.getItem('organic_sisterz_users');
+                      if (stored) {
+                        setUsersList(JSON.parse(stored));
+                      }
+                      alert('User list refreshed successfully!');
+                    }}
+                    className="flex items-center gap-2 border border-outline-variant/35 hover:bg-[#FAF9F5] px-4 py-2.5 rounded-xl text-xs font-bold text-primary transition-all cursor-pointer bg-white shadow-sm"
+                  >
+                    <RefreshCw className="w-4 h-4 text-primary" />
+                    <span>Refresh</span>
+                  </button>
                 </div>
 
+                {/* Search Bar */}
+                <div className="relative max-w-md">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/70">
+                    <Search className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={userSearchQuery}
+                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                    className="w-full bg-white border border-outline-variant/35 rounded-xl pl-11 pr-4 py-3.5 text-xs focus:outline-none focus:border-primary transition-all text-[#1F2937] font-semibold shadow-sm"
+                  />
+                </div>
+
+                {/* Users Table */}
                 <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
-                  <table className="w-full text-left text-sm">
+                  <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="bg-surface-container-low text-primary font-bold border-b border-outline-variant/25">
+                      <tr className="bg-[#FAF9F6]/80 text-[#374151] font-bold border-b border-outline-variant/25">
                         <th className="px-6 py-4">Name</th>
+                        <th className="px-6 py-4">Email</th>
+                        <th className="px-6 py-4">Mobile</th>
+                        <th className="px-6 py-4">Joined</th>
                         <th className="px-6 py-4">Role</th>
-                        <th className="px-6 py-4">Console Permissions</th>
+                        <th className="px-6 py-4">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-outline-variant/10">
-                      {adminUsers.map((u, i) => (
-                        <tr key={i} className="hover:bg-[#FAF9F5]/40 transition-colors">
-                          <td className="px-6 py-4 font-semibold text-primary">{u.name}</td>
-                          <td className="px-6 py-4">
-                            <span className="bg-secondary/15 text-secondary px-3 py-1 rounded-full font-bold text-xs">
-                              {u.role}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-on-surface-variant font-medium">Read / Write CRUD Admin Console Full Access</td>
-                        </tr>
-                      ))}
+                      {usersList
+                        .filter(u => 
+                          u.name.toLowerCase().includes(userSearchQuery.toLowerCase()) || 
+                          u.email.toLowerCase().includes(userSearchQuery.toLowerCase())
+                        )
+                        .map((u, i) => {
+                          const dateObj = new Date(u.joinedDate);
+                          const joinedFormatted = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+                          
+                          return (
+                            <tr key={i} className="hover:bg-[#FAF9F5]/40 transition-colors">
+                              <td className="px-6 py-4.5 font-bold text-primary text-sm">{u.name}</td>
+                              <td className="px-6 py-4.5 text-on-surface-variant font-medium">{u.email}</td>
+                              <td className="px-6 py-4.5 text-on-surface-variant font-bold">{u.mobile}</td>
+                              <td className="px-6 py-4.5 text-on-surface-variant font-medium">{joinedFormatted}</td>
+                              <td className="px-6 py-4.5">
+                                {u.role === 'Admin' ? (
+                                  <span className="bg-[#DCFCE7] text-[#166534] border border-[#BBF7D0] px-3 py-1.5 rounded-xl font-bold text-[10px] inline-flex items-center gap-1.5">
+                                    <Shield className="w-3.5 h-3.5" />
+                                    <span>Admin</span>
+                                  </span>
+                                ) : (
+                                  <span className="bg-[#F3F4F6] text-[#4B5563] border border-[#E5E7EB] px-3 py-1.5 rounded-xl font-bold text-[10px] inline-flex items-center gap-1.5">
+                                    <Users className="w-3.5 h-3.5" />
+                                    <span>Customer</span>
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4.5">
+                                {u.role === 'Admin' ? (
+                                  <button
+                                    onClick={() => {
+                                      if (confirm(`Remove admin permissions from ${u.name}?`)) {
+                                        const updated = usersList.map(item => 
+                                          item.email === u.email ? { ...item, role: 'Customer' as const } : item
+                                        );
+                                        saveUsers(updated);
+                                      }
+                                    }}
+                                    className="border border-[#FECACA] hover:bg-[#FEF2F2] text-[#991B1B] bg-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                    <span>Remove Admin</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      if (confirm(`Promote ${u.name} to store administrator?`)) {
+                                        const updated = usersList.map(item => 
+                                          item.email === u.email ? { ...item, role: 'Admin' as const } : item
+                                        );
+                                        saveUsers(updated);
+                                      }
+                                    }}
+                                    className="border border-[#86EFAC] hover:bg-[#F0FDF4] text-[#166534] bg-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                                  >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    <span>Make Admin</span>
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
                     </tbody>
                   </table>
                 </div>
