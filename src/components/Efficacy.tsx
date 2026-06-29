@@ -1,48 +1,51 @@
-import { motion } from 'motion/react';
-import { Beaker, Leaf, Droplets } from 'lucide-react';
+import { motion } from "motion/react";
+import { Beaker, Leaf, Droplets } from "lucide-react";
 
 export default function Efficacy() {
   const cards = [
     {
       icon: <Beaker className="w-6 h-6 text-on-secondary-container" />,
-      iconBg: 'bg-secondary-container',
-      title: 'Follicle Revitalization',
-      description: 'Observed 42% increase in hair density and root activation within 28 days of Mahizham Hair Oil application.',
-      tags: ['Growth Activator', 'Amla Extract'],
-      tagBg: 'bg-secondary-fixed text-on-secondary-fixed'
+      iconBg: "bg-secondary-container",
+      title: "Follicle Revitalization",
+      description:
+        "Observed 42% increase in hair density and root activation within 28 days of Mahizham Hair Oil application.",
+      tags: ["Growth Activator", "Amla Extract"],
+      tagBg: "bg-secondary-fixed text-on-secondary-fixed",
     },
     {
       icon: <Leaf className="w-6 h-6 text-on-tertiary-fixed" />,
-      iconBg: 'bg-tertiary-fixed',
-      title: 'Scalp Soothing',
-      description: 'Significant reduction in dandruff and scalp flaking using our 40-herb Shikakai Bio Wash complex.',
-      tags: ['Anti-Dandruff', 'Natural Saponins'],
-      tagBg: 'bg-tertiary-fixed-dim text-on-tertiary-fixed-variant'
+      iconBg: "bg-tertiary-fixed",
+      title: "Scalp Soothing",
+      description:
+        "Significant reduction in dandruff and scalp flaking using our 40-herb Shikakai Bio Wash complex.",
+      tags: ["Anti-Dandruff", "Natural Saponins"],
+      tagBg: "bg-tertiary-fixed-dim text-on-tertiary-fixed-variant",
     },
     {
       icon: <Droplets className="w-6 h-6 text-on-primary-fixed" />,
-      iconBg: 'bg-primary-fixed',
-      title: 'Barrier Restoration',
-      description: 'Skin lipid recovery accelerated by 65%, clearing acne and sunburn with the Face Pack Wild Turmeric.',
-      tags: ['Complexion Care', 'Curcuminoids'],
-      tagBg: 'bg-primary-fixed-dim text-on-primary-fixed-variant'
-    }
+      iconBg: "bg-primary-fixed",
+      title: "Barrier Restoration",
+      description:
+        "Skin lipid recovery accelerated by 65%, clearing acne and sunburn with the Face Pack Wild Turmeric.",
+      tags: ["Complexion Care", "Curcuminoids"],
+      tagBg: "bg-primary-fixed-dim text-on-primary-fixed-variant",
+    },
   ];
 
   return (
     <section className="relative py-32 min-h-[90vh] flex items-center">
       {/* Background with overlay */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmR6ZxR3Rk33dWJrnZNHs_Ps-BKheStlNXJOleMO7HgQK_WIEv0anvpEf4Z6cAxXmUZHa4CCFkhMwhMHCdqqPRFWJ3wbDHvaqEANcjfmNBaUdRG-NSUD_8rqqsqEKXgjrDyeopAAkzNTVldIS-pI3D6X6xWIlsHqoEsiEpTsBW85VCgPizSem3SNjquufBNl645_zdOeCDhoFV9dR00iCy5v69m7NhnDmyOiI4CONSF_3XxcpHYg4Nxp8PrUGpRw9T_CYa6t0eZgw" 
-          alt="Lush botanical greenhouse background" 
+        <img
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmR6ZxR3Rk33dWJrnZNHs_Ps-BKheStlNXJOleMO7HgQK_WIEv0anvpEf4Z6cAxXmUZHa4CCFkhMwhMHCdqqPRFWJ3wbDHvaqEANcjfmNBaUdRG-NSUD_8rqqsqEKXgjrDyeopAAkzNTVldIS-pI3D6X6xWIlsHqoEsiEpTsBW85VCgPizSem3SNjquufBNl645_zdOeCDhoFV9dR00iCy5v69m7NhnDmyOiI4CONSF_3XxcpHYg4Nxp8PrUGpRw9T_CYa6t0eZgw"
+          alt="Lush botanical greenhouse background"
           className="w-full h-full object-cover mix-blend-multiply opacity-70"
         />
         <div className="absolute inset-0 bg-surface/90 backdrop-blur-[8px]" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto w-full px-6 lg:px-8 text-center">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
@@ -56,7 +59,9 @@ export default function Efficacy() {
             Proven Botanical Efficacy
           </h2>
           <p className="font-body text-base text-on-surface-variant leading-relaxed">
-            Our formulations undergo rigorous independent clinical trials to ensure they deliver measurable results without the side effects of traditional synthetic interventions.
+            Our formulations undergo rigorous independent clinical trials to
+            ensure they deliver measurable results without the side effects of
+            traditional synthetic interventions.
           </p>
         </motion.div>
 
@@ -70,7 +75,9 @@ export default function Efficacy() {
               transition={{ duration: 0.6, delay: index * 0.2 }}
               className="glass-panel p-10 rounded-2xl text-left hover:-translate-y-2 transition-transform duration-500 shadow-sm flex flex-col h-full"
             >
-              <div className={`w-14 h-14 ${card.iconBg} rounded-full flex items-center justify-center mb-8 shrink-0`}>
+              <div
+                className={`w-14 h-14 ${card.iconBg} rounded-full flex items-center justify-center mb-8 shrink-0`}
+              >
                 {card.icon}
               </div>
               <h3 className="font-display text-2xl text-primary font-medium mb-4">
@@ -80,8 +87,11 @@ export default function Efficacy() {
                 {card.description}
               </p>
               <div className="flex flex-wrap gap-2 mt-auto pt-4">
-                {card.tags.map(tag => (
-                  <span key={tag} className={`${card.tagBg} px-3 py-1.5 rounded-full font-body text-[11px] font-semibold tracking-wide uppercase`}>
+                {card.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className={`${card.tagBg} px-3 py-1.5 rounded-full font-body text-[11px] font-semibold tracking-wide uppercase`}
+                  >
                     {tag}
                   </span>
                 ))}

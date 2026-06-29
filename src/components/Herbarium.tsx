@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Compass, Beaker, Shield, Activity, X } from 'lucide-react';
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Compass, Beaker, Shield, Activity, X } from "lucide-react";
 
 interface Ingredient {
   id: string;
@@ -16,71 +16,88 @@ interface Ingredient {
 
 const ingredients: Ingredient[] = [
   {
-    id: 'shikakai',
-    name: 'Shikakai',
-    scientificName: 'Acacia Concinna',
-    extraction: 'Traditional Sun-Drying & Pulverization',
-    activeCompound: 'Saponins (Natural Foaming Glycosides)',
-    bioavailability: '96%',
-    clinicalBenefit: 'Mild natural surfactant that cleanses scalp build-up while preserving healthy follicle lipids.',
-    image: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&q=80&w=600',
-    details: 'Shikakai (literally meaning "fruit for hair") has been India\'s premier hair wash for centuries. The bark and pods contain natural saponins which lather mildly when mixed with water. It dissolves sebum, prevents dandruff, and conditions the cuticle without stripping the scalp\'s delicate acid mantle.'
+    id: "shikakai",
+    name: "Shikakai",
+    scientificName: "Acacia Concinna",
+    extraction: "Traditional Sun-Drying & Pulverization",
+    activeCompound: "Saponins (Natural Foaming Glycosides)",
+    bioavailability: "96%",
+    clinicalBenefit:
+      "Mild natural surfactant that cleanses scalp build-up while preserving healthy follicle lipids.",
+    image:
+      "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=600",
+    details:
+      "Shikakai (literally meaning \"fruit for hair\") has been India's premier hair wash for centuries. The bark and pods contain natural saponins which lather mildly when mixed with water. It dissolves sebum, prevents dandruff, and conditions the cuticle without stripping the scalp's delicate acid mantle.",
   },
   {
-    id: 'aavaram-senna',
-    name: 'Aavaram Senna',
-    scientificName: 'Senna Auriculata',
-    extraction: 'Low-Temp Vacuum Preservation',
-    activeCompound: 'Polyphenols & Flavonoids',
-    bioavailability: '94%',
-    clinicalBenefit: 'Soothes sunburn, eliminates dark spots, and reduces skin pigmentation naturally.',
-    image: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&q=80&w=600',
-    details: 'Aavaram Senna (Aavarampoo) is a brilliant golden-yellow flower celebrated for its skin hydrating properties. Our low-temperature vacuum milling ensures its polyphenolic antioxidants remain stable, allowing them to treat acne, prevent body odor, and clear facial tan when used daily.'
+    id: "aavaram-senna",
+    name: "Aavaram Senna",
+    scientificName: "Senna Auriculata",
+    extraction: "Low-Temp Vacuum Preservation",
+    activeCompound: "Polyphenols & Flavonoids",
+    bioavailability: "94%",
+    clinicalBenefit:
+      "Soothes sunburn, eliminates dark spots, and reduces skin pigmentation naturally.",
+    image:
+      "https://images.unsplash.com/photo-1596273437140-f38b13684a0a?auto=format&fit=crop&q=80&w=600",
+    details:
+      "Aavaram Senna (Aavarampoo) is a brilliant golden-yellow flower celebrated for its skin hydrating properties. Our low-temperature vacuum milling ensures its polyphenolic antioxidants remain stable, allowing them to treat acne, prevent body odor, and clear facial tan when used daily.",
   },
   {
-    id: 'amla',
-    name: 'Amla Fruit',
-    scientificName: 'Phyllanthus Emblica',
-    extraction: 'Cold-Press & Centrifugation',
-    activeCompound: 'Ascorbic Acid (Vitamin C)',
-    bioavailability: '98%',
-    clinicalBenefit: 'Neutralizes root oxidative stress, delaying premature greying and strengthening the keratin sheath.',
-    image: 'https://images.unsplash.com/photo-1626015276681-2b446c6a22b7?auto=format&fit=crop&q=80&w=600',
-    details: 'Amla is a powerful organic source of Vitamin C. It strengthens hair follicles from within by promoting collagen synthesis, helping to keep hair roots firmly anchored while maintaining natural dark pigment cells.'
+    id: "amla",
+    name: "Amla Fruit",
+    scientificName: "Phyllanthus Emblica",
+    extraction: "Cold-Press & Centrifugation",
+    activeCompound: "Ascorbic Acid (Vitamin C)",
+    bioavailability: "98%",
+    clinicalBenefit:
+      "Neutralizes root oxidative stress, delaying premature greying and strengthening the keratin sheath.",
+    image:
+      "https://images.unsplash.com/photo-1502741126161-b84851a15864?auto=format&fit=crop&q=80&w=600",
+    details:
+      "Amla is a powerful organic source of Vitamin C. It strengthens hair follicles from within by promoting collagen synthesis, helping to keep hair roots firmly anchored while maintaining natural dark pigment cells.",
   },
   {
-    id: 'kasthuri-manjal',
-    name: 'Kasthuri Manjal',
-    scientificName: 'Curcuma Aromatica',
-    extraction: 'Superfine Pulverization & Triple Sifting',
-    activeCompound: 'Curcuminoids (3.5%) & Essential Oils',
-    bioavailability: '92%',
-    clinicalBenefit: 'Regulates skin sebum, suppresses acne-causing pathogens, and brightens complexion.',
-    image: 'https://images.unsplash.com/photo-1608248597481-496100c80836?auto=format&fit=crop&q=80&w=600',
-    details: 'Wild Turmeric (Kasthuri Manjal) is renowned for its cosmetic efficacy. Unlike cooking turmeric, it does not stain the skin yellow. It acts as a powerful natural antibiotic and anti-inflammatory, resolving deep acne and protecting the skin barrier.'
-  }
+    id: "kasthuri-manjal",
+    name: "Kasthuri Manjal",
+    scientificName: "Curcuma Aromatica",
+    extraction: "Superfine Pulverization & Triple Sifting",
+    activeCompound: "Curcuminoids (3.5%) & Essential Oils",
+    bioavailability: "92%",
+    clinicalBenefit:
+      "Regulates skin sebum, suppresses acne-causing pathogens, and brightens complexion.",
+    image:
+      "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=80&w=600",
+    details:
+      "Wild Turmeric (Kasthuri Manjal) is renowned for its cosmetic efficacy. Unlike cooking turmeric, it does not stain the skin yellow. It acts as a powerful natural antibiotic and anti-inflammatory, resolving deep acne and protecting the skin barrier.",
+  },
 ];
 
 export default function Herbarium() {
-  const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
+  const [selectedIngredient, setSelectedIngredient] =
+    useState<Ingredient | null>(null);
 
   return (
-    <section className="py-24 md:py-32 bg-background relative overflow-hidden">
+    <section
+      id="herbarium"
+      className="py-24 md:py-32 bg-background relative overflow-hidden"
+    >
       {/* Background graphic grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#061b0e08_1px,transparent_1px),linear-gradient(to_bottom,#061b0e08_1px,transparent_1px)] bg-[size:4rem_4rem] -z-10" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center space-y-6 mb-20">
           <span className="font-body text-xs font-semibold text-secondary tracking-[0.2em] uppercase flex items-center justify-center gap-2">
-            <Compass className="w-4 h-4 animate-spin-slow" /> Extraction & Science
+            <Compass className="w-4 h-4 animate-spin-slow" /> Extraction &
+            Science
           </span>
           <h2 className="font-display text-4xl md:text-5xl text-primary font-medium tracking-tight">
             The Interactive Herbarium
           </h2>
           <p className="font-body text-base text-on-surface-variant leading-relaxed">
-            Click on any active botanical below to dissect its molecular properties, extraction methods, and clinical verification data.
+            Click on any active botanical below to dissect its molecular
+            properties, extraction methods, and clinical verification data.
           </p>
         </div>
 
@@ -177,22 +194,34 @@ export default function Herbarium() {
                       <div className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/10 flex items-start gap-3">
                         <Beaker className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
                         <div>
-                          <span className="block font-body text-[10px] uppercase tracking-wider text-on-surface-variant">Active Compound</span>
-                          <span className="font-body text-xs font-semibold text-primary">{selectedIngredient.activeCompound}</span>
+                          <span className="block font-body text-[10px] uppercase tracking-wider text-on-surface-variant">
+                            Active Compound
+                          </span>
+                          <span className="font-body text-xs font-semibold text-primary">
+                            {selectedIngredient.activeCompound}
+                          </span>
                         </div>
                       </div>
                       <div className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/10 flex items-start gap-3">
                         <Activity className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
                         <div>
-                          <span className="block font-body text-[10px] uppercase tracking-wider text-on-surface-variant">Bioavailability</span>
-                          <span className="font-body text-xs font-semibold text-primary">{selectedIngredient.bioavailability}</span>
+                          <span className="block font-body text-[10px] uppercase tracking-wider text-on-surface-variant">
+                            Bioavailability
+                          </span>
+                          <span className="font-body text-xs font-semibold text-primary">
+                            {selectedIngredient.bioavailability}
+                          </span>
                         </div>
                       </div>
                       <div className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/10 flex items-start gap-3 col-span-2">
                         <Shield className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
                         <div>
-                          <span className="block font-body text-[10px] uppercase tracking-wider text-on-surface-variant">Extraction Process</span>
-                          <span className="font-body text-xs font-semibold text-primary">{selectedIngredient.extraction}</span>
+                          <span className="block font-body text-[10px] uppercase tracking-wider text-on-surface-variant">
+                            Extraction Process
+                          </span>
+                          <span className="font-body text-xs font-semibold text-primary">
+                            {selectedIngredient.extraction}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -209,7 +238,13 @@ export default function Herbarium() {
 
 function ArrowMicroRight() {
   return (
-    <svg className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+    <svg
+      className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2.5}
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
     </svg>
   );
