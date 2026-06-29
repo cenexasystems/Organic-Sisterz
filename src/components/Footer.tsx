@@ -57,10 +57,10 @@ export default function Footer({ onAdminClick }: FooterProps) {
             Member Portal
           </a>
           <a
-            href="#"
-            className="text-outline-variant hover:text-white font-body text-base hover:translate-x-1 transition-transform duration-300"
+            href="mailto:organicsisterz@gmail.com"
+            className="text-outline-variant hover:text-white font-body text-base hover:translate-x-1 transition-transform duration-300 flex items-center gap-2"
           >
-            Contact
+            organicsisterz@gmail.com
           </a>
           {onAdminClick && (
             <button
