@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import Lenis from 'lenis';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import CinematicReveal from './components/CinematicReveal';
 import ProductCatalog from './components/ProductCatalog';
 import BeforeAfter from './components/BeforeAfter';
+import BlendCustomizer from './components/BlendCustomizer';
 import Herbarium from './components/Herbarium';
 import ComparisonTable from './components/ComparisonTable';
 import Sourcing from './components/Sourcing';
@@ -20,6 +23,28 @@ function Storefront() {
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Initialize Lenis smooth scroll
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+
+    let rafId: number;
+    function raf(time: number) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -34,8 +59,10 @@ function Storefront() {
       
       <main>
         <Hero onConsultationClick={() => setIsQuizOpen(true)} />
+        <CinematicReveal />
         <ProductCatalog />
         <BeforeAfter />
+        <BlendCustomizer />
         <Herbarium />
         <ComparisonTable />
         <Sourcing />
