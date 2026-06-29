@@ -185,12 +185,27 @@ export function saveStoredOrders(orders: Order[]): void {
 
 export function addOrder(order: Omit<Order, 'id' | 'createdAt' | 'status'>): Order {
   const orders = getStoredOrders();
+  
+  // Generate incremental Invoice ID
+  const currentYear = new Date().getFullYear();
+  let nextNumber = 1;
+  const yearOrders = orders.filter(o => o.id.startsWith(`INV_${currentYear}_`));
+  if (yearOrders.length > 0) {
+    const highestNumber = Math.max(...yearOrders.map(o => {
+      const parts = o.id.split('_');
+      return parseInt(parts[2]) || 0;
+    }));
+    nextNumber = highestNumber + 1;
+  }
+  const paddedNumber = nextNumber.toString().padStart(4, '0');
+  const newOrderId = `INV_${currentYear}_${paddedNumber}`;
+
   const newOrder: Order = {
     ...order,
-    id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+    id: newOrderId,
     status: 'Pending',
     createdAt: new Date().toISOString(),
-    source: 'STOREFRONT'
+    source: order.source || 'STOREFRONT'
   };
   orders.unshift(newOrder);
   saveStoredOrders(orders);
