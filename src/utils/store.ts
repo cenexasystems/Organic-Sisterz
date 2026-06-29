@@ -33,6 +33,12 @@ export interface Order {
   status: 'Pending' | 'Processing' | 'Completed' | 'Cancelled';
   createdAt: string;
   source?: 'OFFLINE' | 'ONLINE' | 'MANUAL' | 'STOREFRONT';
+  couponCode?: string;
+  couponDiscount?: number;
+  manualDiscount?: number;
+  deliveryCharge?: number;
+  cashReceived?: number;
+  changeReturned?: number;
 }
 
 // Exact product details and text from the packaging labels, plus the handwritten pricing

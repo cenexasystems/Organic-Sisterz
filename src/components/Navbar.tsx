@@ -1,4 +1,4 @@
-import { ShoppingBag, Menu, X, Settings, Plus, Minus, Trash2, CheckCircle } from 'lucide-react';
+import { ShoppingBag, Menu, X, Settings, Plus, Minus, Trash2, CheckCircle, Leaf, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { getStoredProducts, addOrder } from '../utils/store';
@@ -156,22 +156,27 @@ export default function Navbar({ onConsultationClick, onAdminClick }: NavbarProp
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-white/90 backdrop-blur-md shadow-sm border-b border-outline-variant/30 py-3'
+            ? 'bg-[#FAF9F5]/90 backdrop-blur-xl shadow-[0_2px_20px_rgba(43,62,47,0.03)] border-b border-[#2b3e2f]/10 py-3'
             : 'bg-transparent py-5'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between">
-          <a href="#" className="font-display text-2xl md:text-3xl font-medium tracking-tight text-primary select-none">
-            Organic Sisterz
+          <a href="#" className="font-display text-2xl md:text-3xl font-medium tracking-tight select-none flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-full bg-[#2B3E2F]/10 flex items-center justify-center text-[#2B3E2F] group-hover:bg-[#2B3E2F] group-hover:text-white transition-all duration-500 shadow-sm">
+              <Leaf className="w-4 h-4" />
+            </div>
+            <span className="font-semibold text-primary">
+              Organic <span className="font-medium italic text-secondary">Sisterz</span>
+            </span>
           </a>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-9">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
-                className={`relative font-body text-xs font-semibold tracking-widest uppercase transition-colors duration-300 ${
+                className={`relative font-body text-[10px] font-bold tracking-[0.2em] uppercase transition-colors duration-300 py-1.5 ${
                   link.active
                     ? 'text-primary'
                     : 'text-on-surface-variant hover:text-primary'
@@ -181,7 +186,7 @@ export default function Navbar({ onConsultationClick, onAdminClick }: NavbarProp
                 {link.active && (
                   <motion.div 
                     layoutId="activeIndicator"
-                    className="absolute -bottom-1 left-0 w-full h-[2px] bg-primary"
+                    className="absolute bottom-0 left-0 w-full h-[2px] bg-secondary"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -190,16 +195,16 @@ export default function Navbar({ onConsultationClick, onAdminClick }: NavbarProp
           </div>
 
           {/* Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 md:space-x-4">
             <button 
               onClick={onConsultationClick}
-              className="hidden md:block bg-primary text-on-primary font-body text-xs font-semibold tracking-widest uppercase px-6 py-3 rounded-full hover:bg-primary-container transition-colors duration-300 cursor-pointer"
+              className="hidden md:flex items-center gap-2 bg-[#2B3E2F] hover:bg-[#1b3022] text-[#FAF9F5] font-body text-[10px] font-bold tracking-[0.15em] uppercase px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
             >
-              Consultation
+              Consultation <Sparkles className="w-3.5 h-3.5" />
             </button>
             <button 
               onClick={() => { setIsCartOpen(true); setCheckoutStep('cart'); }}
-              className="text-primary hover:text-primary-container transition-colors duration-300 p-2 hover:bg-black/5 rounded-full cursor-pointer relative"
+              className="text-primary hover:text-secondary hover:bg-[#2B3E2F]/5 transition-all p-2 rounded-full cursor-pointer relative"
               title="View Cart"
             >
               <ShoppingBag className="w-5 h-5" />
@@ -211,7 +216,7 @@ export default function Navbar({ onConsultationClick, onAdminClick }: NavbarProp
             </button>
             <button 
               onClick={onAdminClick}
-              className="text-primary hover:text-primary-container transition-colors duration-300 p-2 hover:bg-black/5 rounded-full cursor-pointer relative"
+              className="text-primary hover:text-secondary hover:bg-[#2B3E2F]/5 transition-all p-2 rounded-full cursor-pointer relative"
               title="Admin Portal"
             >
               <Settings className="w-5 h-5" />
