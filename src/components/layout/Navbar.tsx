@@ -142,31 +142,27 @@ export default function Navbar({
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const navLinks = [
-    { name: "Products", href: "#products-catalog", id: "products-catalog" },
-    { name: "Results", href: "#before-after", id: "before-after" },
-    { name: "Story", href: "#herbarium", id: "herbarium" },
-    { name: "Reviews", href: "#testimonials", id: "testimonials" },
+    { name: "Products", href: "/#products-catalog", id: "products-catalog" },
+    { name: "Results", href: "/#before-after", id: "before-after" },
+    { name: "Story", href: "/#herbarium", id: "herbarium" },
+    { name: "Reviews", href: "/#testimonials", id: "testimonials" },
   ];
 
   return (
     <>
       <nav
-        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-          isScrolled ? "py-4 md:py-6 px-4 md:px-8" : "py-5 md:py-6 px-0"
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          isScrolled 
+            ? "bg-[#FAF9F5]/95 backdrop-blur-md border-b border-[#2B3E2F]/10 shadow-[0_2px_15px_rgba(0,0,0,0.02)] py-4 px-6 md:px-12" 
+            : "bg-transparent py-6 px-6 md:px-12"
         }`}
       >
-        <div 
-          className={`w-full max-w-[1600px] mx-auto transition-all duration-500 grid grid-cols-2 md:grid-cols-3 items-center ${
-            isScrolled 
-              ? "bg-[#FAF9F5]/90 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#2B3E2F]/10 rounded-full px-6 md:px-8 py-2.5" 
-              : "bg-transparent px-6 md:px-8 py-0"
-          }`}
-        >
+        <div className="w-full max-w-[1600px] mx-auto grid grid-cols-2 md:grid-cols-3 items-center">
           
           {/* Left Side: Logo */}
           <div className="flex justify-start">
             <a
-              href="#"
+              href="/"
               className="font-display text-2xl md:text-3xl font-extrabold tracking-tight select-none text-primary flex items-center"
             >
               Organic Sisterz
@@ -210,12 +206,6 @@ export default function Navbar({
               <Gift className="w-3.5 h-3.5" /> Gift a Friend
             </button>
             <button
-              onClick={() => navigate('/login')}
-              className="hidden md:flex items-center gap-2 bg-[#2B3E2F] hover:bg-[#1b3022] text-[#FAF9F5] font-body text-[10px] font-bold tracking-[0.15em] uppercase px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
-            >
-              <User className="w-3.5 h-3.5" /> {user ? "Profile" : "Login"}
-            </button>
-            <button
               onClick={() => navigate('/cart')}
               className="text-primary hover:text-secondary hover:bg-[#2B3E2F]/5 transition-all p-2 rounded-full cursor-pointer relative"
               title="View Cart"
@@ -226,6 +216,12 @@ export default function Navbar({
                   {totalQuantity}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => navigate(user ? '/profile' : '/login')}
+              className="hidden md:flex items-center gap-2 bg-[#2B3E2F] hover:bg-[#1b3022] text-[#FAF9F5] font-body text-[10px] font-bold tracking-[0.15em] uppercase px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+            >
+              <User className="w-3.5 h-3.5" /> {user ? "Profile" : "Login"}
             </button>
             <button
               className="md:hidden text-primary p-2 -mr-2 cursor-pointer"
@@ -269,7 +265,7 @@ export default function Navbar({
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    navigate('/login');
+                    navigate(user ? '/profile' : '/login');
                   }}
                   className="font-body text-sm font-semibold tracking-widest uppercase text-primary border border-outline-variant/30 rounded-xl py-3 w-full flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors"
                 >

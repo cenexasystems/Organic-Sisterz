@@ -135,19 +135,24 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
 
   if (!product) return null;
 
-  const spec = productSpecs[product.id] || {
-    tamilName: '',
-    rating: '4.7',
-    details: product.description,
+  // Read details, herbs, benefits, and howToUse dynamically from the product object
+  const spec = {
+    tamilName: product.tamilName || '',
+    rating: '4.8',
+    details: product.details || product.description,
     ingredients: product.herbs,
     benefitsList: product.benefits,
-    usage: 'Apply as directed on the label.',
-    features: [
-      { icon: 'leaf', title: '100% Natural', subtitle: 'Pure & Handpicked' },
-      { icon: 'sparkles', title: 'Fresh & Fragrant', subtitle: 'Daily Selection' },
-      { icon: 'plant', title: 'Pooja Ready', subtitle: 'Temple Quality' },
-      { icon: 'shield', title: 'Safe Packaging', subtitle: 'Hygienically Packed' }
-    ]
+    usage: product.howToUse || 'Apply as directed on the label.',
+    features: (productSpecs[product.id] || {
+      features: [
+        { icon: 'leaf', title: '100% Organic', subtitle: 'Pure & Handcrafted' },
+        { icon: 'sparkles', title: 'Fresh & Organic', subtitle: 'Restores Root Lipids' },
+        { icon: 'plant', title: 'Premium Herbs', subtitle: 'No Artificial Additives' },
+        { icon: 'shield', title: 'Safe Packaging', subtitle: 'Zero Mineral Oils' }
+      ]
+    }).features,
+    fssai: productSpecs[product.id]?.fssai,
+    nutritionalInfo: productSpecs[product.id]?.nutritionalInfo
   };
 
   const activeSizeStr = selectedSize || (product.sizes[0]?.size || '');
@@ -249,11 +254,6 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                   <h2 className="font-display text-3xl md:text-4xl text-primary font-bold tracking-tight">
                     {product.name}
                   </h2>
-                  {spec.tamilName && (
-                    <span className="block font-display text-lg text-on-surface-variant font-medium opacity-85">
-                      {spec.tamilName}
-                    </span>
-                  )}
                 </div>
 
                 {/* Ratings Row */}
@@ -302,19 +302,31 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                   </div>
                   
                   <div className="flex flex-wrap gap-3">
-                    {product.sizes.map((sObj, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedSize(sObj.size)}
-                        className={`px-5 py-3.5 rounded-xl font-body text-sm font-bold border transition-all duration-300 ${
-                          activeSizeStr === sObj.size
-                            ? 'bg-primary text-white border-primary shadow-md'
-                            : 'bg-white text-primary border-outline-variant/30 hover:border-secondary'
-                        }`}
-                      >
-                        {sObj.size}
-                      </button>
-                    ))}
+                    {product.sizes.map((sObj, idx) => {
+                      const isSizeAvailable = sObj.isAvailable !== false;
+                      const isSelected = activeSizeStr === sObj.size;
+                      return (
+                        <button
+                          key={idx}
+                          disabled={!isSizeAvailable}
+                          onClick={() => setSelectedSize(sObj.size)}
+                          className={`px-5 py-3.5 rounded-xl font-body text-sm font-bold border transition-all duration-300 relative ${
+                            !isSizeAvailable
+                              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60'
+                              : isSelected
+                                ? 'bg-primary text-white border-primary shadow-md cursor-pointer'
+                                : 'bg-white text-primary border-outline-variant/30 hover:border-secondary cursor-pointer'
+                          }`}
+                        >
+                          <span>{sObj.size}</span>
+                          {!isSizeAvailable && (
+                            <span className="absolute -top-2 -right-2 bg-error text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider scale-90">
+                              OOS
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                   <p className="font-body text-[10px] text-on-surface-variant/80">
                     Net Weight: {activeSizeStr} • Total price: ₹{currentPrice}
@@ -497,22 +509,30 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                   )}
                 </div>
               </div>
-
               {/* Bottom Sticky Action Bar */}
               <div className="p-6 md:px-10 md:py-6 border-t border-outline-variant/20 flex flex-col sm:flex-row gap-4 items-center justify-between bg-[#FAF9F5]/40 backdrop-blur-sm shrink-0">
                 <div>
                   <span className="text-[10px] font-bold text-on-surface-variant/70 uppercase block">Total</span>
-                  <span className="font-display text-2xl font-extrabold text-primary">₹{currentPrice}.00</span>
+                  <span className="font-display text-2xl font-extrabold text-primary">₹{currentPrice}</span>
                 </div>
                 <button
+                  disabled={product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false)}
                   onClick={() => {
                     onAddToCart(product.id, activeSizeStr);
                     onClose();
                   }}
-                  className="w-full sm:w-auto bg-primary hover:bg-primary-container text-on-primary font-body text-xs font-bold tracking-widest uppercase px-12 py-4 rounded-full flex items-center justify-center gap-2 shadow-lg transition-all duration-300 cursor-pointer"
+                  className={`w-full sm:w-auto font-body text-xs font-bold tracking-widest uppercase px-12 py-4 rounded-full flex items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
+                    product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false)
+                      ? 'bg-gray-400 text-white cursor-not-allowed shadow-none'
+                      : 'bg-primary hover:bg-primary-container text-on-primary cursor-pointer'
+                  }`}
                 >
                   <ShoppingBag className="w-4 h-4" />
-                  <span>Add to Cart</span>
+                  <span>
+                    {product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false)
+                      ? 'Out of Stock'
+                      : 'Add to Cart'}
+                  </span>
                 </button>
               </div>
             </div>

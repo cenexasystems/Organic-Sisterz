@@ -77,8 +77,8 @@ export default function LocationMap() {
                 <Phone className="w-5 h-5 text-secondary shrink-0" />
                 <div>
                   <p className="font-semibold text-primary">Formulation Consultation</p>
-                  <a href="tel:+919940088786" className="mt-0.5 hover:underline block text-secondary font-semibold">
-                    +91 99400 88786
+                  <a href="tel:+919000000000" className="mt-0.5 hover:underline block text-secondary font-semibold">
+                    +91 90000 00000
                   </a>
                 </div>
               </div>

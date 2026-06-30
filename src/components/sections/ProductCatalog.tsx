@@ -98,12 +98,12 @@ export default function ProductCatalog() {
                 {/* Image Section */}
                 <div
                   onClick={() => handleOpenModal(product)}
-                  className="relative aspect-[4/5] overflow-hidden bg-surface-container-high cursor-pointer flex items-center justify-center p-4 bg-[#FAF9F5]"
+                  className="relative aspect-square overflow-hidden bg-white cursor-pointer flex items-center justify-center p-6 border-b border-outline-variant/10"
                 >
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="max-h-full max-w-full object-contain transition-transform duration-[2s] group-hover:scale-105"
+                    className="max-h-full max-w-full object-contain transition-transform duration-[2s] group-hover:scale-103"
                   />
                   <div className="absolute inset-0 bg-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
@@ -168,19 +168,19 @@ export default function ProductCatalog() {
                   </ul>
 
                   {/* Pricing and Select Options */}
-                  <div className="flex items-center justify-between pt-2">
-                    <div>
-                      <span className="font-body text-[9px] text-on-surface-variant uppercase tracking-widest block opacity-75">
+                  <div className="flex items-center justify-between pt-2 gap-2">
+                    <div className="min-w-0">
+                      <span className="font-body text-[9px] text-on-surface-variant uppercase tracking-widest block opacity-75 truncate">
                         Starting at
                       </span>
-                      <span className="font-display text-xl font-bold text-primary">
-                        ₹{lowestPrice}.00
+                      <span className="font-display text-xl font-bold text-primary block truncate">
+                        ₹{lowestPrice}
                       </span>
                     </div>
 
                     <button
                       onClick={() => handleOpenModal(product)}
-                      className="font-body text-[10px] font-semibold tracking-widest uppercase px-5 py-3 rounded-full flex items-center gap-1.5 bg-primary text-on-primary hover:bg-primary-container transition-all duration-300 select-none cursor-pointer"
+                      className="shrink-0 font-body text-[10px] font-semibold tracking-widest uppercase px-5 py-3 rounded-full flex items-center gap-1.5 bg-primary text-on-primary hover:bg-primary-container transition-all duration-300 select-none cursor-pointer"
                     >
                       Select Options <ArrowRight className="w-3.5 h-3.5" />
                     </button>
