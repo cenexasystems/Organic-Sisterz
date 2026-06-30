@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, MessageSquare, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { getStoredCart, saveStoredCart, addOrder } from '../utils/store';
-import Navbar from './Navbar';
+import Navbar from '../components/layout/Navbar';
 import type { OrderItem } from '../utils/store';
 
 export default function CartPage() {

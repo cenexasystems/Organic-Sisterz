@@ -8,7 +8,7 @@ import {
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
-import { getStoredProducts, getStoredCart, saveStoredCart } from "../utils/store";
+import { getStoredProducts, getStoredCart, saveStoredCart } from "../../utils/store";
 
 interface NavbarProps {
   onConsultationClick: () => void;

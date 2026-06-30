@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Heart, Shield, Leaf, Sparkles, ChevronDown, ShoppingBag } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import type { Product } from '../utils/store';
+import type { Product } from '../../utils/store';
 
 interface ProductDetailModalProps {
   product: Product | null;

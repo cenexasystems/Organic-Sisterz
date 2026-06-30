@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Heart, ShieldCheck } from "lucide-react";
-import ProductDetailModal from "./ProductDetailModal";
-import { getStoredProducts } from "../utils/store";
-import type { Product } from "../utils/store";
+import ProductDetailModal from "../ui/ProductDetailModal";
+import { getStoredProducts } from "../../utils/store";
+import type { Product } from "../../utils/store";
 
 export default function ProductCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
