@@ -4,20 +4,30 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, User, LogOut, Leaf, ShoppingBag, Settings } from 'lucide-react';
 import { getStoredOrders } from '../utils/store';
 import type { Order } from '../utils/store';
+import { useAuth } from '../hooks/useAuth';
 
 export default function CustomerProfile() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [activeTab, setActiveTab] = useState<'orders' | 'profile'>('orders');
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
-    // Fetch orders to display in the dummy profile
-    // Filtering out gifts just to show standard purchases
-    setOrders(getStoredOrders().filter(o => !o.isGift).reverse());
-  }, []);
+    const storedOrders = getStoredOrders();
+    if (user?.email) {
+      // Find orders matching user email or prefix
+      const userOrders = storedOrders.filter(o => 
+        o.customerEmail === user.email || 
+        o.customerName.toLowerCase().includes((user.email || '').split('@')[0].toLowerCase())
+      );
+      setOrders(userOrders.reverse());
+    } else {
+      setOrders(storedOrders.filter(o => !o.isGift).reverse());
+    }
+  }, [user]);
 
-  const handleLogout = () => {
-    // Dummy logout
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 
@@ -40,8 +50,12 @@ export default function CustomerProfile() {
               <User className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-display font-bold text-primary">Guest User</h2>
-              <span className="text-xs text-on-surface-variant font-medium">VIP Member</span>
+              <h2 className="text-xl font-display font-bold text-primary">
+                {user ? (user.user_metadata?.full_name || user.email?.split('@')[0] || '') : 'Guest User'}
+              </h2>
+              <span className="text-xs text-on-surface-variant font-medium">
+                {user ? 'Authenticated Member' : 'Guest Account'}
+              </span>
             </div>
           </div>
         </div>
@@ -180,15 +194,15 @@ export default function CustomerProfile() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-xs font-bold text-primary uppercase tracking-wider mb-2">Full Name</label>
-                    <input type="text" value="Guest User" readOnly className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-sm text-primary bg-[#FAF9F5]" />
+                    <input type="text" value={user ? (user.user_metadata?.full_name || user.email?.split('@')[0] || '') : 'Guest User'} readOnly className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-sm text-primary bg-[#FAF9F5]" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-primary uppercase tracking-wider mb-2">Email Address</label>
-                    <input type="email" value="guest@example.com" readOnly className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-sm text-primary bg-[#FAF9F5]" />
+                    <input type="email" value={user?.email || 'guest@example.com'} readOnly className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-sm text-primary bg-[#FAF9F5]" />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-xs font-bold text-primary uppercase tracking-wider mb-2">Primary Shipping Address</label>
-                    <textarea readOnly className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-sm text-primary bg-[#FAF9F5] min-h-[100px]" value="123 Herbal Garden Road, Chennai, Tamil Nadu, 600001" />
+                    <textarea readOnly className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-sm text-primary bg-[#FAF9F5] min-h-[100px]" value={orders[0]?.customerAddress || 'No address saved yet. Make your first purchase to save an address!'} />
                   </div>
                 </div>
                 
