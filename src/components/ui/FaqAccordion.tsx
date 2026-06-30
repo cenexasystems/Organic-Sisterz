@@ -86,18 +86,7 @@ export default function FaqAccordion() {
           })}
         </div>
 
-        {/* Contact CTA */}
-        <div className="mt-16 text-center bg-surface-container-low border border-outline-variant/20 p-8 rounded-2xl">
-          <p className="font-body text-sm text-on-surface-variant mb-4">
-            Have a custom scalp diagnostic question or require bulk clinic orders?
-          </p>
-          <a 
-            href="#" 
-            className="inline-block bg-primary text-on-primary font-body text-xs font-semibold tracking-widest uppercase px-6 py-3.5 rounded-full hover:bg-primary-container transition-all duration-300"
-          >
-            Speak to a Trichologist
-          </a>
-        </div>
+
 
       </div>
     </section>

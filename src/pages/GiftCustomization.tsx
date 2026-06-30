@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Gift, Sparkles, Check, Heart, Plus, Minus, MessageSquare } from 'lucide-react';
 import { getStoredProducts, addOrder } from '../utils/store';
 import type { Product } from '../utils/store';
+import ProductDetailModal from '../components/ui/ProductDetailModal';
 
 export default function GiftCustomization() {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ export default function GiftCustomization() {
   const [whatsappLink, setWhatsappLink] = useState("");
   
   const [animState, setAnimState] = useState<'entering' | 'idle' | 'boxing' | 'wrapping' | 'ready'>('entering');
+  const [selectedDetailProduct, setSelectedDetailProduct] = useState<Product | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -82,49 +85,52 @@ export default function GiftCustomization() {
       return;
     }
 
+    const items = Object.entries(selectedProducts).map(([id, data]) => {
+      const p = products.find(p => p.id === id)!;
+      return {
+        productId: p.id,
+        name: p.name,
+        size: data.size,
+        price: data.price,
+        quantity: data.quantity
+      };
+    });
+
+    const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "917904199050";
+    whatsappNumber = whatsappNumber.replace(/\D/g, '');
+    if (whatsappNumber.length === 10) {
+      whatsappNumber = `91${whatsappNumber}`;
+    }
+
+    const orderLines = items.map(it => `${it.quantity}x ${it.name} (${it.size}) - ₹${it.price * it.quantity}`).join("\n");
+    const text = `*New Gift Order!*\n\n*From:* ${senderName} (${senderMobile})\n*To:* ${recipientName}\n*Phone:* ${recipientPhone || "N/A"}\n*Address:* ${recipientAddress}\n\n*Products:*\n${orderLines}\n*Total:* ₹${totalPrice}\n\n*Gift Message:*\n"${giftMessage}"`;
+    
+    setWhatsappLink(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`);
+
     window.scrollTo(0, 0);
     setAnimState('boxing');
     
-    // Boxing Animation (Extended duration)
+    // Boxing Animation
     setTimeout(() => {
       setAnimState('wrapping');
       
-      // Wrapping Animation (Extended duration)
+      // Wrapping Animation
       setTimeout(() => {
         setAnimState('ready');
         
-        // Finalize Order (Extended duration)
-        setTimeout(() => {
-          const items = Object.entries(selectedProducts).map(([id, data]) => {
-            const p = products.find(p => p.id === id)!;
-            return {
-              productId: p.id,
-              name: p.name,
-              size: data.size,
-              price: data.price,
-              quantity: data.quantity
-            };
-          });
-
-          const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-          addOrder({
-            customerName: recipientName + " (Gift from " + senderName + ")",
-            customerPhone: recipientPhone || "N/A",
-            customerEmail: "WhatsApp Gift Order",
-            customerAddress: recipientAddress,
-            items,
-            totalPrice,
-            isGift: true,
-            giftMessage: giftMessage
-          });
-
-          const whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "917904199050";
-          const orderLines = items.map(it => `${it.quantity}x ${it.name} (${it.size}) - ₹${it.price * it.quantity}`).join("\n");
-          const text = `*New Gift Order!*\n\n*From:* ${senderName} (${senderMobile})\n*To:* ${recipientName}\n*Phone:* ${recipientPhone || "N/A"}\n*Address:* ${recipientAddress}\n\n*Products:*\n${orderLines}\n*Total:* ₹${totalPrice}\n\n*Gift Message:*\n"${giftMessage}"`;
-          
-          setWhatsappLink(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`);
-        }, 5000);
+        // Finalize Order
+        addOrder({
+          customerName: recipientName + " (Gift from " + senderName + ")",
+          customerPhone: recipientPhone || "N/A",
+          customerEmail: "WhatsApp Gift Order",
+          customerAddress: recipientAddress,
+          items,
+          totalPrice,
+          isGift: true,
+          giftMessage: giftMessage
+        });
       }, 4500);
     }, 4000);
   };
@@ -159,8 +165,8 @@ export default function GiftCustomization() {
               transition={{ delay: 0.8, duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
               className="absolute inset-0 bg-[#1B3022] flex flex-col justify-center items-center z-20 shadow-2xl border-b-[20px] border-[#D4AF37]"
             >
-              <Gift className="w-24 h-24 text-[#D4AF37] mb-6 opacity-90 animate-pulse" />
-              <h2 className="font-display text-3xl font-bold tracking-[0.3em] uppercase text-[#FAF9F5]">
+              <Gift className="w-20 h-20 sm:w-24 text-[#D4AF37] mb-6 opacity-90 animate-pulse" />
+              <h2 className="font-display text-lg sm:text-2xl md:text-3xl font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase text-[#FAF9F5] text-center px-6">
                 Opening The Gifting Boutique
               </h2>
             </motion.div>
@@ -226,13 +232,23 @@ export default function GiftCustomization() {
                         }`}
                       >
                         <div 
-                          className="cursor-pointer flex flex-col items-center w-full"
-                          onClick={() => toggleProduct(product)}
+                          className="flex flex-col items-center w-full"
                         >
-                          <div className={`w-24 h-24 rounded-full overflow-hidden border-2 transition-all duration-500 bg-white ${isSelected ? 'border-[#D4AF37] scale-105' : 'border-outline-variant/20 group-hover:border-outline-variant/40'}`}>
-                            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                          <div 
+                            className={`w-28 h-28 rounded-2xl overflow-hidden border-2 transition-all duration-500 bg-white p-2 flex items-center justify-center cursor-pointer ${isSelected ? 'border-[#D4AF37] scale-105' : 'border-outline-variant/20 group-hover:border-outline-variant/40'}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedDetailProduct(product);
+                              setIsDetailModalOpen(true);
+                            }}
+                            title="Click to view details"
+                          >
+                            <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain" />
                           </div>
-                          <span className={`font-display text-sm font-bold tracking-wide mt-4 ${isSelected ? 'text-[#FAF9F5]' : 'text-[#1B3022]'}`}>
+                          <span 
+                            className={`font-display text-sm font-bold tracking-wide mt-4 cursor-pointer text-center ${isSelected ? 'text-[#FAF9F5]' : 'text-[#1B3022]'}`}
+                            onClick={() => toggleProduct(product)}
+                          >
                             {product.name}
                           </span>
                         </div>
@@ -434,9 +450,9 @@ export default function GiftCustomization() {
                           stiffness: 80, 
                           delay: idx * 0.3 
                         }}
-                        className="w-20 h-20 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden z-10"
+                        className="w-20 h-20 rounded-2xl border-4 border-white shadow-xl bg-white p-1.5 flex items-center justify-center overflow-hidden z-10"
                       >
-                        <img src={src} className="w-full h-full object-cover" alt="gift product" />
+                        <img src={src} className="max-w-full max-h-full object-contain" alt="gift product" />
                       </motion.div>
                     ))}
                   </div>
@@ -445,7 +461,7 @@ export default function GiftCustomization() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1 }}
-                    className="absolute bottom-24 font-display text-2xl font-bold tracking-widest uppercase text-[#1B3022]"
+                    className="absolute bottom-24 font-display text-lg sm:text-2xl font-bold tracking-widest uppercase text-[#1B3022] text-center px-4"
                   >
                     Boxing Your Selections...
                   </motion.h3>
@@ -506,7 +522,7 @@ export default function GiftCustomization() {
                   <motion.h3 
                     animate={{ opacity: [1, 0.5, 1] }} 
                     transition={{ duration: 2, repeat: Infinity }}
-                    className="font-display text-2xl font-bold tracking-widest uppercase text-[#1B3022]"
+                    className="font-display text-lg sm:text-2xl font-bold tracking-widest uppercase text-[#1B3022] text-center px-4"
                   >
                     Tying The Ribbon...
                   </motion.h3>
@@ -550,16 +566,42 @@ export default function GiftCustomization() {
                   <div className="w-24 h-24 rounded-full bg-[#1B3022] flex items-center justify-center mb-8 shadow-2xl relative z-20">
                     <Check className="w-12 h-12 text-[#FAF9F5] stroke-[3]" />
                   </div>
-                  <h3 className="font-display text-4xl font-bold tracking-widest uppercase text-[#1B3022] relative z-20">Gift Ready!</h3>
-                  <p className="font-body text-[#4B5563] mt-4 max-w-md leading-relaxed relative z-20">
+                  <h3 className="font-display text-2xl sm:text-4xl font-bold tracking-widest uppercase text-[#1B3022] relative z-20 text-center px-4">Gift Ready!</h3>
+                  <p className="font-body text-[#4B5563] mt-4 max-w-md leading-relaxed relative z-20 text-center px-6">
                     Your exquisite gift package has been meticulously prepared and will be delivered to <span className="text-[#1B3022] font-bold">{recipientName}</span>.
                   </p>
                   
                   <a
-                    href={whatsappLink}
+                    href={whatsappLink || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => setTimeout(() => navigate('/'), 200)}
+                    onClick={(e) => {
+                      if (!whatsappLink) {
+                        e.preventDefault();
+                        const items = Object.entries(selectedProducts).map(([id, data]) => {
+                          const p = products.find(p => p.id === id)!;
+                          return {
+                            productId: p.id,
+                            name: p.name,
+                            size: data.size,
+                            price: data.price,
+                            quantity: data.quantity
+                          };
+                        });
+                        const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                        let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "917904199050";
+                        whatsappNumber = whatsappNumber.replace(/\D/g, '');
+                        if (whatsappNumber.length === 10) {
+                          whatsappNumber = `91${whatsappNumber}`;
+                        }
+                        const orderLines = items.map(it => `${it.quantity}x ${it.name} (${it.size}) - ₹${it.price * it.quantity}`).join("\n");
+                        const text = `*New Gift Order!*\n\n*From:* ${senderName} (${senderMobile})\n*To:* ${recipientName}\n*Phone:* ${recipientPhone || "N/A"}\n*Address:* ${recipientAddress}\n\n*Products:*\n${orderLines}\n*Total:* ₹${totalPrice}\n\n*Gift Message:*\n"${giftMessage}"`;
+                        
+                        const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+                        window.open(link, '_blank');
+                      }
+                      setTimeout(() => navigate('/'), 500);
+                    }}
                     className="mt-8 relative z-20 flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#1DA851] text-white font-body text-sm font-bold tracking-widest uppercase px-8 py-4 rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
                   >
                     <MessageSquare className="w-5 h-5" />
@@ -572,6 +614,30 @@ export default function GiftCustomization() {
         )}
       </AnimatePresence>
 
+      <ProductDetailModal
+        product={selectedDetailProduct}
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedDetailProduct(null);
+        }}
+        onAddToCart={(id, size) => {
+          const product = products.find(p => p.id === id);
+          if (product) {
+            setSelectedProducts(prev => {
+              const next = { ...prev };
+              const sizeObj = product.sizes.find(s => s.size === size) || product.sizes[0];
+              next[id] = {
+                size: sizeObj.size,
+                price: sizeObj.price,
+                quantity: 1,
+                image: product.image
+              };
+              return next;
+            });
+          }
+        }}
+      />
     </div>
   );
 }
