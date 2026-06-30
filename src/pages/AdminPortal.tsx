@@ -2,9 +2,9 @@ import { useState, useEffect, Fragment } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Lock, Plus, Trash2, Edit3, Settings, Eye, Search, Shield,
-  LayoutDashboard, MessageSquare, BarChart3, ShoppingCart, Receipt, 
+  MessageSquare, BarChart3, ShoppingCart, Receipt, 
   Package, FolderTree, Ticket, Users, RefreshCw, Award, CheckCircle2, TrendingUp,
-  Globe, ShoppingBag, Gift, ChevronLeft, ChevronRight
+  Globe, ShoppingBag, Gift, ChevronLeft, ChevronRight, Download
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getStoredProducts, saveStoredProducts, getStoredOrders, saveStoredOrders } from '../utils/store';
@@ -67,7 +67,12 @@ export default function AdminPortal() {
   const [prodDesc, setProdDesc] = useState('');
   const [prodHerbs, setProdHerbs] = useState('');
   const [prodBenefits, setProdBenefits] = useState('');
-  const [prodSizes, setProdSizes] = useState<{ size: string; price: number }[]>([{ size: '', price: 0 }]);
+  const [prodSizes, setProdSizes] = useState<{ size: string; price: number; isAvailable?: boolean }[]>([{ size: '', price: 0, isAvailable: true }]);
+  const [prodIsAvailable, setProdIsAvailable] = useState(true);
+  const [prodDetails, setProdDetails] = useState('');
+  const [prodHowToUse, setProdHowToUse] = useState('');
+  const [prodTamilName, setProdTamilName] = useState('');
+  const [prodNutritionalInfo, setProdNutritionalInfo] = useState('');
 
   // Orders state
   const [orders, setOrders] = useState<Order[]>([]);
@@ -75,7 +80,10 @@ export default function AdminPortal() {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   // Filter state for dashboard/whatsapp center
-  const [periodFilter, setPeriodFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [periodFilter, setPeriodFilter] = useState<'all' | 'today' | 'week' | 'month' | 'year' | 'custom'>('all');
+  const [whatsappSearch, setWhatsappSearch] = useState('');
+  const [whatsappCustomStart, setWhatsappCustomStart] = useState('');
+  const [whatsappCustomEnd, setWhatsappCustomEnd] = useState('');
 
   // Filters for Orders Hub tab (Bills)
   const [ordersSourceFilter, setOrdersSourceFilter] = useState<'ALL' | 'OFFLINE' | 'ONLINE' | 'MANUAL'>('ALL');
@@ -165,7 +173,7 @@ export default function AdminPortal() {
 
   // Add/Remove size fields in form
   const addSizeField = () => {
-    setProdSizes([...prodSizes, { size: '', price: 0 }]);
+    setProdSizes([...prodSizes, { size: '', price: 0, isAvailable: true }]);
   };
 
   const removeSizeField = (index: number) => {
@@ -174,15 +182,18 @@ export default function AdminPortal() {
     setProdSizes(newSizes);
   };
 
-  const handleSizeChangeInForm = (index: number, field: 'size' | 'price', value: string | number) => {
+  const handleSizeChangeInForm = (index: number, field: 'size' | 'price' | 'isAvailable', value: any) => {
     const newSizes = [...prodSizes];
     if (field === 'size') {
       newSizes[index].size = value as string;
-    } else {
+    } else if (field === 'price') {
       newSizes[index].price = Number(value);
+    } else {
+      newSizes[index].isAvailable = Boolean(value);
     }
     setProdSizes(newSizes);
   };
+
 
   // Open Edit Product form
   const startEditProduct = (prod: Product) => {
@@ -192,7 +203,17 @@ export default function AdminPortal() {
     setProdDesc(prod.description);
     setProdHerbs(prod.herbs);
     setProdBenefits(prod.benefits.join('\n'));
-    setProdSizes(prod.sizes.length > 0 ? [...prod.sizes] : [{ size: '', price: 0 }]);
+    setProdSizes(prod.sizes.length > 0 ? prod.sizes.map(s => ({ ...s, isAvailable: s.isAvailable !== false })) : [{ size: '', price: 0, isAvailable: true }]);
+    setProdIsAvailable(prod.isAvailable !== false);
+
+    setProdDetails(prod.details || '');
+    setProdHowToUse(prod.howToUse || '');
+    setProdTamilName(prod.tamilName || '');
+    setProdNutritionalInfo(
+      prod.nutritionalInfo
+        ? prod.nutritionalInfo.map(n => `${n.label}: ${n.value}`).join('\n')
+        : ''
+    );
     setIsAddingProduct(false);
   };
 
@@ -204,20 +225,38 @@ export default function AdminPortal() {
     setProdDesc('');
     setProdHerbs('');
     setProdBenefits('');
-    setProdSizes([{ size: '', price: 0 }]);
+    setProdSizes([{ size: '', price: 0, isAvailable: true }]);
+    setProdIsAvailable(true);
+
+    setProdDetails('');
+    setProdHowToUse('');
+    setProdTamilName('');
+    setProdNutritionalInfo('');
     setIsAddingProduct(true);
   };
 
   // Save product (Add or Edit)
   const saveProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanSizes = prodSizes.filter(s => s.size.trim() !== '' && s.price > 0);
+    const cleanSizes = prodSizes
+      .filter(s => s.size.trim() !== '' && s.price > 0)
+      .map(s => ({ size: s.size, price: s.price, isAvailable: s.isAvailable !== false }));
     if (cleanSizes.length === 0) {
       alert('Please add at least one valid size option with a price.');
       return;
     }
 
     const benefitsArray = prodBenefits.split('\n').filter(b => b.trim() !== '');
+
+    const nutritionalInfoArray = prodNutritionalInfo
+      .split('\n')
+      .filter(line => line.includes(':'))
+      .map(line => {
+        const parts = line.split(':');
+        const label = parts[0].trim();
+        const value = parts.slice(1).join(':').trim();
+        return { label, value };
+      });
 
     let updatedList = [...products];
 
@@ -232,7 +271,12 @@ export default function AdminPortal() {
             description: prodDesc,
             herbs: prodHerbs,
             benefits: benefitsArray,
-            sizes: cleanSizes
+            sizes: cleanSizes,
+            isAvailable: prodIsAvailable,
+            details: prodDetails,
+            howToUse: prodHowToUse,
+            tamilName: prodTamilName,
+            nutritionalInfo: nutritionalInfoArray.length > 0 ? nutritionalInfoArray : undefined
           };
         }
         return p;
@@ -248,7 +292,12 @@ export default function AdminPortal() {
         image: '/herbal-hair-oil.jpeg', // default fallback asset
         herbs: prodHerbs,
         benefits: benefitsArray,
-        sizes: cleanSizes
+        sizes: cleanSizes,
+        isAvailable: prodIsAvailable,
+        details: prodDetails,
+        howToUse: prodHowToUse,
+        tamilName: prodTamilName,
+        nutritionalInfo: nutritionalInfoArray.length > 0 ? nutritionalInfoArray : undefined
       };
       updatedList.push(newProd);
       setIsAddingProduct(false);
@@ -554,11 +603,13 @@ export default function AdminPortal() {
   };
 
   // Filter storefront orders (WhatsApp requests) by time period
-  const getFilteredOrders = () => {
+  const getFilteredOrders = (excludeSearch = false) => {
     const now = new Date();
     // Only show storefront requests (ID starting with ORD-)
-    const storefrontOrders = orders.filter(o => o.id.startsWith('ORD-'));
-    return storefrontOrders.filter(o => {
+    let list = orders.filter(o => o.id.startsWith('ORD-'));
+    
+    // Period filter
+    list = list.filter(o => {
       const oDate = new Date(o.createdAt);
       if (periodFilter === 'today') {
         return oDate.toDateString() === now.toDateString();
@@ -570,8 +621,35 @@ export default function AdminPortal() {
       if (periodFilter === 'month') {
         return oDate.getMonth() === now.getMonth() && oDate.getFullYear() === now.getFullYear();
       }
+      if (periodFilter === 'year') {
+        return oDate.getFullYear() === now.getFullYear();
+      }
+      if (periodFilter === 'custom') {
+        if (whatsappCustomStart) {
+          const start = new Date(whatsappCustomStart);
+          start.setHours(0, 0, 0, 0);
+          if (oDate < start) return false;
+        }
+        if (whatsappCustomEnd) {
+          const end = new Date(whatsappCustomEnd);
+          end.setHours(23, 59, 59, 999);
+          if (oDate > end) return false;
+        }
+      }
       return true; // all
     });
+
+    // Search filter
+    if (!excludeSearch && whatsappSearch) {
+      const s = whatsappSearch.toLowerCase();
+      list = list.filter(o => 
+        o.customerName.toLowerCase().includes(s) || 
+        o.customerPhone.toLowerCase().includes(s) || 
+        o.id.toLowerCase().includes(s)
+      );
+    }
+    
+    return list;
   };
 
   const filteredOrdersList = getFilteredOrders();
@@ -630,14 +708,88 @@ export default function AdminPortal() {
 
   const filteredBills = getFilteredBills();
 
+  const handleExportCSV = () => {
+    if (filteredBills.length === 0) {
+      alert("No bills available to export.");
+      return;
+    }
+
+    const headers = [
+      "Bill ID",
+      "Date",
+      "Customer Name",
+      "Customer Phone",
+      "Source",
+      "Items Purchased",
+      "Total Price (INR)",
+      "Status",
+      "Coupon Code",
+      "Coupon Discount (INR)",
+      "Manual Discount (INR)",
+      "Delivery Charge (INR)",
+      "Cash Paid (INR)",
+      "Change Return (INR)"
+    ];
+
+    const csvRows = [
+      headers.join(",")
+    ];
+
+    filteredBills.forEach(o => {
+      const src = o.source || (o.items.some(it => it.productId === 'custom') ? 'MANUAL' : (o.customerAddress.includes('Offline') ? 'OFFLINE' : 'ONLINE'));
+      const itemsString = o.items.map(it => `${it.name} x${it.quantity} (${it.size}, Rs. ${it.price})`).join(" | ");
+
+      const cleanPhone = o.customerPhone.split('_')[0];
+      const oDate = new Date(o.createdAt);
+      const yyyy = oDate.getFullYear();
+      const mm = String(oDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(oDate.getDate()).padStart(2, '0');
+      const hh = String(oDate.getHours()).padStart(2, '0');
+      const min = String(oDate.getMinutes()).padStart(2, '0');
+      const formattedDate = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+
+      const row = [
+        `"${o.id}"`,
+        `"${formattedDate}"`,
+        `"${o.customerName.replace(/"/g, '""')}"`,
+        `"=""${cleanPhone}"""`,
+        `"${src}"`,
+        `"${itemsString.replace(/"/g, '""')}"`,
+        o.totalPrice,
+        `"${o.status}"`,
+        `"${(o.couponCode || "").replace(/"/g, '""')}"`,
+        o.couponDiscount || 0,
+        o.manualDiscount || 0,
+        o.deliveryCharge || 0,
+        o.cashReceived || 0,
+        o.changeReturned || 0
+      ];
+
+      csvRows.push(row.join(","));
+    });
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    const dateSuffix = new Date().toISOString().split('T')[0];
+    link.setAttribute("download", `organic_sisterz_bills_${dateSuffix}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Calculated stats metrics for WhatsApp center (storefront ORD- orders only)
-  const totalRevenue = orders
-    .filter(o => o.id.startsWith('ORD-') && o.status === 'Completed')
+  const ordersFilteredByPeriod = getFilteredOrders(true);
+  const totalRevenue = ordersFilteredByPeriod
+    .filter(o => o.status === 'Completed')
     .reduce((sum, o) => sum + o.totalPrice, 0);
-  const totalRequestsCount = orders.filter(o => o.id.startsWith('ORD-')).length;
-  const pendingOrdersCount = orders.filter(o => o.id.startsWith('ORD-') && o.status === 'Pending').length;
-  const contactedOrdersCount = orders.filter(o => o.id.startsWith('ORD-') && o.status === 'Processing').length;
-  const completedOrdersCount = orders.filter(o => o.id.startsWith('ORD-') && o.status === 'Completed').length;
+  const totalRequestsCount = ordersFilteredByPeriod.length;
+  const pendingOrdersCount = ordersFilteredByPeriod.filter(o => o.status === 'Pending').length;
+  const contactedOrdersCount = ordersFilteredByPeriod.filter(o => o.status === 'Processing').length;
+  const completedOrdersCount = ordersFilteredByPeriod.filter(o => o.status === 'Completed').length;
 
   return (
     <div className="min-h-screen md:h-screen bg-[#FAF9F5] flex flex-col md:flex-row font-poppins text-primary antialiased md:overflow-hidden">
@@ -735,22 +887,7 @@ export default function AdminPortal() {
                 </div>
               </div>
 
-              {/* Sidebar Tabs */}
-              <div className="space-y-1.5 w-full">
-                <button
-                  onClick={() => { setActiveTab('dashboard'); }}
-                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
-                    activeTab === 'dashboard'
-                      ? 'bg-[#2B3E2F] text-white shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
-                  }`}
-                  title="Control Center"
-                >
-                  <LayoutDashboard className="w-4.5 h-4.5 shrink-0" />
-                  {isSidebarOpen && <span className="whitespace-nowrap truncate">Control Center</span>}
-                </button>
-
-                <button
+              <div className="space-y-1.5 w-full">                <button
                   onClick={() => { setActiveTab('whatsapp'); }}
                   className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'justify-between px-4.5' : 'justify-center px-0 relative'} ${
                     activeTab === 'whatsapp'
@@ -901,31 +1038,66 @@ export default function AdminPortal() {
                     </span>
                   </div>
                   
-                  {/* Period selection filters and Refresh button */}
-                  <div className="flex items-center gap-3 self-start sm:self-auto">
-                    <div className="bg-[#ECEEEB] p-1.5 rounded-full flex gap-1">
-                      {(['all', 'today', 'week', 'month'] as const).map(f => (
-                        <button
-                          key={f}
-                          onClick={() => setPeriodFilter(f)}
-                          className={`text-xs font-semibold py-2 px-4 rounded-full transition-all cursor-pointer uppercase ${
-                            periodFilter === f
-                              ? 'bg-[#2B3E2F] text-white shadow-sm'
-                              : 'text-on-surface-variant hover:text-primary'
-                          }`}
-                        >
-                          {f === 'all' ? 'All' : f === 'today' ? 'Today' : f === 'week' ? 'Week' : 'Month'}
-                        </button>
-                      ))}
+                  {/* Filters Container */}
+                  <div className="flex flex-col xl:flex-row items-end xl:items-center gap-4 self-start sm:self-auto w-full xl:w-auto">
+
+                    {/* Period selection filters and Refresh button */}
+                    <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto pb-1 xl:pb-0">
+                      <div className="bg-[#ECEEEB] p-1.5 rounded-full flex gap-1 shrink-0">
+                        {(['all', 'today', 'week', 'month', 'year', 'custom'] as const).map(f => (
+                          <button
+                            key={f}
+                            onClick={() => setPeriodFilter(f)}
+                            className={`text-[10px] sm:text-xs font-semibold py-2 px-3 sm:px-4 rounded-full transition-all cursor-pointer uppercase whitespace-nowrap ${
+                              periodFilter === f
+                                ? 'bg-[#2B3E2F] text-white shadow-sm'
+                                : 'text-on-surface-variant hover:text-primary'
+                            }`}
+                          >
+                            {f === 'all' ? 'All' : f === 'today' ? 'Today' : f === 'week' ? 'Week' : f === 'month' ? 'Month' : f === 'year' ? 'Year' : 'Custom'}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={handleRefresh}
+                        className="bg-white border border-outline-variant/35 hover:border-secondary text-primary font-bold text-xs py-3 px-4 rounded-full flex items-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                      </button>
                     </div>
-                    <button
-                      onClick={handleRefresh}
-                      className="bg-white border border-outline-variant/35 hover:border-secondary text-primary font-bold text-xs py-3 px-4 rounded-full flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" /> Refresh
-                    </button>
                   </div>
                 </div>
+
+                {/* Custom Date Pickers */}
+                <AnimatePresence>
+                  {periodFilter === 'custom' && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                      animate={{ opacity: 1, height: 'auto', marginTop: -24 }}
+                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                      className="flex flex-wrap items-center gap-4 bg-[#FAF9F5] p-4 rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">From:</span>
+                        <input
+                          type="date"
+                          value={whatsappCustomStart}
+                          onChange={(e) => setWhatsappCustomStart(e.target.value)}
+                          className="text-sm font-medium bg-white border border-outline-variant/30 rounded-lg px-3 py-2 focus:outline-none focus:border-secondary"
+                        />
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">To:</span>
+                        <input
+                          type="date"
+                          value={whatsappCustomEnd}
+                          onChange={(e) => setWhatsappCustomEnd(e.target.value)}
+                          className="text-sm font-medium bg-white border border-outline-variant/30 rounded-lg px-3 py-2 focus:outline-none focus:border-secondary"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Metrics Stats Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
@@ -949,17 +1121,29 @@ export default function AdminPortal() {
 
                 {/* Customer Requests Panel */}
                 <div className="bg-white border border-outline-variant/20 rounded-3xl overflow-hidden shadow-md">
-                  <div className="p-6 md:p-8 bg-[#FAF9F5]/30 border-b border-outline-variant/20 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                    <div className="flex items-center gap-3">
+                  <div className="p-6 md:p-8 bg-[#FAF9F5]/30 border-b border-outline-variant/20 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-3">
                       <MessageSquare className="w-5 h-5 text-green-500" />
                       <h3 className="text-lg font-bold text-primary">Customer Requests</h3>
-                      <span className="text-xs text-on-surface-variant font-semibold bg-surface-container py-1 px-3 rounded-full">
+                      <span className="text-xs text-[#2B3E2F] font-semibold bg-[#2B3E2F]/5 border border-[#2B3E2F]/10 py-1 px-3 rounded-full">
                         ₹{totalRevenue} revenue - status updates only
                       </span>
+                      <span className="text-xs font-bold text-[#4B5563] bg-gray-100 py-1 px-3 rounded-full">
+                        {filteredOrdersList.length} requests
+                      </span>
                     </div>
-                    <span className="text-sm font-semibold text-[#4B5563]">
-                      {filteredOrdersList.length} requests
-                    </span>
+
+                    {/* Styled Search Bar matching theme */}
+                    <div className="relative w-full md:w-64">
+                      <Search className="w-4 h-4 text-[#2B3E2F] absolute left-4 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        placeholder="Search requests..."
+                        value={whatsappSearch}
+                        onChange={(e) => setWhatsappSearch(e.target.value)}
+                        className="pl-11 pr-4 py-2.5 bg-[#F5F2EB] border border-[#2B3E2F]/30 hover:border-[#2B3E2F]/60 focus:border-[#2B3E2F] rounded-full text-xs font-semibold focus:outline-none w-full text-primary shadow-sm"
+                      />
+                    </div>
                   </div>
 
                   <div className="overflow-x-auto">
@@ -986,7 +1170,7 @@ export default function AdminPortal() {
                             <Fragment key={o.id}>
                               <tr className="hover:bg-[#FAF9F5]/20 transition-colors">
                                 <td className="px-6 py-5 font-semibold text-primary">{o.customerName}</td>
-                                <td className="px-6 py-5 font-medium">{o.customerPhone}</td>
+                                <td className="px-6 py-5 font-medium">{o.customerPhone.split('_')[0]}</td>
                                 <td className="px-6 py-5 max-w-xs truncate text-on-surface-variant">{o.customerAddress}</td>
                                 <td className="px-6 py-5 text-center">
                                   <span className="bg-primary/5 text-primary border border-primary/10 px-3 py-1 rounded-full font-bold text-xs">
@@ -1046,7 +1230,7 @@ export default function AdminPortal() {
                                       {/* Row 1: Name, Phone, Address */}
                                       <div className="text-sm font-semibold text-[#1F2937] flex flex-wrap gap-x-6 gap-y-2 pb-4 border-b border-outline-variant/10">
                                         <span>Name: <strong className="text-primary font-bold">{o.customerName}</strong></span>
-                                        <span>Phone: <strong className="text-primary font-bold">{o.customerPhone}</strong></span>
+                                        <span>Phone: <strong className="text-primary font-bold">{o.customerPhone.split('_')[0]}</strong></span>
                                         <span>Address: <strong className="text-primary font-bold">{o.customerAddress}</strong></span>
                                       </div>
 
@@ -1554,59 +1738,6 @@ export default function AdminPortal() {
               </div>
             )}
 
-            {/* TAB 2: GENERAL CONTROL CENTER OVERVIEW */}
-            {activeTab === 'dashboard' && (
-              <div className="space-y-8">
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-primary">Control Center</h1>
-                  <p className="text-sm text-on-surface-variant mt-1">Admin dashboard metrics overview.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm space-y-2">
-                    <span className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Total Inventory Items</span>
-                    <span className="block text-3xl font-bold text-primary">{products.length} Products</span>
-                  </div>
-                  <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm space-y-2">
-                    <span className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Discount Coupons Active</span>
-                    <span className="block text-3xl font-bold text-[#16A34A]">{coupons.length} Active</span>
-                  </div>
-                  <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 shadow-sm space-y-2">
-                    <span className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest">Authorized Staff Admin Users</span>
-                    <span className="block text-3xl font-bold text-[#2563EB]">{usersList.filter(u => u.role === 'Admin').length} Admins</span>
-                  </div>
-                </div>
-
-                {/* Quick Info Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 space-y-4">
-                    <h3 className="text-base font-bold text-primary uppercase tracking-wider">Product Categories</h3>
-                    <ul className="divide-y divide-outline-variant/10">
-                      {categories.map((c, i) => (
-                        <li key={i} className="py-2.5 flex justify-between text-sm">
-                          <span>{c}</span>
-                          <span className="font-semibold text-primary">
-                            {products.filter(p => p.category === c).length} formulations
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="bg-white border border-outline-variant/20 rounded-2xl p-6 space-y-4">
-                    <h3 className="text-base font-bold text-primary uppercase tracking-wider">Active Promotional Coupons</h3>
-                    <ul className="divide-y divide-outline-variant/10">
-                      {coupons.map((cp, i) => (
-                        <li key={i} className="py-2.5 flex justify-between text-sm">
-                          <span className="font-bold text-secondary">{cp.code}</span>
-                          <span className="font-semibold text-primary">{cp.discount}% Discount</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* TAB 3: POS ANALYTICS */}
             {activeTab === 'analytics' && (
@@ -2065,7 +2196,7 @@ export default function AdminPortal() {
                                     return (
                                       <tr key={idx} className="border-b border-[#F3F4F6] hover:bg-[#FAF9F6]/30 font-semibold text-primary">
                                         <td className="py-3.5 px-4 font-mono font-bold text-[#2B3E2F]">{o.id}</td>
-                                        <td className="py-3.5 px-4">{o.customerPhone}</td>
+                                        <td className="py-3.5 px-4">{o.customerPhone.split('_')[0]}</td>
                                         <td className="py-3.5 px-4">
                                           <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold ${
                                             src === 'OFFLINE' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
@@ -2335,8 +2466,8 @@ export default function AdminPortal() {
                           <tr key={o.id} className="hover:bg-[#FAF9F5]/40 transition-colors">
                             <td className="px-6 py-4 font-bold text-primary">{o.id}</td>
                             <td className="px-6 py-4">
-                              <div className="font-semibold text-primary">{o.customerName}</div>
-                              <div className="text-xs text-on-surface-variant mt-0.5">{o.customerPhone} | {o.customerAddress}</div>
+                                                              <div className="font-semibold text-primary">{o.customerName}</div>
+                                                              <div className="text-xs text-on-surface-variant mt-0.5">{o.customerPhone.split('_')[0]} | {o.customerAddress}</div>
                             </td>
                             <td className="px-6 py-4">
                               <div className="bg-[#FAF9F5] p-3 rounded-lg border border-[#D4AF37]/30 text-xs italic text-[#1B3022]">
@@ -2365,11 +2496,19 @@ export default function AdminPortal() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Orders List */}
                 <div className="lg:col-span-7 space-y-5">
-                  <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-primary font-poppins">Billing & Invoice Hub</h1>
-                    <p className="text-sm text-on-surface-variant mt-1 font-medium">
-                      Filter POS sales records, track offline/online sources, and manage transactions.
-                    </p>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h1 className="text-3xl font-bold tracking-tight text-primary font-poppins">Billing & Invoice Hub</h1>
+                      <p className="text-sm text-on-surface-variant mt-1 font-medium">
+                        Filter POS sales records, track offline/online sources, and manage transactions.
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleExportCSV}
+                      className="bg-[#2B3E2F] hover:bg-[#1b2b20] text-white font-body text-xs font-bold tracking-widest uppercase py-3.5 px-6 rounded-full flex items-center gap-1.5 shadow transition-colors cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Export CSV
+                    </button>
                   </div>
 
                   {/* Filter controls row 1: Source classification */}
@@ -2518,7 +2657,7 @@ export default function AdminPortal() {
                                 <td className="px-6 py-4 font-bold text-primary">{o.id}</td>
                                 <td className="px-6 py-4">
                                   <div className="font-semibold">{o.customerName}</div>
-                                  <div className="text-xs text-on-surface-variant mt-0.5">{o.customerPhone}</div>
+                                  <div className="text-xs text-on-surface-variant mt-0.5">{o.customerPhone.split('_')[0]}</div>
                                 </td>
                                 <td className="px-6 py-4">
                                   <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase ${
@@ -2608,7 +2747,7 @@ export default function AdminPortal() {
                           <span className="block text-xs font-bold text-primary uppercase tracking-wider">Shipping details</span>
                           <div className="space-y-2 text-sm text-primary">
                             <div className="font-bold">{selectedOrder.customerName}</div>
-                            <div>Phone: {selectedOrder.customerPhone}</div>
+                            <div>Phone: {selectedOrder.customerPhone.split('_')[0]}</div>
                             <div>Email: {selectedOrder.customerEmail}</div>
                             <div className="text-on-surface-variant italic leading-relaxed pt-2 border-t border-outline-variant/10 mt-2">
                               {selectedOrder.customerAddress}
@@ -2790,7 +2929,7 @@ export default function AdminPortal() {
                     </div>
 
                     <form onSubmit={saveProductSubmit} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 gap-6">
                         {/* Product Name */}
                         <div className="space-y-2">
                           <label className="block text-xs font-bold text-primary uppercase tracking-wider">Product Name</label>
@@ -2803,7 +2942,9 @@ export default function AdminPortal() {
                             required
                           />
                         </div>
+                      </div>
 
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Category */}
                         <div className="space-y-2">
                           <label className="block text-xs font-bold text-primary uppercase tracking-wider">Category</label>
@@ -2817,32 +2958,58 @@ export default function AdminPortal() {
                             ))}
                           </select>
                         </div>
-                      </div>
 
-                      {/* Description */}
-                      <div className="space-y-2">
-                        <label className="block text-xs font-bold text-primary uppercase tracking-wider">Description</label>
-                        <textarea
-                          value={prodDesc}
-                          onChange={(e) => setProdDesc(e.target.value)}
-                          rows={4}
-                          className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-xs text-primary focus:outline-none focus:border-secondary"
-                          placeholder="Describe the formulation's purpose and highlights..."
-                          required
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Herbs count/label */}
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-primary uppercase tracking-wider">Botanical Herbs Count</label>
+                          <label className="block text-xs font-bold text-primary uppercase tracking-wider">Botanical Ingredients (Short Summary)</label>
                           <input
                             type="text"
                             value={prodHerbs}
                             onChange={(e) => setProdHerbs(e.target.value)}
                             className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-xs text-primary focus:outline-none focus:border-secondary"
-                            placeholder="e.g. 40 Herbs or 45 Ingredients"
+                            placeholder="e.g. Shikakai, Methi, Vetiver with unique herbs"
                             required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Description (Card short description) */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-primary uppercase tracking-wider">Card Description (Short)</label>
+                          <textarea
+                            value={prodDesc}
+                            onChange={(e) => setProdDesc(e.target.value)}
+                            rows={4}
+                            className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-xs text-primary focus:outline-none focus:border-secondary"
+                            placeholder="Describe the formulation's purpose and highlights..."
+                            required
+                          />
+                        </div>
+
+                        {/* Detailed Description */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-primary uppercase tracking-wider">Product Details (Detailed Packaging Info)</label>
+                          <textarea
+                            value={prodDetails}
+                            onChange={(e) => setProdDetails(e.target.value)}
+                            rows={4}
+                            className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-xs text-primary focus:outline-none focus:border-secondary"
+                            placeholder="NO Chemicals&#10;Artificial Scents&#10;Best before 6 months..."
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* How to Use */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-primary uppercase tracking-wider">How to Use Instructions</label>
+                          <textarea
+                            value={prodHowToUse}
+                            onChange={(e) => setProdHowToUse(e.target.value)}
+                            rows={4}
+                            className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-xs text-primary focus:outline-none focus:border-secondary"
+                            placeholder="Suggested Use :&#10;* Apply on your scalp..."
                           />
                         </div>
 
@@ -2857,6 +3024,40 @@ export default function AdminPortal() {
                             placeholder="* Controls premature greying&#10;* Boosts volume and hair growth"
                             required
                           />
+                        </div>
+                      </div>
+
+                      {(prodCategory === 'Nutrition' || prodName.toLowerCase().includes('wellness')) && (
+                        <div className="grid grid-cols-1 gap-6">
+                          <div className="space-y-2">
+                            <label className="block text-xs font-bold text-primary uppercase tracking-wider">Nutritional Facts (One per line, e.g. Energy: 431 Kcal)</label>
+                            <textarea
+                              value={prodNutritionalInfo}
+                              onChange={(e) => setProdNutritionalInfo(e.target.value)}
+                              rows={4}
+                              className="w-full border border-outline-variant/40 rounded-xl py-3.5 px-4 text-xs text-primary focus:outline-none focus:border-secondary"
+                              placeholder="Energy: 431 Kcal&#10;Carbohydrates: 63.9 g..."
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 gap-6">
+                        {/* Availability Toggle */}
+                        <div className="space-y-2 flex flex-col justify-center pt-2">
+                          <label className="block text-xs font-bold text-primary uppercase tracking-wider mb-3">Inventory Status</label>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              className="sr-only peer"
+                              checked={prodIsAvailable}
+                              onChange={(e) => setProdIsAvailable(e.target.checked)}
+                            />
+                            <div className="w-14 h-7 bg-outline-variant/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#10B981]"></div>
+                            <span className={`ml-4 text-sm font-bold tracking-wide ${prodIsAvailable ? 'text-[#10B981]' : 'text-error'}`}>
+                              {prodIsAvailable ? 'IN STOCK' : 'OUT OF STOCK'}
+                            </span>
+                          </label>
                         </div>
                       </div>
 
@@ -2876,12 +3077,12 @@ export default function AdminPortal() {
                         <div className="space-y-3">
                           {prodSizes.map((sizeObj, idx) => (
                             <div key={idx} className="flex gap-4 items-center">
-                              <div className="flex-grow grid grid-cols-2 gap-4">
+                              <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <input
                                   type="text"
                                   value={sizeObj.size}
                                   onChange={(e) => handleSizeChangeInForm(idx, 'size', e.target.value)}
-                                  className="w-full border border-outline-variant/40 rounded-xl py-3 px-4 text-xs text-primary focus:outline-none focus:border-secondary"
+                                  className="w-full border border-outline-variant/40 rounded-xl py-3 px-4 text-xs text-primary focus:outline-none focus:border-secondary font-semibold"
                                   placeholder="e.g. 100ml or 250g"
                                   required
                                 />
@@ -2891,10 +3092,24 @@ export default function AdminPortal() {
                                     type="number"
                                     value={sizeObj.price || ''}
                                     onChange={(e) => handleSizeChangeInForm(idx, 'price', e.target.value)}
-                                    className="w-full border border-outline-variant/40 rounded-xl py-3 pl-8 pr-4 text-xs text-primary focus:outline-none focus:border-secondary"
+                                    className="w-full border border-outline-variant/40 rounded-xl py-3 pl-8 pr-4 text-xs text-primary focus:outline-none focus:border-secondary font-semibold"
                                     placeholder="Price in INR"
                                     required
                                   />
+                                </div>
+                                <div className="flex items-center gap-3 bg-[#FAF9F5]/40 border border-outline-variant/30 rounded-xl px-4 py-2 select-none">
+                                  <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={sizeObj.isAvailable !== false}
+                                      onChange={(e) => handleSizeChangeInForm(idx, 'isAvailable', e.target.checked)}
+                                      className="sr-only peer"
+                                    />
+                                    <div className="w-10 h-5 bg-outline-variant/40 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#10B981]"></div>
+                                  </label>
+                                  <span className={`text-xs font-bold ${sizeObj.isAvailable !== false ? 'text-[#10B981]' : 'text-error'}`}>
+                                    {sizeObj.isAvailable !== false ? 'In Stock' : 'Out of Stock'}
+                                  </span>
                                 </div>
                               </div>
                               <button

@@ -22,20 +22,13 @@ export default function GiftCustomization() {
   const [giftMessage, setGiftMessage] = useState('');
   const [whatsappLink, setWhatsappLink] = useState("");
   
-  const [animState, setAnimState] = useState<'entering' | 'idle' | 'boxing' | 'wrapping' | 'ready'>('entering');
+  const [animState, setAnimState] = useState<'entering' | 'idle' | 'boxing' | 'wrapping' | 'ready'>('idle');
   const [selectedDetailProduct, setSelectedDetailProduct] = useState<Product | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     setProducts(getStoredProducts());
-    
-    // Entry Animation: Box Lid Lifting
-    const timer = setTimeout(() => {
-      setAnimState('idle');
-    }, 1800); 
-    
-    return () => clearTimeout(timer);
   }, []);
 
   const toggleProduct = (product: Product) => {
@@ -150,30 +143,6 @@ export default function GiftCustomization() {
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22,12 c0-2.8-2.2-5-5-5 c-1.7,0-3.2,0.8-4.1,2.1 c-0.9-1.3-2.4-2.1-4.1-2.1 C6,7,3.8,9.2,3.8,12 c0,2.8,2.2,5,5,5 c1.7,0,3.2-0.8,4.1-2.1 c0.9,1.3,2.4,2.1,4.1,2.1 C19.8,17,22,14.8,22,12z"/></svg>
       </div>
 
-      {/* --- ENTRY ANIMATION (Lid Lifting) --- */}
-      <AnimatePresence>
-        {animState === 'entering' && (
-          <motion.div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#FAF9F5]"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2 }}
-          >
-            {/* The Lid */}
-            <motion.div 
-              initial={{ y: 0 }}
-              animate={{ y: -1000 }}
-              transition={{ delay: 0.8, duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute inset-0 bg-[#1B3022] flex flex-col justify-center items-center z-20 shadow-2xl border-b-[20px] border-[#D4AF37]"
-            >
-              <Gift className="w-20 h-20 sm:w-24 text-[#D4AF37] mb-6 opacity-90 animate-pulse" />
-              <h2 className="font-display text-lg sm:text-2xl md:text-3xl font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase text-[#FAF9F5] text-center px-6">
-                Opening The Gifting Boutique
-              </h2>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* --- MAIN PAGE CONTENT --- */}
       <AnimatePresence>
         {animState === 'idle' && (
@@ -276,7 +245,7 @@ export default function GiftCustomization() {
                         ) : (
                           <button 
                             onClick={() => toggleProduct(product)}
-                            className="mt-2 text-[10px] uppercase tracking-widest font-bold text-[#1B3022] opacity-50 group-hover:opacity-100 transition-opacity border border-outline-variant/40 rounded-full px-4 py-1.5"
+                            className="mt-2 text-[10px] uppercase tracking-widest font-extrabold px-5 py-2.5 rounded-full transition-all duration-300 cursor-pointer bg-[#FAF9F5] border border-[#1B3022]/20 text-[#1B3022] hover:bg-[#1B3022] hover:text-[#FAF9F5] hover:border-[#1B3022] shadow-sm hover:shadow-md"
                           >
                             Add to Gift
                           </button>
@@ -305,7 +274,7 @@ export default function GiftCustomization() {
                         value={senderName}
                         onChange={e => setSenderName(e.target.value)}
                         className="w-full bg-[#FAF9F5] border border-outline-variant/40 rounded-xl px-5 py-4 font-body text-[#1B3022] placeholder-[#6B7280]/50 focus:outline-none focus:border-[#D4AF37] transition-all"
-                        placeholder="E.g., Anand"
+                        placeholder="E.g., Sarah"
                       />
                     </div>
                     <div>
