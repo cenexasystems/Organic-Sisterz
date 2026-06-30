@@ -1,6 +1,6 @@
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import { Leaf, ShieldCheck, Sparkles, Star } from 'lucide-react';
-import React, { MouseEvent } from 'react';
+import React, { type MouseEvent } from 'react';
 
 export default function BotanicalHealing() {
   const mouseX = useMotionValue(0);

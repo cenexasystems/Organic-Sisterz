@@ -7,7 +7,6 @@ import type { Product } from "../utils/store";
 
 export default function ProductCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [addedProduct, setAddedProduct] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,8 +29,6 @@ export default function ProductCatalog() {
   };
 
   const handleAddToCart = (id: string, size?: string) => {
-    setAddedProduct(id);
-    setTimeout(() => setAddedProduct(null), 2000);
 
     const event = new CustomEvent("mahizham_add_to_cart_triggered", {
       detail: { productId: id, size: size || "" },

@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Lenis from "lenis";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import CinematicReveal from "./components/CinematicReveal";
 import ProductCatalog from "./components/ProductCatalog";
 import BotanicalHealing from "./components/BotanicalHealing";
 import BlendCustomizer from "./components/BlendCustomizer";
@@ -20,6 +19,8 @@ import ConsultationQuiz from "./components/ConsultationQuiz";
 import AdminPortal from "./components/AdminPortal";
 import GiftCustomization from "./components/GiftCustomization";
 import Login from "./components/Login";
+import CustomerProfile from "./components/CustomerProfile";
+import CartPage from "./components/CartPage";
 
 function Storefront() {
   const [isQuizOpen, setIsQuizOpen] = useState(false);
@@ -57,11 +58,11 @@ function Storefront() {
       <Navbar
         onConsultationClick={() => setIsQuizOpen(true)}
         onAdminClick={() => navigate("/admin")}
-        onGiftClick={() => window.scrollTo(0, 0) || navigate("/gift")}
+        onGiftClick={() => { window.scrollTo(0, 0); navigate("/gift"); }}
       />
 
       <main>
-        <Hero onConsultationClick={() => setIsQuizOpen(true)} />
+        <Hero />
         <ProductCatalog />
         <BotanicalHealing />
         <BlendCustomizer />
@@ -100,6 +101,8 @@ export default function App() {
               <Route path="/admin" element={<AdminPortal />} />
               <Route path="/gift" element={<GiftCustomization />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/profile" element={<CustomerProfile />} />
+              <Route path="/cart" element={<CartPage />} />
             </Routes>
           </BrowserRouter>
         )}

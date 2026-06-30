@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Gift, Sparkles, Check, Heart, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Gift, Sparkles, Check, Heart, Plus, Minus, MessageSquare } from 'lucide-react';
 import { getStoredProducts, addOrder } from '../utils/store';
 import type { Product } from '../utils/store';
 
@@ -19,6 +19,7 @@ export default function GiftCustomization() {
   const [recipientPhone, setRecipientPhone] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
   const [giftMessage, setGiftMessage] = useState('');
+  const [whatsappLink, setWhatsappLink] = useState("");
   
   const [animState, setAnimState] = useState<'entering' | 'idle' | 'boxing' | 'wrapping' | 'ready'>('entering');
 
@@ -118,13 +119,11 @@ export default function GiftCustomization() {
             giftMessage: giftMessage
           });
 
-          // WhatsApp Redirect
-          const whatsappNumber = "919940088786";
-          const orderLines = items.map(it => `${it.quantity}x ${it.name} (${it.size}) - ₹${it.price * it.quantity}`).join("%0A");
-          const text = `*New Gift Order!*%0A%0A*From:* ${senderName} (${senderMobile})%0A*To:* ${recipientName}%0A*Phone:* ${recipientPhone || "N/A"}%0A*Address:* ${recipientAddress}%0A%0A*Products:*%0A${orderLines}%0A*Total:* ₹${totalPrice}%0A%0A*Gift Message:*%0A"${giftMessage}"`;
+          const whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "917904199050";
+          const orderLines = items.map(it => `${it.quantity}x ${it.name} (${it.size}) - ₹${it.price * it.quantity}`).join("\n");
+          const text = `*New Gift Order!*\n\n*From:* ${senderName} (${senderMobile})\n*To:* ${recipientName}\n*Phone:* ${recipientPhone || "N/A"}\n*Address:* ${recipientAddress}\n\n*Products:*\n${orderLines}\n*Total:* ₹${totalPrice}\n\n*Gift Message:*\n"${giftMessage}"`;
           
-          window.open(`https://wa.me/${whatsappNumber}?text=${text}`, '_blank');
-          navigate('/');
+          setWhatsappLink(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`);
         }, 5000);
       }, 4500);
     }, 4000);
@@ -555,6 +554,17 @@ export default function GiftCustomization() {
                   <p className="font-body text-[#4B5563] mt-4 max-w-md leading-relaxed relative z-20">
                     Your exquisite gift package has been meticulously prepared and will be delivered to <span className="text-[#1B3022] font-bold">{recipientName}</span>.
                   </p>
+                  
+                  <a
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setTimeout(() => navigate('/'), 200)}
+                    className="mt-8 relative z-20 flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#1DA851] text-white font-body text-sm font-bold tracking-widest uppercase px-8 py-4 rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                  >
+                    <MessageSquare className="w-5 h-5" />
+                    Send Gift to WhatsApp
+                  </a>
                 </motion.div>
               )}
             </AnimatePresence>
