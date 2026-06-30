@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { ArrowRight, Heart, ShieldCheck } from "lucide-react";
+import { ArrowRight, Heart } from "lucide-react";
 import ProductDetailModal from "../ui/ProductDetailModal";
 import { fetchProducts } from "../../utils/db";
 import type { Product } from "../../utils/store";
@@ -36,7 +36,6 @@ export default function ProductCatalog() {
   };
 
   const handleAddToCart = (id: string, size?: string) => {
-
     const event = new CustomEvent("mahizham_add_to_cart_triggered", {
       detail: { productId: id, size: size || "" },
     });
@@ -136,13 +135,6 @@ export default function ProductCatalog() {
                   <div className="absolute top-4 left-4 bg-white/85 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1 border border-outline-variant/10">
                     <span className="font-body text-[10px] font-bold tracking-widest uppercase text-on-surface-variant">
                       {product.category}
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-4 left-4 bg-primary/80 backdrop-blur-md px-2.5 py-1 rounded-md text-on-primary">
-                    <span className="font-body text-[9px] font-semibold tracking-wider uppercase flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3 text-secondary-container" />{" "}
-                      {product.herbs}
                     </span>
                   </div>
                 </div>
