@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { getStoredProducts, getStoredCart, saveStoredCart } from "../../utils/store";
+import { useAuth } from "../../hooks/useAuth";
 
 interface NavbarProps {
   onConsultationClick: () => void;
@@ -26,6 +27,7 @@ export default function Navbar({
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -213,7 +215,7 @@ export default function Navbar({
               onClick={() => navigate('/login')}
               className="hidden md:flex items-center gap-2 bg-[#2B3E2F] hover:bg-[#1b3022] text-[#FAF9F5] font-body text-[10px] font-bold tracking-[0.15em] uppercase px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
             >
-              <User className="w-3.5 h-3.5" /> Login
+              <User className="w-3.5 h-3.5" /> {user ? "Profile" : "Login"}
             </button>
             <button
               onClick={() => navigate('/cart')}
@@ -277,7 +279,7 @@ export default function Navbar({
                   }}
                   className="font-body text-sm font-semibold tracking-widest uppercase text-primary border border-outline-variant/30 rounded-xl py-3 w-full flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors"
                 >
-                  <User className="w-4 h-4" /> Login
+                  <User className="w-4 h-4" /> {user ? "Profile" : "Login"}
                 </button>
                 <button
                   onClick={() => {
