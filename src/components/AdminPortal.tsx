@@ -4,7 +4,7 @@ import {
   X, Lock, Plus, Trash2, Edit3, Settings, Eye, Search, Shield,
   LayoutDashboard, MessageSquare, BarChart3, ShoppingCart, Receipt, 
   Package, FolderTree, Ticket, Users, RefreshCw, Award, CheckCircle2, TrendingUp,
-  Globe, ShoppingBag
+  Globe, ShoppingBag, Gift, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getStoredProducts, saveStoredProducts, getStoredOrders, saveStoredOrders } from '../utils/store';
@@ -37,7 +37,10 @@ export default function AdminPortal() {
   const [errorMsg, setErrorMsg] = useState('');
   
   // Tabs matching the reference image
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'whatsapp' | 'pos_billing' | 'analytics' | 'orders' | 'products' | 'categories' | 'coupons' | 'users'>('whatsapp');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'whatsapp' | 'pos_billing' | 'analytics' | 'orders' | 'gifts' | 'products' | 'categories' | 'coupons' | 'users'>('whatsapp');
+  
+  // Sidebar State
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // POS Billing states
   const [billingCustomerName, setBillingCustomerName] = useState('');
@@ -279,14 +282,7 @@ export default function AdminPortal() {
     setOrders(updated);
   };
 
-  const deleteOrder = (orderId: string) => {
-    if (window.confirm('Are you sure you want to delete this order?')) {
-      const filtered = orders.filter(o => o.id !== orderId);
-      saveStoredOrders(filtered);
-      setOrders(filtered);
-      setSelectedOrder(null);
-    }
-  };
+
 
   // Category additions
   const addCategory = (e: React.FormEvent) => {
@@ -401,10 +397,7 @@ export default function AdminPortal() {
     return `🌿 *Order Request - Naatu Marundhu*\n👤 ${order.customerName}\n📞 ${order.customerPhone}\n📍 ${order.customerAddress}\n📦 *Items:*\n${itemsText}\n💰 *Estimated Total: ₹${order.totalPrice}*`;
   };
 
-  const generateWhatsAppLink = (order: Order) => {
-    const msg = formatWhatsAppMessage(order);
-    return `https://wa.me/917904199050?text=${encodeURIComponent(msg)}`;
-  };
+
 
   // POS Billing Helper Functions
   const getSubtotal = () => billingItems.reduce((acc, it) => acc + (it.price * it.quantity), 0);
@@ -697,156 +690,199 @@ export default function AdminPortal() {
       ) : (
         <>
           {/* LEFT SIDEBAR NAVIGATION */}
-          <div className="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-outline-variant/25 flex flex-col p-8 shrink-0 shadow-sm justify-between md:h-full">
-            <div>
+          <div className={`relative bg-white border-b md:border-b-0 md:border-r border-outline-variant/25 flex flex-col shrink-0 shadow-sm justify-between md:h-full transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-full md:w-72 p-8' : 'w-full md:w-[90px] p-4 items-center'}`}>
+            
+            {/* Toggle Button */}
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="absolute -right-3.5 top-12 bg-white border border-outline-variant/30 shadow-sm rounded-full p-1.5 text-primary hover:bg-[#FAF9F5] z-50 hidden md:block cursor-pointer"
+            >
+              {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </button>
+
+            <div className="w-full">
               {/* Branding Section */}
-              <div className="flex items-center gap-3.5 mb-10 pb-6 border-b border-outline-variant/10">
-                <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10">
-                  <Settings className="w-6 h-6 text-primary animate-spin-slow" />
+              <div className={`flex flex-col gap-6 mb-10 pb-6 border-b border-outline-variant/10 ${!isSidebarOpen && 'items-center'}`}>
+                <div className={`flex items-center gap-3.5 ${!isSidebarOpen && 'justify-center'}`}>
+                  <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10 shrink-0">
+                    <Settings className="w-6 h-6 text-primary animate-spin-slow" />
+                  </div>
+                  {isSidebarOpen && (
+                    <div className="whitespace-nowrap transition-opacity duration-300">
+                      <h2 className="text-base font-bold text-primary tracking-wide">Business ERP</h2>
+                      <span className="text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold block">Organic Sisterz</span>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <h2 className="text-base font-bold text-primary tracking-wide">Business ERP</h2>
-                  <span className="text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold block">Organic Sisterz</span>
+                {/* Top Actions */}
+                <div className={`flex gap-2.5 w-full ${!isSidebarOpen && 'flex-col items-center'}`}>
+                  <button
+                    onClick={() => navigate('/')}
+                    className={`flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-[#FAF9F5] text-primary hover:bg-outline-variant/20 transition-all cursor-pointer border border-outline-variant/20 text-xs font-bold ${!isSidebarOpen && 'w-10 flex-none'}`}
+                    title="Exit Console"
+                  >
+                    <X className="w-3.5 h-3.5 shrink-0" />
+                    {isSidebarOpen && <span>Exit</span>}
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className={`flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-red-50 text-error hover:bg-red-100 transition-all cursor-pointer border border-red-200/50 text-xs font-bold ${!isSidebarOpen && 'w-10 flex-none'}`}
+                    title="Log Out"
+                  >
+                    <Lock className="w-3.5 h-3.5 shrink-0" />
+                    {isSidebarOpen && <span>Logout</span>}
+                  </button>
                 </div>
               </div>
 
               {/* Sidebar Tabs */}
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 w-full">
                 <button
                   onClick={() => { setActiveTab('dashboard'); }}
-                  className={`w-full flex items-center gap-3.5 text-xs font-bold tracking-wider uppercase py-4 px-4.5 rounded-xl transition-all cursor-pointer ${
+                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
                     activeTab === 'dashboard'
                       ? 'bg-[#2B3E2F] text-white shadow-md'
                       : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
                   }`}
+                  title="Control Center"
                 >
-                  <LayoutDashboard className="w-4.5 h-4.5" />
-                  <span>Control Center</span>
+                  <LayoutDashboard className="w-4.5 h-4.5 shrink-0" />
+                  {isSidebarOpen && <span className="whitespace-nowrap truncate">Control Center</span>}
                 </button>
 
                 <button
                   onClick={() => { setActiveTab('whatsapp'); }}
-                  className={`w-full flex items-center justify-between text-xs font-bold tracking-wider uppercase py-4 px-4.5 rounded-xl transition-all cursor-pointer ${
+                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'justify-between px-4.5' : 'justify-center px-0 relative'} ${
                     activeTab === 'whatsapp'
                       ? 'bg-[#2B3E2F] text-white shadow-md'
                       : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
                   }`}
+                  title="WhatsApp"
                 >
-                  <div className="flex items-center gap-3.5">
-                    <MessageSquare className="w-4.5 h-4.5 text-green-500" />
-                    <span>WhatsApp</span>
+                  <div className={`flex items-center ${isSidebarOpen ? 'gap-3.5' : ''}`}>
+                    <MessageSquare className="w-4.5 h-4.5 text-green-500 shrink-0" />
+                    {isSidebarOpen && <span>WhatsApp</span>}
                   </div>
                   {pendingOrdersCount > 0 && (
-                    <span className="bg-secondary text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                      {pendingOrdersCount}
+                    <span className={`${isSidebarOpen ? 'bg-secondary text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full' : 'absolute top-2 right-2 w-2.5 h-2.5 bg-secondary rounded-full'}`}>
+                      {isSidebarOpen ? pendingOrdersCount : ''}
                     </span>
                   )}
                 </button>
 
                 <button
                   onClick={() => { setActiveTab('pos_billing'); }}
-                  className={`w-full flex items-center gap-3.5 text-xs font-bold tracking-wider uppercase py-4 px-4.5 rounded-xl transition-all cursor-pointer ${
+                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
                     activeTab === 'pos_billing'
                       ? 'bg-[#2B3E2F] text-white shadow-md'
                       : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
                   }`}
+                  title="POS Billing"
                 >
-                  <Receipt className="w-4.5 h-4.5 text-orange-500" />
-                  <span>POS Billing</span>
+                  <Receipt className="w-4.5 h-4.5 text-orange-500 shrink-0" />
+                  {isSidebarOpen && <span className="whitespace-nowrap truncate">POS Billing</span>}
                 </button>
 
                 <button
                   onClick={() => { setActiveTab('analytics'); }}
-                  className={`w-full flex items-center gap-3.5 text-xs font-bold tracking-wider uppercase py-4 px-4.5 rounded-xl transition-all cursor-pointer ${
+                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
                     activeTab === 'analytics'
                       ? 'bg-[#2B3E2F] text-white shadow-md'
                       : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
                   }`}
+                  title="POS Analytics"
                 >
-                  <BarChart3 className="w-4.5 h-4.5" />
-                  <span>POS Analytics</span>
+                  <BarChart3 className="w-4.5 h-4.5 shrink-0" />
+                  {isSidebarOpen && <span className="whitespace-nowrap truncate">POS Analytics</span>}
                 </button>
 
                 <button
                   onClick={() => { setActiveTab('orders'); setSelectedOrder(null); }}
-                  className={`w-full flex items-center justify-between text-xs font-bold tracking-wider uppercase py-4 px-4.5 rounded-xl transition-all cursor-pointer ${
+                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'justify-between px-4.5' : 'justify-center px-0'} ${
                     activeTab === 'orders'
                       ? 'bg-[#2B3E2F] text-white shadow-md'
                       : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
                   }`}
+                  title="Orders"
                 >
-                  <div className="flex items-center gap-3.5">
-                    <ShoppingCart className="w-4.5 h-4.5" />
-                    <span>Orders</span>
+                  <div className={`flex items-center ${isSidebarOpen ? 'gap-3.5' : ''}`}>
+                    <ShoppingCart className="w-4.5 h-4.5 shrink-0" />
+                    {isSidebarOpen && <span>Orders</span>}
                   </div>
                 </button>
 
                 <button
+                  onClick={() => { setActiveTab('gifts'); setSelectedOrder(null); }}
+                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'justify-between px-4.5' : 'justify-center px-0 relative'} ${
+                    activeTab === 'gifts'
+                      ? 'bg-[#2B3E2F] text-white shadow-md'
+                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                  }`}
+                  title="Gifts Received"
+                >
+                  <div className={`flex items-center ${isSidebarOpen ? 'gap-3.5' : ''}`}>
+                    <Gift className="w-4.5 h-4.5 text-[#D4AF37] shrink-0" />
+                    {isSidebarOpen && <span>Gifts Received</span>}
+                  </div>
+                  {orders.filter(o => o.isGift).length > 0 && (
+                    <span className={`${isSidebarOpen ? 'bg-[#D4AF37] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm' : 'absolute top-2 right-2 w-2.5 h-2.5 bg-[#D4AF37] rounded-full'}`}>
+                      {isSidebarOpen ? orders.filter(o => o.isGift).length : ''}
+                    </span>
+                  )}
+                </button>
+
+                <button
                   onClick={() => { setActiveTab('products'); setEditingProduct(null); setIsAddingProduct(false); }}
-                  className={`w-full flex items-center gap-3.5 text-xs font-bold tracking-wider uppercase py-4 px-4.5 rounded-xl transition-all cursor-pointer ${
+                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
                     activeTab === 'products'
                       ? 'bg-[#2B3E2F] text-white shadow-md'
                       : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
                   }`}
+                  title="Inventory"
                 >
-                  <Package className="w-4.5 h-4.5" />
-                  <span>Inventory</span>
+                  <Package className="w-4.5 h-4.5 shrink-0" />
+                  {isSidebarOpen && <span className="whitespace-nowrap truncate">Inventory</span>}
                 </button>
 
                 <button
                   onClick={() => { setActiveTab('categories'); }}
-                  className={`w-full flex items-center gap-3.5 text-xs font-bold tracking-wider uppercase py-4 px-4.5 rounded-xl transition-all cursor-pointer ${
+                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
                     activeTab === 'categories'
                       ? 'bg-[#2B3E2F] text-white shadow-md'
                       : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
                   }`}
+                  title="Categories"
                 >
-                  <FolderTree className="w-4.5 h-4.5" />
-                  <span>Categories</span>
+                  <FolderTree className="w-4.5 h-4.5 shrink-0" />
+                  {isSidebarOpen && <span className="whitespace-nowrap truncate">Categories</span>}
                 </button>
 
                 <button
                   onClick={() => { setActiveTab('coupons'); }}
-                  className={`w-full flex items-center gap-3.5 text-xs font-bold tracking-wider uppercase py-4 px-4.5 rounded-xl transition-all cursor-pointer ${
+                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
                     activeTab === 'coupons'
                       ? 'bg-[#2B3E2F] text-white shadow-md'
                       : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
                   }`}
+                  title="Coupons"
                 >
-                  <Ticket className="w-4.5 h-4.5" />
-                  <span>Coupons</span>
+                  <Ticket className="w-4.5 h-4.5 shrink-0" />
+                  {isSidebarOpen && <span className="whitespace-nowrap truncate">Coupons</span>}
                 </button>
 
                 <button
                   onClick={() => { setActiveTab('users'); }}
-                  className={`w-full flex items-center gap-3.5 text-xs font-bold tracking-wider uppercase py-4 px-4.5 rounded-xl transition-all cursor-pointer ${
+                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
                     activeTab === 'users'
                       ? 'bg-[#2B3E2F] text-white shadow-md'
                       : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
                   }`}
+                  title="Users"
                 >
-                  <Users className="w-4.5 h-4.5" />
-                  <span>Users</span>
+                  <Users className="w-4.5 h-4.5 shrink-0" />
+                  {isSidebarOpen && <span className="whitespace-nowrap truncate">Users</span>}
                 </button>
               </div>
-            </div>
-
-            {/* Logout and Exit Console Actions */}
-            <div className="pt-8 border-t border-outline-variant/15 space-y-3 mt-10">
-              <button
-                onClick={() => navigate('/')}
-                className="w-full flex items-center gap-3 text-xs font-bold text-primary uppercase tracking-wider hover:bg-surface-container-low py-3 px-4 rounded-xl transition-all cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-                <span>Exit Console</span>
-              </button>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 text-xs font-bold text-error uppercase tracking-wider hover:bg-red-50 py-3 px-4 rounded-xl transition-all cursor-pointer"
-              >
-                <Lock className="w-4 h-4" />
-                <span>Log Out</span>
-              </button>
             </div>
           </div>
 
@@ -1058,7 +1094,8 @@ export default function AdminPortal() {
                                               navigator.clipboard.writeText(msg);
                                               alert('Message copied to clipboard!');
                                               // Open WhatsApp Web using the override phone number "7904199050"
-                                              window.open(`https://wa.me/917904199050?text=${encodeURIComponent(msg)}`, '_blank');
+                                              const adminNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "917904199050";
+                                              window.open(`https://wa.me/${adminNumber}?text=${encodeURIComponent(msg)}`, '_blank');
                                             }}
                                             className="bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
                                           >
@@ -2267,6 +2304,62 @@ export default function AdminPortal() {
               </div>
             )}
 
+            {/* TAB: GIFTS RECEIVED */}
+            {activeTab === 'gifts' && (
+              <div className="space-y-6 w-full">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight text-primary font-poppins">Gifts Received</h1>
+                  <p className="text-sm text-on-surface-variant mt-1 font-medium">
+                    Track and manage gift orders sent from customers to their loved ones.
+                  </p>
+                </div>
+                
+                <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
+                  {orders.filter(o => o.isGift).length === 0 ? (
+                    <div className="p-12 text-center text-on-surface-variant text-sm italic">
+                      No gift orders found.
+                    </div>
+                  ) : (
+                    <table className="w-full text-left text-sm">
+                      <thead>
+                        <tr className="bg-[#FAF9F5] text-primary font-bold border-b border-outline-variant/25 uppercase text-[10px] tracking-wider">
+                          <th className="px-6 py-4">Invoice ID</th>
+                          <th className="px-6 py-4">Sender / Recipient</th>
+                          <th className="px-6 py-4">Personal Message</th>
+                          <th className="px-6 py-4">Products</th>
+                          <th className="px-6 py-4 text-right">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-outline-variant/10">
+                        {orders.filter(o => o.isGift).map(o => (
+                          <tr key={o.id} className="hover:bg-[#FAF9F5]/40 transition-colors">
+                            <td className="px-6 py-4 font-bold text-primary">{o.id}</td>
+                            <td className="px-6 py-4">
+                              <div className="font-semibold text-primary">{o.customerName}</div>
+                              <div className="text-xs text-on-surface-variant mt-0.5">{o.customerPhone} | {o.customerAddress}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="bg-[#FAF9F5] p-3 rounded-lg border border-[#D4AF37]/30 text-xs italic text-[#1B3022]">
+                                "{o.giftMessage || 'No message provided'}"
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <ul className="text-xs space-y-1 text-on-surface-variant">
+                                {o.items.map((it, idx) => (
+                                  <li key={idx}>• {it.name} ({it.size}) x{it.quantity}</li>
+                                ))}
+                              </ul>
+                            </td>
+                            <td className="px-6 py-4 font-bold text-primary text-right">₹{o.totalPrice}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* TAB 4: ORDERS HUB */}
             {activeTab === 'orders' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -2640,7 +2733,7 @@ export default function AdminPortal() {
                                 <div className="text-xs text-on-surface-variant mt-1.5 leading-relaxed line-clamp-2">{p.description}</div>
                               </td>
                               <td className="px-6 py-5">
-                                <span className="bg-primary/5 text-primary border border-primary/10 px-3 py-1.5 rounded-full font-semibold text-xs">
+                                <span className="inline-block whitespace-nowrap bg-primary/5 text-primary border border-primary/10 px-3 py-1.5 rounded-full font-semibold text-xs">
                                   {p.category}
                                 </span>
                               </td>

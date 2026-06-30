@@ -1,4 +1,3 @@
-import React from 'react';
 import { MapPin, Mail } from 'lucide-react';
 
 export default function LocationMap() {

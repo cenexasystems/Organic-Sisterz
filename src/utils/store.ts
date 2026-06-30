@@ -183,6 +183,16 @@ export function saveStoredOrders(orders: Order[]): void {
   window.dispatchEvent(new Event('mahizham_orders_updated'));
 }
 
+// Global Cart Storage Helpers
+export const getStoredCart = (): OrderItem[] => {
+  const saved = localStorage.getItem('mahizham_cart');
+  return saved ? JSON.parse(saved) : [];
+};
+
+export const saveStoredCart = (items: OrderItem[]) => {
+  localStorage.setItem('mahizham_cart', JSON.stringify(items));
+};
+
 export function addOrder(order: Omit<Order, 'id' | 'createdAt' | 'status'>): Order {
   const orders = getStoredOrders();
   
