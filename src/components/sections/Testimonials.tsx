@@ -205,49 +205,51 @@ export default function Testimonials() {
       </AnimatePresence>
 
       {/* Scrolling Testimonial Container */}
-      <div className="flex w-max gap-8 animate-marquee hover:[animation-play-state:paused] cursor-grab select-none">
-        {/* Double items for seamless infinite scroll */}
-        {[...reviews, ...reviews].map((t, index) => (
-          <motion.div
-            key={`${t.id}-${index}`}
-            whileHover={{ y: -4, borderColor: "var(--color-secondary)" }}
-            className="w-[350px] md:w-[420px] bg-white p-8 md:p-10 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shrink-0 shadow-sm transition-all duration-300"
-          >
-            <div className="space-y-6">
-              {/* Stars & Tag */}
-              <div className="flex items-center justify-between">
-                <div className="flex gap-1">
-                  {[...Array(t.stars)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-4 h-4 text-[#D4AF37] fill-current"
-                    />
-                  ))}
+      <div className="w-full overflow-hidden py-2">
+        <div className="flex w-max gap-8 animate-marquee hover:[animation-play-state:paused] cursor-grab select-none">
+          {/* Double items for seamless infinite scroll */}
+          {[...reviews, ...reviews].map((t, index) => (
+            <motion.div
+              key={`${t.id}-${index}`}
+              whileHover={{ y: -4, borderColor: "var(--color-secondary)" }}
+              className="w-[285px] sm:w-[350px] md:w-[420px] bg-white p-6 sm:p-8 md:p-10 rounded-2xl border border-outline-variant/30 flex flex-col justify-between shrink-0 shadow-sm transition-all duration-300"
+            >
+              <div className="space-y-6">
+                {/* Stars & Tag */}
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-1">
+                    {[...Array(t.stars)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="w-4 h-4 text-[#D4AF37] fill-current"
+                      />
+                    ))}
+                  </div>
+                  <span className="font-body text-[9px] font-bold tracking-wider uppercase bg-surface-container px-3 py-1 rounded-full text-on-surface-variant flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-secondary" /> {t.tag}
+                  </span>
                 </div>
-                <span className="font-body text-[9px] font-bold tracking-wider uppercase bg-surface-container px-3 py-1 rounded-full text-on-surface-variant flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-secondary" /> {t.tag}
-                </span>
+
+                {/* Quote */}
+                <p className="font-body text-sm sm:text-base text-on-surface-variant leading-relaxed italic">
+                  "{t.quote}"
+                </p>
               </div>
 
-              {/* Quote */}
-              <p className="font-body text-base text-on-surface-variant leading-relaxed italic">
-                "{t.quote}"
-              </p>
-            </div>
-
-            {/* Author */}
-            <div className="mt-8 pt-6 border-t border-outline-variant/20 flex items-center gap-3">
-              <div>
-                <span className="block font-display text-lg text-primary font-medium">
-                  {t.name}
-                </span>
-                <span className="block font-body text-xs text-on-surface-variant">
-                  {t.role}
-                </span>
+              {/* Author */}
+              <div className="mt-8 pt-6 border-t border-outline-variant/20 flex items-center gap-3">
+                <div>
+                  <span className="block font-display text-base sm:text-lg text-primary font-medium">
+                    {t.name}
+                  </span>
+                  <span className="block font-body text-xs text-on-surface-variant">
+                    {t.role}
+                  </span>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       {/* Styling for marquee marquee animation */}

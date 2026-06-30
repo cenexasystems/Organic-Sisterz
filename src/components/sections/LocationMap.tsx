@@ -21,27 +21,41 @@ export default function LocationMap() {
           </p>
         </div>
 
-        {/* Map Container with Floating Card */}
-        <div className="relative w-full h-[600px] rounded-[2.5rem] overflow-hidden shadow-[0_24px_80px_rgba(6,27,14,0.08)] border border-[#061b0e]/10 bg-white">
+        {/* Map Container with Responsive Layout */}
+        <div className="flex flex-col md:relative w-full md:h-[600px] rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-[0_24px_80px_rgba(6,27,14,0.08)] border border-[#061b0e]/10 bg-white">
           
           {/* Google Maps Iframe with custom organic tint */}
-          <iframe 
-            src="https://maps.google.com/maps?q=13.117467,80.165820&t=&z=16&ie=UTF8&iwloc=&output=embed"
-            width="100%" 
-            height="100%" 
-            style={{ 
-              border: 0,
-              filter: 'grayscale(25%) sepia(20%) brightness(98%) contrast(96%)'
-            }} 
-            allowFullScreen={true} 
-            loading="lazy" 
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Organic Sisterz Location"
-            className="absolute inset-0 w-full h-full"
-          ></iframe>
+          <div className="w-full h-[320px] md:h-full md:absolute md:inset-0 order-2 md:order-1 relative">
+            <iframe 
+              src="https://maps.google.com/maps?q=13.117467,80.165820&t=&z=16&ie=UTF8&iwloc=&output=embed"
+              width="100%" 
+              height="100%" 
+              style={{ 
+                border: 0,
+                filter: 'grayscale(25%) sepia(20%) brightness(98%) contrast(96%)'
+              }} 
+              allowFullScreen={true} 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Organic Sisterz Location"
+              className="w-full h-full absolute inset-0"
+            ></iframe>
 
-          {/* Floating Address Panel (Top-Left on Desktop, Stacked on Mobile) */}
-          <div className="absolute top-6 left-6 z-20 w-[calc(100%-3rem)] md:w-[380px] bg-white/90 backdrop-blur-xl border border-white/50 p-8 rounded-[2rem] shadow-[0_16px_40px_rgba(6,27,14,0.06)] flex flex-col space-y-6">
+            {/* Central Pulsing Target / Indicator for Mobile and Desktop center */}
+            <div className="absolute right-4 bottom-4 z-20">
+              <a 
+                href="https://maps.google.com/maps?q=13.117467,80.165820" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="bg-[#061b0e]/95 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-widest px-4.5 py-2.5 rounded-full hover:bg-secondary hover:scale-105 transition-all duration-300 inline-flex items-center gap-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-white/10"
+              >
+                <MapPin className="w-3 h-3 animate-pulse text-secondary" /> Open Map
+              </a>
+            </div>
+          </div>
+
+          {/* Address Panel (Stacked on mobile, Floating on desktop) */}
+          <div className="w-full md:absolute md:top-6 md:left-6 md:z-20 md:w-[380px] bg-white md:bg-white/90 md:backdrop-blur-xl border-b md:border border-outline-variant/20 md:border-white/50 p-6 sm:p-8 rounded-none md:rounded-[2rem] shadow-none md:shadow-[0_16px_40px_rgba(6,27,14,0.06)] flex flex-col space-y-5 order-1 md:order-2">
             <div>
               <span className="font-body text-[10px] text-secondary font-bold uppercase tracking-widest block mb-1">
                 Chennai, Tamil Nadu
@@ -100,22 +114,10 @@ export default function LocationMap() {
               href="https://maps.google.com/maps?q=13.117467,80.165820" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="w-full bg-[#061b0e] text-white text-xs font-bold uppercase tracking-widest py-4 rounded-xl hover:bg-secondary transition-all duration-300 flex items-center justify-center gap-2 shadow-md group"
+              className="w-full bg-[#061b0e] text-white text-xs font-bold uppercase tracking-widest py-3.5 rounded-xl hover:bg-secondary transition-all duration-300 flex items-center justify-center gap-2 shadow-md group"
             >
               <Navigation className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" /> 
               Get Directions
-            </a>
-          </div>
-
-          {/* Central Pulsing Target / Indicator for Mobile and Desktop center */}
-          <div className="absolute right-6 bottom-6 z-20 pointer-events-none md:pointer-events-auto">
-            <a 
-              href="https://maps.google.com/maps?q=13.117467,80.165820" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="bg-[#061b0e]/95 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-6 py-3.5 rounded-full hover:bg-secondary hover:scale-105 transition-all duration-300 inline-flex items-center gap-2 shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-white/10"
-            >
-              <MapPin className="w-3.5 h-3.5 animate-pulse" /> Open in Google Maps
             </a>
           </div>
           

@@ -153,25 +153,31 @@ export default function CartPage() {
                   const product = productsList.find(p => p.id === item.productId);
                   const productImage = product?.image || '/placeholder.jpg';
                   return (
-                    <div key={idx} className="flex items-center gap-4 p-5 rounded-2xl bg-white border border-outline-variant/20 shadow-sm hover:border-[#1B3022]/20 hover:shadow-md transition-all duration-300">
+                    <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white border border-outline-variant/20 shadow-sm hover:border-[#1B3022]/20 hover:shadow-md transition-all duration-300">
                       
-                      {/* Product Thumbnail */}
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white p-2 flex items-center justify-center border border-outline-variant/20 shrink-0 shadow-sm">
-                        <img src={productImage} alt={item.name} className="max-w-full max-h-full object-contain" />
+                      {/* Left: Thumbnail & Details */}
+                      <div className="flex items-center gap-3.5 sm:gap-4 flex-grow min-w-0">
+                        {/* Product Thumbnail */}
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white p-2 flex items-center justify-center border border-outline-variant/20 shrink-0 shadow-sm">
+                          <img src={productImage} alt={item.name} className="max-w-full max-h-full object-contain" />
+                        </div>
+
+                        {/* Product Info */}
+                        <div className="min-w-0 flex-grow">
+                          <h4 className="font-display font-bold text-[#1B3022] text-sm sm:text-base leading-snug break-words">
+                            {item.name}
+                          </h4>
+                          <span className="text-[10px] text-on-surface-variant/80 font-bold uppercase tracking-wider mt-1 block">
+                            Size: {item.size} • Unit Price: ₹{item.price}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Product Info */}
-                      <div className="flex-grow min-w-0">
-                        <h4 className="font-display font-bold text-[#1B3022] text-sm sm:text-base leading-snug truncate">{item.name}</h4>
-                        <span className="text-[10px] text-on-surface-variant/80 font-bold uppercase tracking-wider mt-1 block">
-                          Size: {item.size} • Unit Price: ₹{item.price}
-                        </span>
-                      </div>
-
-                      {/* Quantity & Controls */}
-                      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 sm:gap-6 shrink-0">
+                      {/* Right: Quantity & Controls */}
+                      <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 border-t border-outline-variant/10 pt-3 sm:pt-0 sm:border-t-0 shrink-0 w-full sm:w-auto">
                         <div className="flex items-center gap-3 bg-[#FAF9F5] border border-outline-variant/30 rounded-full p-1 shadow-sm">
                           <button 
+                            type="button"
                             onClick={() => updateQuantity(idx, -1)} 
                             className="w-7 h-7 rounded-full bg-white border border-outline-variant/20 hover:border-[#1B3022] flex items-center justify-center transition-all cursor-pointer shadow-sm text-primary"
                           >
@@ -179,6 +185,7 @@ export default function CartPage() {
                           </button>
                           <span className="font-body font-bold text-xs w-4 text-center text-[#1B3022]">{item.quantity}</span>
                           <button 
+                            type="button"
                             onClick={() => updateQuantity(idx, 1)} 
                             className="w-7 h-7 rounded-full bg-white border border-outline-variant/20 hover:border-[#1B3022] flex items-center justify-center transition-all cursor-pointer shadow-sm text-primary"
                           >
@@ -186,9 +193,10 @@ export default function CartPage() {
                           </button>
                         </div>
                         
-                        <div className="flex flex-col items-end gap-1.5 min-w-[70px]">
+                        <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-1.5 min-w-[80px] justify-end">
                           <span className="font-display font-extrabold text-base text-[#1B3022]">₹{item.price * item.quantity}</span>
                           <button 
+                            type="button"
                             onClick={() => removeItem(idx)} 
                             className="text-[9px] text-error hover:text-red-700 font-bold uppercase tracking-widest transition-colors cursor-pointer flex items-center gap-1"
                           >
