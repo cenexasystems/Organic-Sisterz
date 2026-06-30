@@ -8,8 +8,6 @@ import ProductCatalog from "./components/sections/ProductCatalog";
 import BotanicalHealing from "./components/sections/BotanicalHealing";
 import BlendCustomizer from "./components/sections/BlendCustomizer";
 import Herbarium from "./components/sections/Herbarium";
-import Sourcing from "./components/sections/Sourcing";
-import Efficacy from "./components/sections/Efficacy";
 import Testimonials from "./components/sections/Testimonials";
 import LocationMap from "./components/sections/LocationMap";
 import FaqAccordion from "./components/ui/FaqAccordion";
@@ -23,8 +21,8 @@ import CustomerProfile from "./pages/CustomerProfile";
 import CartPage from "./pages/CartPage";
 
 function Storefront() {
-  const [isQuizOpen, setIsQuizOpen] = useState(false);
   const navigate = useNavigate();
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
 
   useEffect(() => {
     // Initialize Lenis smooth scroll
@@ -67,8 +65,6 @@ function Storefront() {
         <BotanicalHealing />
         <BlendCustomizer />
         <Herbarium />
-        <Sourcing />
-        <Efficacy />
         <Testimonials />
         <LocationMap />
         <FaqAccordion />
@@ -76,11 +72,7 @@ function Storefront() {
 
       <Footer onAdminClick={() => navigate("/admin")} />
 
-      {/* Diagnostic consultation quiz overlay */}
-      <ConsultationQuiz
-        isOpen={isQuizOpen}
-        onClose={() => setIsQuizOpen(false)}
-      />
+      <ConsultationQuiz isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
     </motion.div>
   );
 }

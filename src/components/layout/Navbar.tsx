@@ -27,7 +27,7 @@ export default function Navbar({
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const [scrollProgress, setScrollProgress] = useState(0);
+
 
   const [cartItems, setCartItems] = useState(getStoredCart());
 
@@ -73,12 +73,6 @@ export default function Navbar({
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
-
-      const totalHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight > 0) {
-        setScrollProgress((window.scrollY / totalHeight) * 100);
-      }
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -155,13 +149,17 @@ export default function Navbar({
   return (
     <>
       <nav
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-[#FAF9F5]/90 backdrop-blur-xl shadow-[0_2px_20px_rgba(43,62,47,0.03)] border-b border-[#2b3e2f]/10 py-3"
-            : "bg-transparent py-5"
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+          isScrolled ? "py-4 md:py-6 px-4 md:px-8" : "py-5 md:py-6 px-0"
         }`}
       >
-        <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-3 items-center">
+        <div 
+          className={`w-full max-w-[1600px] mx-auto transition-all duration-500 grid grid-cols-2 md:grid-cols-3 items-center ${
+            isScrolled 
+              ? "bg-[#FAF9F5]/90 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#2B3E2F]/10 rounded-full px-6 md:px-8 py-2.5" 
+              : "bg-transparent px-6 md:px-8 py-0"
+          }`}
+        >
           
           {/* Left Side: Logo */}
           <div className="flex justify-start">
@@ -240,11 +238,7 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Scroll Progress Indicator */}
-        <div
-          className="absolute bottom-0 left-0 h-[2px] bg-secondary transition-all duration-100"
-          style={{ width: `${scrollProgress}%` }}
-        />
+
 
         {/* Mobile Nav */}
         <AnimatePresence>

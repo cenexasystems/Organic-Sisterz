@@ -73,23 +73,24 @@ export default function Footer({ onAdminClick }: FooterProps) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto mt-24 pt-8 border-t border-primary-container/50 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left text-inverse-on-surface font-body text-sm opacity-50">
-        <div>
-          © {new Date().getFullYear()} Organic Sisterz. Clinical Botanical
-          Excellence.
+      <div className="max-w-7xl mx-auto mt-24 pt-8 border-t border-primary-container/50 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left text-inverse-on-surface font-body text-sm opacity-60">
+        <div className="flex-1 text-left">
+          © {new Date().getFullYear()} Organic Sisterz.
         </div>
-        <div>
+        
+        <div className="flex-1 flex justify-center items-center">
           Powered by{" "}
           <a
             href="https://cenexasystems.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-white transition-colors underline"
+            className="ml-1.5 font-display text-lg tracking-wide font-bold text-secondary hover:text-white transition-colors"
           >
             Cenexa Systems
           </a>
         </div>
-        <div className="tracking-wider uppercase text-xs">
+        
+        <div className="flex-1 text-right tracking-widest uppercase text-xs font-bold text-on-primary opacity-80">
           Pure • Organic • Proven
         </div>
       </div>
