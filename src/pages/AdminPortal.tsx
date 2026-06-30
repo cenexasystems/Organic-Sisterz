@@ -7,34 +7,25 @@ import {
   Globe, ShoppingBag, Gift, ChevronLeft, ChevronRight, Download
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getStoredProducts, saveStoredProducts, getStoredOrders, saveStoredOrders } from '../utils/store';
-import type { Product, Order } from '../utils/store';
-
-export interface Coupon {
-  code: string;
-  discount: number;
-  minOrder: number;
-  expiryDate?: string;
-  usageLimit?: number;
-  usedCount: number;
-  status: 'ACTIVE' | 'INACTIVE';
-}
-
-export interface UserProfile {
-  name: string;
-  email: string;
-  mobile: string;
-  joinedDate: string;
-  role: 'Admin' | 'Customer';
-}
+import { useAuth } from '../hooks/useAuth';
+import { 
+  fetchProducts, upsertProduct, deleteProduct as dbDeleteProduct, 
+  fetchCategories, insertCategory, deleteCategory as dbDeleteCategory,
+  fetchCoupons, upsertCoupon, deleteCoupon as dbDeleteCoupon,
+  fetchProfiles, updateUserRole,
+  fetchWhatsappRequests, updateWhatsappRequestStatus,
+  fetchGiftRequests, updateGiftRequestStatus,
+  fetchOrders, insertOrder, updateOrderStatus as updateOrderStatusDb
+} from '../utils/db';
+import type { Product, Order, Coupon, UserProfile } from '../utils/store';
 
 export default function AdminPortal() {
   const navigate = useNavigate();
-  const [passcode, setPasscode] = useState('');
+  const { user } = useAuth();
   
-  // Set passcode bypassed (authenticated by default) as requested: "remove pass for now"
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [errorMsg, setErrorMsg] = useState('');
+  // Authentication states
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   
   // Tabs matching the reference image
   const [activeTab, setActiveTab] = useState<'dashboard' | 'whatsapp' | 'pos_billing' | 'analytics' | 'orders' | 'gifts' | 'products' | 'categories' | 'coupons' | 'users'>('whatsapp');
@@ -60,6 +51,7 @@ export default function AdminPortal() {
   const [products, setProducts] = useState<Product[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [prodImageFile, setProdImageFile] = useState<File | null>(null);
 
   // Form states for product
   const [prodName, setProdName] = useState('');
@@ -109,17 +101,7 @@ export default function AdminPortal() {
     { code: 'WELCOME', discount: 10, minOrder: 10, expiryDate: '2026-12-31', usageLimit: 50, usedCount: 1, status: 'ACTIVE' },
     { code: 'SAVE10', discount: 10, minOrder: 1, expiryDate: '', usageLimit: 0, usedCount: 0, status: 'ACTIVE' }
   ]);
-  const [usersList, setUsersList] = useState<UserProfile[]>([
-    { name: 'Francis', email: 'gavinindiagroup@gmail.com', mobile: '9629713666', joinedDate: '2026-06-21', role: 'Customer' },
-    { name: 'kalaivani g', email: 'kalaivaniganesan01@gmail.com', mobile: '—', joinedDate: '2026-06-19', role: 'Customer' },
-    { name: 'SHIVA PRASAD', email: 'shivaprasad035@gmail.com', mobile: '9866251587', joinedDate: '2026-06-19', role: 'Customer' },
-    { name: 'Merline Sushmitha', email: 'ravikumarmerline10@gmail.com', mobile: '—', joinedDate: '2026-06-17', role: 'Customer' },
-    { name: 'karthikeyan Shanthakumar', email: 'karthik.vvip@gmail.com', mobile: '—', joinedDate: '2026-06-16', role: 'Customer' },
-    { name: 'S Dhanasekaran', email: 'dhanaonline87@gmail.com', mobile: '—', joinedDate: '2026-06-16', role: 'Customer' },
-    { name: 'Eshwar Balaji', email: 'eshwarbalaji07@gmail.com', mobile: '9884626063', joinedDate: '2026-06-15', role: 'Admin' },
-    { name: 'KAVIN G', email: 'kavingiri2006@gmail.com', mobile: '7200212576', joinedDate: '2026-06-11', role: 'Customer' },
-    { name: 'SANJANA M S 24CB1038', email: '241038.cb@rmkec.ac.in', mobile: '—', joinedDate: '2026-06-10', role: 'Customer' }
-  ]);
+  const [usersList, setUsersList] = useState<UserProfile[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState('');
 
   // Form states for category/coupon
@@ -131,44 +113,68 @@ export default function AdminPortal() {
   const [newCouponUsageLimit, setNewCouponUsageLimit] = useState<number>(20);
   const [editingCouponCode, setEditingCouponCode] = useState<string | null>(null);
 
-  useEffect(() => {
-    setProducts(getStoredProducts());
-    setOrders(getStoredOrders());
-    const storedUsers = localStorage.getItem('organic_sisterz_users');
-    if (storedUsers) {
-      try {
-        setUsersList(JSON.parse(storedUsers));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, []);
+  // Gift requests and Whatsapp requests state
+  const [whatsappRequests, setWhatsappRequests] = useState<any[]>([]);
+  const [giftRequests, setGiftRequests] = useState<any[]>([]);
 
-  const saveUsers = (newUsers: UserProfile[]) => {
-    setUsersList(newUsers);
-    localStorage.setItem('organic_sisterz_users', JSON.stringify(newUsers));
+  const loadData = async () => {
+    try {
+      const [prods, cats, coups, profs, ords, whatsapps, gifts] = await Promise.all([
+        fetchProducts(),
+        fetchCategories(),
+        fetchCoupons(),
+        fetchProfiles(),
+        fetchOrders(),
+        fetchWhatsappRequests(),
+        fetchGiftRequests()
+      ]);
+      setProducts(prods);
+      setCategories(cats);
+      setCoupons(coups);
+      setUsersList(profs);
+      setOrders(ords);
+      setWhatsappRequests(whatsapps);
+      setGiftRequests(gifts);
+    } catch (err) {
+      console.error("Error loading dashboard data", err);
+    }
   };
 
-  const handleRefresh = () => {
-    setProducts(getStoredProducts());
-    setOrders(getStoredOrders());
+  useEffect(() => {
+    const checkRoleAndLoad = async () => {
+      if (!user) {
+        setIsAuthenticated(false);
+        setCheckingAuth(false);
+        return;
+      }
+      try {
+        const profs = await fetchProfiles();
+        const me = profs.find(p => p.id === user.id);
+        if (me && me.role === 'Admin') {
+          setIsAuthenticated(true);
+          await loadData();
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (e) {
+        console.error(e);
+        setIsAuthenticated(false);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+    checkRoleAndLoad();
+  }, [user]);
+
+
+  const handleRefresh = async () => {
+    await loadData();
     alert('Dashboard data refreshed successfully!');
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passcode === '9940088786') {
-      setIsAuthenticated(true);
-      setErrorMsg('');
-    } else {
-      setErrorMsg('Invalid Admin Passcode');
-      setPasscode('');
-    }
-  };
-
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    setPasscode('');
+    // Auth hook handles logout, just redirect
+    navigate('/');
   };
 
   // Add/Remove size fields in form
@@ -211,9 +217,10 @@ export default function AdminPortal() {
     setProdTamilName(prod.tamilName || '');
     setProdNutritionalInfo(
       prod.nutritionalInfo
-        ? prod.nutritionalInfo.map(n => `${n.label}: ${n.value}`).join('\n')
+        ? (prod.nutritionalInfo as any).map((n: any) => `${n.label}: ${n.value}`).join('\n')
         : ''
     );
+    setProdImageFile(null);
     setIsAddingProduct(false);
   };
 
@@ -232,11 +239,12 @@ export default function AdminPortal() {
     setProdHowToUse('');
     setProdTamilName('');
     setProdNutritionalInfo('');
+    setProdImageFile(null);
     setIsAddingProduct(true);
   };
 
   // Save product (Add or Edit)
-  const saveProductSubmit = (e: React.FormEvent) => {
+  const saveProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanSizes = prodSizes
       .filter(s => s.size.trim() !== '' && s.price > 0)
@@ -258,141 +266,156 @@ export default function AdminPortal() {
         return { label, value };
       });
 
-    let updatedList = [...products];
+    const newProd: Product = {
+      id: editingProduct ? editingProduct.id : prodName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      name: prodName,
+      category: prodCategory,
+      description: prodDesc,
+      image: editingProduct ? editingProduct.image : '/herbal-hair-oil.jpeg',
+      herbs: prodHerbs,
+      benefits: benefitsArray,
+      sizes: cleanSizes,
+      isAvailable: prodIsAvailable,
+      details: prodDetails,
+      howToUse: prodHowToUse,
+      tamilName: prodTamilName,
+      nutritionalInfo: nutritionalInfoArray.length > 0 ? nutritionalInfoArray : undefined
+    };
 
-    if (editingProduct) {
-      // Edit mode
-      updatedList = updatedList.map(p => {
-        if (p.id === editingProduct.id) {
-          return {
-            ...p,
-            name: prodName,
-            category: prodCategory,
-            description: prodDesc,
-            herbs: prodHerbs,
-            benefits: benefitsArray,
-            sizes: cleanSizes,
-            isAvailable: prodIsAvailable,
-            details: prodDetails,
-            howToUse: prodHowToUse,
-            tamilName: prodTamilName,
-            nutritionalInfo: nutritionalInfoArray.length > 0 ? nutritionalInfoArray : undefined
-          };
-        }
-        return p;
+    try {
+      const imgUrl = await upsertProduct(newProd, prodImageFile || undefined);
+      newProd.image = imgUrl;
+      setProducts(prev => {
+        const exists = prev.find(p => p.id === newProd.id);
+        if (exists) return prev.map(p => p.id === newProd.id ? newProd : p);
+        return [...prev, newProd];
       });
-      setEditingProduct(null);
-    } else {
-      // Add mode
-      const newProd: Product = {
-        id: prodName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        name: prodName,
-        category: prodCategory,
-        description: prodDesc,
-        image: '/herbal-hair-oil.jpeg', // default fallback asset
-        herbs: prodHerbs,
-        benefits: benefitsArray,
-        sizes: cleanSizes,
-        isAvailable: prodIsAvailable,
-        details: prodDetails,
-        howToUse: prodHowToUse,
-        tamilName: prodTamilName,
-        nutritionalInfo: nutritionalInfoArray.length > 0 ? nutritionalInfoArray : undefined
-      };
-      updatedList.push(newProd);
       setIsAddingProduct(false);
+      setEditingProduct(null);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save product');
     }
-
-    saveStoredProducts(updatedList);
-    setProducts(updatedList);
   };
 
-  const deleteProduct = (id: string) => {
+  const deleteProduct = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      const filtered = products.filter(p => p.id !== id);
-      saveStoredProducts(filtered);
-      setProducts(filtered);
+      try {
+        await dbDeleteProduct(id);
+        setProducts(prev => prev.filter(p => p.id !== id));
+      } catch (err) {
+        console.error(err);
+        alert('Failed to delete product');
+      }
     }
   };
 
   // Order status updates
-  const updateOrderStatus = (orderId: string, newStatus: Order['status']) => {
-    const updated = orders.map(o => {
-      if (o.id === orderId) {
-        const updatedOrder = { ...o, status: newStatus };
-        if (selectedOrder && selectedOrder.id === orderId) {
-          setSelectedOrder(updatedOrder);
-        }
-        return updatedOrder;
+  const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+    try {
+      if (whatsappRequests.some(o => o.id === orderId)) {
+        await updateWhatsappRequestStatus(orderId, newStatus);
+        setWhatsappRequests(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+      } else if (giftRequests.some(o => o.id === orderId)) {
+        await updateGiftRequestStatus(orderId, newStatus);
+        setGiftRequests(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+      } else {
+        await updateOrderStatusDb(orderId, newStatus);
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
       }
-      return o;
-    });
-    saveStoredOrders(updated);
-    setOrders(updated);
+
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, status: newStatus });
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update status');
+    }
   };
 
 
 
   // Category additions
-  const addCategory = (e: React.FormEvent) => {
+  const addCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCatName.trim()) return;
     if (categories.includes(newCatName.trim())) {
       alert('Category already exists.');
       return;
     }
-    setCategories([...categories, newCatName.trim()]);
-    setNewCatName('');
+    try {
+      await insertCategory(newCatName.trim());
+      setCategories([...categories, newCatName.trim()]);
+      setNewCatName('');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to add category');
+    }
   };
 
-  const deleteCategory = (cat: string) => {
+  const deleteCategory = async (cat: string) => {
     if (window.confirm(`Are you sure you want to delete category "${cat}"?`)) {
-      setCategories(categories.filter(c => c !== cat));
+      try {
+        await dbDeleteCategory(cat);
+        setCategories(categories.filter(c => c !== cat));
+      } catch (err) {
+        console.error(err);
+        alert('Failed to delete category');
+      }
     }
   };
 
   // Coupon additions
-  const addCoupon = (e: React.FormEvent) => {
+  const addCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCouponCode.trim() || newCouponDiscount <= 0) return;
     
     const formattedCode = newCouponCode.trim().toUpperCase();
     
-    if (editingCouponCode) {
-      // Update existing coupon
-      setCoupons(prev => prev.map(c => c.code === editingCouponCode ? {
-        ...c,
-        code: formattedCode,
-        discount: newCouponDiscount,
-        minOrder: newCouponMinOrder,
-        expiryDate: newCouponExpiryDate,
-        usageLimit: newCouponUsageLimit
-      } : c));
-      setEditingCouponCode(null);
-    } else {
-      // Create new coupon
-      if (coupons.some(c => c.code.toUpperCase() === formattedCode)) {
-        alert('Coupon code already exists.');
-        return;
+    try {
+      if (editingCouponCode) {
+        // Update existing coupon
+        const updatedCoupon: Coupon = {
+          code: formattedCode,
+          discount: newCouponDiscount,
+          minOrder: newCouponMinOrder,
+          expiryDate: newCouponExpiryDate,
+          usageLimit: newCouponUsageLimit,
+          usedCount: coupons.find(c => c.code === editingCouponCode)?.usedCount || 0,
+          status: coupons.find(c => c.code === editingCouponCode)?.status || 'ACTIVE'
+        };
+        await upsertCoupon(updatedCoupon);
+        setCoupons(prev => prev.map(c => c.code === editingCouponCode ? updatedCoupon : c));
+        setEditingCouponCode(null);
+      } else {
+        // Create new coupon
+        if (coupons.some(c => c.code.toUpperCase() === formattedCode)) {
+          alert('Coupon code already exists.');
+          return;
+        }
+        const newCp: Coupon = {
+          code: formattedCode,
+          discount: newCouponDiscount,
+          minOrder: newCouponMinOrder,
+          expiryDate: newCouponExpiryDate,
+          usageLimit: newCouponUsageLimit,
+          usedCount: 0,
+          status: 'ACTIVE'
+        };
+        await upsertCoupon(newCp);
+        setCoupons([...coupons, newCp]);
       }
-      const newCp: Coupon = {
-        code: formattedCode,
-        discount: newCouponDiscount,
-        minOrder: newCouponMinOrder,
-        expiryDate: newCouponExpiryDate,
-        usageLimit: newCouponUsageLimit,
-        usedCount: 0,
-        status: 'ACTIVE'
-      };
-      setCoupons([...coupons, newCp]);
+      
+      // Reset form states
+      setNewCouponCode('');
+      setNewCouponDiscount(10);
+      setNewCouponMinOrder(1);
+      setNewCouponExpiryDate('');
+      setNewCouponUsageLimit(20);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save coupon');
     }
-    
-    // Reset form states
-    setNewCouponCode('');
-    setNewCouponDiscount(10);
-    setNewCouponMinOrder(1);
-    setNewCouponExpiryDate('');
-    setNewCouponUsageLimit(20);
   };
 
   const startEditCoupon = (cp: Coupon) => {
@@ -404,12 +427,27 @@ export default function AdminPortal() {
     setNewCouponUsageLimit(cp.usageLimit || 0);
   };
 
-  const deleteCoupon = (code: string) => {
-    setCoupons(coupons.filter(c => c.code !== code));
+  const deleteCoupon = async (code: string) => {
+    try {
+      await dbDeleteCoupon(code);
+      setCoupons(coupons.filter(c => c.code !== code));
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete coupon');
+    }
   };
 
-  const toggleCouponStatus = (code: string) => {
-    setCoupons(prev => prev.map(c => c.code === code ? { ...c, status: c.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' } : c));
+  const toggleCouponStatus = async (code: string) => {
+    const cp = coupons.find(c => c.code === code);
+    if (!cp) return;
+    try {
+      const updated = { ...cp, status: cp.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' as 'ACTIVE'|'INACTIVE' };
+      await upsertCoupon(updated);
+      setCoupons(prev => prev.map(c => c.code === code ? updated : c));
+    } catch (err) {
+      console.error(err);
+      alert('Failed to toggle coupon status');
+    }
   };
 
   const formatCouponExpiry = (dateStr?: string) => {
@@ -529,7 +567,7 @@ export default function AdminPortal() {
     return `INV-2026-${paddedNum}`;
   };
 
-  const handleCheckoutPOS = () => {
+  const handleCheckoutPOS = async () => {
     const subtotal = getSubtotal();
     const couponDisc = getCouponDiscount(subtotal);
     const manualDisc = getManualDiscount(subtotal);
@@ -545,9 +583,7 @@ export default function AdminPortal() {
       customerPhone: billingCustomerPhone || '7904199050',
       customerEmail: '', // Not required for offline POS checkout
       customerAddress: billingSource === 'OFFLINE' ? 'Offline POS Shop' : 'Online Shipping Address',
-      source: billingSource === 'OFFLINE'
-        ? (billingItems.some(it => it.isCustom) ? 'MANUAL' : 'OFFLINE')
-        : 'ONLINE',
+      source: billingSource,
       items: billingItems.map(it => ({
         productId: it.isCustom ? 'custom' : 'catalog',
         name: it.name || 'Unnamed Item',
@@ -555,6 +591,7 @@ export default function AdminPortal() {
         quantity: it.quantity,
         price: it.price
       })),
+      subtotal: subtotal,
       totalPrice: grandTotal,
       status: 'Completed', // POS orders are completed immediately on checkout
       createdAt: new Date().toISOString(),
@@ -566,10 +603,16 @@ export default function AdminPortal() {
       changeReturned: balance
     };
 
-    // Save order
-    const updatedOrders = [newOrder, ...orders];
-    saveStoredOrders(updatedOrders);
-    setOrders(updatedOrders);
+    try {
+      // Save order
+      await insertOrder(newOrder);
+      const updatedOrders = [newOrder, ...orders];
+      setOrders(updatedOrders);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save POS bill');
+      return;
+    }
 
     // Format WhatsApp invoice
     const dateStr = new Date().toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
@@ -605,12 +648,12 @@ export default function AdminPortal() {
   // Filter storefront orders (WhatsApp requests) by time period
   const getFilteredOrders = (excludeSearch = false) => {
     const now = new Date();
-    // Only show storefront requests (ID starting with ORD-)
-    let list = orders.filter(o => o.id.startsWith('ORD-'));
+    // Only show storefront requests
+    let list = [...whatsappRequests];
     
     // Period filter
     list = list.filter(o => {
-      const oDate = new Date(o.createdAt);
+      const oDate = new Date(o.created_at);
       if (periodFilter === 'today') {
         return oDate.toDateString() === now.toDateString();
       }
@@ -643,8 +686,8 @@ export default function AdminPortal() {
     if (!excludeSearch && whatsappSearch) {
       const s = whatsappSearch.toLowerCase();
       list = list.filter(o => 
-        o.customerName.toLowerCase().includes(s) || 
-        o.customerPhone.toLowerCase().includes(s) || 
+        o.customer_name.toLowerCase().includes(s) || 
+        o.customer_phone.toLowerCase().includes(s) || 
         o.id.toLowerCase().includes(s)
       );
     }
@@ -785,7 +828,7 @@ export default function AdminPortal() {
   const ordersFilteredByPeriod = getFilteredOrders(true);
   const totalRevenue = ordersFilteredByPeriod
     .filter(o => o.status === 'Completed')
-    .reduce((sum, o) => sum + o.totalPrice, 0);
+    .reduce((sum, o) => sum + Number(o.total_price), 0);
   const totalRequestsCount = ordersFilteredByPeriod.length;
   const pendingOrdersCount = ordersFilteredByPeriod.filter(o => o.status === 'Pending').length;
   const contactedOrdersCount = ordersFilteredByPeriod.filter(o => o.status === 'Processing').length;
@@ -795,48 +838,41 @@ export default function AdminPortal() {
     <div className="min-h-screen md:h-screen bg-[#FAF9F5] flex flex-col md:flex-row font-poppins text-primary antialiased md:overflow-hidden">
       
       {/* AUTHENTICATION VIEW */}
-      {!isAuthenticated ? (
+      {checkingAuth ? (
+        <div className="flex-grow flex items-center justify-center p-6 bg-[#FAF9F5] min-h-screen">
+          <div className="flex flex-col items-center gap-4">
+            <Settings className="w-10 h-10 text-primary animate-spin" />
+            <h3 className="font-display text-xl font-bold text-primary">Verifying access...</h3>
+          </div>
+        </div>
+      ) : !isAuthenticated ? (
         <div className="flex-grow flex items-center justify-center p-6 bg-[#FAF9F5] min-h-screen">
           <motion.div 
             initial={{ y: 15, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="bg-white border border-outline-variant/30 rounded-2xl p-10 max-w-lg w-full shadow-xl text-center space-y-8"
           >
-            <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mx-auto border border-outline-variant/20">
-              <Lock className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto border border-red-100">
+              <Lock className="w-8 h-8 text-red-600" />
             </div>
-            <h3 className="font-display text-2xl font-bold text-primary tracking-tight">Passcode Verification</h3>
+            <h3 className="font-display text-2xl font-bold text-primary tracking-tight">Access Denied</h3>
             <p className="text-sm text-on-surface-variant leading-relaxed px-2">
-              Access to the Organic Sisterz admin ERP portal requires authentication. Please input your passcode to enter.
+              You must be logged in as an Administrator to view this page.
             </p>
-            <form onSubmit={handleLogin} className="space-y-6">
-              <input
-                type="password"
-                placeholder="••••••••••••"
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
-                className="w-full border border-outline-variant/50 rounded-2xl py-4.5 px-6 text-lg text-center tracking-widest text-primary focus:outline-none focus:border-secondary transition-all"
-                required
-              />
-              {errorMsg && (
-                <p className="text-error text-xs font-semibold">{errorMsg}</p>
-              )}
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => navigate('/')}
-                  className="w-1/3 border border-outline-variant/40 text-primary hover:bg-[#FAF9F5] text-xs font-bold tracking-widest uppercase py-4 rounded-xl transition-all cursor-pointer"
-                >
-                  Back
-                </button>
-                <button
-                  type="submit"
-                  className="w-2/3 bg-primary hover:bg-primary-container text-on-primary text-xs font-bold tracking-widest uppercase py-4 rounded-xl shadow transition-colors cursor-pointer"
-                >
-                  Authenticate
-                </button>
-              </div>
-            </form>
+            <div className="flex gap-4 pt-4">
+              <button
+                onClick={() => navigate('/login')}
+                className="w-1/2 bg-primary hover:bg-primary-container text-on-primary text-xs font-bold tracking-widest uppercase py-4 rounded-xl shadow transition-colors cursor-pointer"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="w-1/2 border border-outline-variant/40 text-primary hover:bg-[#FAF9F5] text-xs font-bold tracking-widest uppercase py-4 rounded-xl transition-all cursor-pointer"
+              >
+                Return to Store
+              </button>
+            </div>
           </motion.div>
         </div>
       ) : (
@@ -1174,7 +1210,7 @@ export default function AdminPortal() {
                                 <td className="px-6 py-5 max-w-xs truncate text-on-surface-variant">{o.customerAddress}</td>
                                 <td className="px-6 py-5 text-center">
                                   <span className="bg-primary/5 text-primary border border-primary/10 px-3 py-1 rounded-full font-bold text-xs">
-                                    {o.items.reduce((sum, it) => sum + it.quantity, 0)}
+                                    {o.items.reduce((sum: number, it: any) => sum + it.quantity, 0)}
                                   </span>
                                 </td>
                                 <td className="px-6 py-5 font-bold text-primary">₹{o.totalPrice}</td>
@@ -1248,7 +1284,7 @@ export default function AdminPortal() {
                                             </tr>
                                           </thead>
                                           <tbody className="divide-y divide-outline-variant/10">
-                                            {o.items.map((it, idx) => (
+                                            {o.items.map((it: any, idx: number) => (
                                               <tr key={idx} className="hover:bg-[#FAF9F5]/20">
                                                 <td className="px-4 py-3 font-semibold text-primary">{it.name}</td>
                                                 <td className="px-4 py-3 text-on-surface-variant">{it.size || '—'}</td>
@@ -2446,7 +2482,7 @@ export default function AdminPortal() {
                 </div>
                 
                 <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
-                  {orders.filter(o => o.isGift).length === 0 ? (
+                  {giftRequests.length === 0 ? (
                     <div className="p-12 text-center text-on-surface-variant text-sm italic">
                       No gift orders found.
                     </div>
@@ -2462,12 +2498,12 @@ export default function AdminPortal() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-outline-variant/10">
-                        {orders.filter(o => o.isGift).map(o => (
+                        {giftRequests.map(o => (
                           <tr key={o.id} className="hover:bg-[#FAF9F5]/40 transition-colors">
                             <td className="px-6 py-4 font-bold text-primary">{o.id}</td>
                             <td className="px-6 py-4">
-                                                              <div className="font-semibold text-primary">{o.customerName}</div>
-                                                              <div className="text-xs text-on-surface-variant mt-0.5">{o.customerPhone.split('_')[0]} | {o.customerAddress}</div>
+                                                              <div className="font-semibold text-primary">{o.recipientName}</div>
+                                                              <div className="text-xs text-on-surface-variant mt-0.5">{o.recipientPhone} | Gift from: {o.senderName}</div>
                             </td>
                             <td className="px-6 py-4">
                               <div className="bg-[#FAF9F5] p-3 rounded-lg border border-[#D4AF37]/30 text-xs italic text-[#1B3022]">
@@ -2476,7 +2512,7 @@ export default function AdminPortal() {
                             </td>
                             <td className="px-6 py-4">
                               <ul className="text-xs space-y-1 text-on-surface-variant">
-                                {o.items.map((it, idx) => (
+                                {o.items.map((it: any, idx: number) => (
                                   <li key={idx}>• {it.name} ({it.size}) x{it.quantity}</li>
                                 ))}
                               </ul>
@@ -2929,7 +2965,7 @@ export default function AdminPortal() {
                     </div>
 
                     <form onSubmit={saveProductSubmit} className="space-y-6">
-                      <div className="grid grid-cols-1 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Product Name */}
                         <div className="space-y-2">
                           <label className="block text-xs font-bold text-primary uppercase tracking-wider">Product Name</label>
@@ -2941,6 +2977,20 @@ export default function AdminPortal() {
                             placeholder="e.g. Herbal Shikakai Powder"
                             required
                           />
+                        </div>
+
+                        {/* Product Image */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-primary uppercase tracking-wider">Product Image Upload</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setProdImageFile(e.target.files?.[0] || null)}
+                            className="w-full border border-outline-variant/40 rounded-xl py-2.5 px-4 text-xs text-primary focus:outline-none focus:border-secondary file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-primary file:text-white hover:file:bg-secondary cursor-pointer"
+                          />
+                          {editingProduct?.image && !prodImageFile && (
+                            <p className="text-[10px] text-gray-500 italic mt-1">Current image will be kept if no new file is uploaded.</p>
+                          )}
                         </div>
                       </div>
 
@@ -3422,12 +3472,15 @@ export default function AdminPortal() {
                     </p>
                   </div>
                   <button
-                    onClick={() => {
-                      const stored = localStorage.getItem('organic_sisterz_users');
-                      if (stored) {
-                        setUsersList(JSON.parse(stored));
+                    onClick={async () => {
+                      try {
+                        const stored = await fetchProfiles();
+                        setUsersList(stored);
+                        alert('User list refreshed successfully!');
+                      } catch (err) {
+                        console.error(err);
+                        alert('Failed to refresh user list');
                       }
-                      alert('User list refreshed successfully!');
                     }}
                     className="flex items-center gap-2 border border-outline-variant/35 hover:bg-[#FAF9F5] px-4 py-2.5 rounded-xl text-xs font-bold text-primary transition-all cursor-pointer bg-white shadow-sm"
                   >
@@ -3495,12 +3548,17 @@ export default function AdminPortal() {
                               <td className="px-6 py-4.5">
                                 {u.role === 'Admin' ? (
                                   <button
-                                    onClick={() => {
+                                    onClick={async () => {
                                       if (confirm(`Remove admin permissions from ${u.name}?`)) {
-                                        const updated = usersList.map(item => 
-                                          item.email === u.email ? { ...item, role: 'Customer' as const } : item
-                                        );
-                                        saveUsers(updated);
+                                        try {
+                                          await updateUserRole(u.id, 'Customer');
+                                          setUsersList(usersList.map(item => 
+                                            item.id === u.id ? { ...item, role: 'Customer' } : item
+                                          ));
+                                        } catch (err) {
+                                          console.error(err);
+                                          alert('Failed to update user role');
+                                        }
                                       }
                                     }}
                                     className="border border-[#FECACA] hover:bg-[#FEF2F2] text-[#991B1B] bg-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
@@ -3510,12 +3568,17 @@ export default function AdminPortal() {
                                   </button>
                                 ) : (
                                   <button
-                                    onClick={() => {
+                                    onClick={async () => {
                                       if (confirm(`Promote ${u.name} to store administrator?`)) {
-                                        const updated = usersList.map(item => 
-                                          item.email === u.email ? { ...item, role: 'Admin' as const } : item
-                                        );
-                                        saveUsers(updated);
+                                        try {
+                                          await updateUserRole(u.id, 'Admin');
+                                          setUsersList(usersList.map(item => 
+                                            item.id === u.id ? { ...item, role: 'Admin' } : item
+                                          ));
+                                        } catch (err) {
+                                          console.error(err);
+                                          alert('Failed to update user role');
+                                        }
                                       }
                                     }}
                                     className="border border-[#86EFAC] hover:bg-[#F0FDF4] text-[#166534] bg-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"

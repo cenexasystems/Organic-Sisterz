@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, User, LogOut, Leaf, ShoppingBag, Settings } from 'lucide-react';
-import { getStoredOrders } from '../utils/store';
+import { fetchWhatsappRequests } from '../utils/db';
 import type { Order } from '../utils/store';
 import { useAuth } from '../hooks/useAuth';
 
@@ -13,17 +13,25 @@ export default function CustomerProfile() {
   const { user, signOut } = useAuth();
 
   useEffect(() => {
-    const storedOrders = getStoredOrders();
-    if (user?.email) {
-      // Find orders matching user email or prefix
-      const userOrders = storedOrders.filter(o => 
-        o.customerEmail === user.email || 
-        o.customerName.toLowerCase().includes((user.email || '').split('@')[0].toLowerCase())
-      );
-      setOrders(userOrders.reverse());
-    } else {
-      setOrders(storedOrders.filter(o => !o.isGift).reverse());
-    }
+    const fetchOrdersData = async () => {
+      try {
+        const storedOrders = await fetchWhatsappRequests() as unknown as Order[];
+        if (user?.email) {
+          // Find orders matching user email or prefix
+          const userOrders = storedOrders.filter(o => 
+            o.customerEmail === user.email || 
+            (o.customerName && o.customerName.toLowerCase().includes((user.email || '').split('@')[0].toLowerCase()))
+          );
+          setOrders(userOrders);
+        } else {
+          setOrders(storedOrders);
+        }
+      } catch (err) {
+        console.error("Failed to load user orders:", err);
+      }
+    };
+    
+    fetchOrdersData();
   }, [user]);
 
   const handleLogout = async () => {

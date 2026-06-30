@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Gift, Sparkles, Check, Heart, Plus, Minus, MessageSquare } from 'lucide-react';
-import { getStoredProducts, addOrder } from '../utils/store';
+import { fetchProducts, insertGiftRequest } from '../utils/db';
 import type { Product } from '../utils/store';
 import ProductDetailModal from '../components/ui/ProductDetailModal';
 
@@ -28,7 +28,7 @@ export default function GiftCustomization() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setProducts(getStoredProducts());
+    fetchProducts().then(setProducts).catch(console.error);
   }, []);
 
   const toggleProduct = (product: Product) => {
@@ -114,16 +114,14 @@ export default function GiftCustomization() {
         setAnimState('ready');
         
         // Finalize Order
-        addOrder({
-          customerName: recipientName + " (Gift from " + senderName + ")",
-          customerPhone: recipientPhone || "N/A",
-          customerEmail: "WhatsApp Gift Order",
-          customerAddress: recipientAddress,
+        insertGiftRequest(
+          senderName,
+          recipientName,
+          recipientPhone || "N/A",
+          giftMessage,
           items,
-          totalPrice,
-          isGift: true,
-          giftMessage: giftMessage
-        });
+          totalPrice
+        ).catch(console.error);
       }, 4500);
     }, 4000);
   };

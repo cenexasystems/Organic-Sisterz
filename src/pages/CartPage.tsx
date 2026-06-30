@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { getStoredCart, saveStoredCart, addOrder, getStoredProducts } from '../utils/store';
+import { getStoredCart, saveStoredCart } from '../utils/store';
+import { fetchProducts, insertWhatsappRequest } from '../utils/db';
+import type { Product } from '../utils/store';
 import Navbar from '../components/layout/Navbar';
 import type { OrderItem } from '../utils/store';
 
@@ -10,13 +12,14 @@ export default function CartPage() {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<OrderItem[]>([]);
   const [custName, setCustName] = useState("");
+  const [custEmail, setCustEmail] = useState("");
   const [custPhone, setCustPhone] = useState("");
   const [custAddress, setCustAddress] = useState("");
-  
-  const productsList = getStoredProducts();
+  const [productsList, setProductsList] = useState<Product[]>([]);
 
   useEffect(() => {
     setCartItems(getStoredCart());
+    fetchProducts().then(setProductsList).catch(console.error);
   }, []);
 
   const updateQuantity = (idx: number, delta: number) => {
@@ -49,13 +52,13 @@ export default function CartPage() {
     const orderData = {
       customerName: custName,
       customerPhone: custPhone,
-      customerEmail: "WhatsApp Web Order",
+      customerEmail: custEmail,
       customerAddress: custAddress,
       items: cartItems,
       totalPrice: totalAmount,
     };
 
-    const newOrder = addOrder(orderData);
+    insertWhatsappRequest(orderData).catch(console.error);
     
     let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "917904199050";
     whatsappNumber = whatsappNumber.replace(/\D/g, '');
@@ -64,7 +67,7 @@ export default function CartPage() {
     }
 
     const orderLines = cartItems.map(it => `${it.quantity}x ${it.name} (${it.size}) - ₹${it.price * it.quantity}`).join("\n");
-    const text = `*New Store Order!* (${newOrder.id})\n\n*Customer:* ${custName}\n*Phone:* ${custPhone}\n*Address:* ${custAddress}\n\n*Products:*\n${orderLines}\n\n*Subtotal:* ₹${subtotal}\n*Delivery:* ${deliveryCharge === 0 ? "Free" : `₹${deliveryCharge}`}\n*Total:* ₹${totalAmount}`;
+    const text = `*New Store Order!*\n\n*Customer:* ${custName}\n*Phone:* ${custPhone}\n*Address:* ${custAddress}\n\n*Products:*\n${orderLines}\n\n*Subtotal:* ₹${subtotal}\n*Delivery:* ${deliveryCharge === 0 ? "Free" : `₹${deliveryCharge}`}\n*Total:* ₹${totalAmount}`;
     
     // Bulletproof Redirect
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
@@ -235,6 +238,18 @@ export default function CartPage() {
                       onChange={e => setCustName(e.target.value)} 
                       className="w-full border border-outline-variant/40 focus:border-[#1B3022] rounded-xl px-4 py-3.5 text-sm bg-[#FAF9F5] text-[#1B3022] outline-none transition-all shadow-inner focus:bg-white" 
                       placeholder="E.g., Jane Doe" 
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#1B3022]/80 uppercase tracking-widest mb-2">Email Address</label>
+                    <input 
+                      required 
+                      type="email" 
+                      value={custEmail} 
+                      onChange={e => setCustEmail(e.target.value)} 
+                      className="w-full border border-outline-variant/40 focus:border-[#1B3022] rounded-xl px-4 py-3.5 text-sm bg-[#FAF9F5] text-[#1B3022] outline-none transition-all shadow-inner focus:bg-white" 
+                      placeholder="E.g., jane@example.com" 
                     />
                   </div>
                   

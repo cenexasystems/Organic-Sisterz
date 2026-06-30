@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Heart, ShieldCheck } from "lucide-react";
 import ProductDetailModal from "../ui/ProductDetailModal";
-import { getStoredProducts } from "../../utils/store";
+import { fetchProducts } from "../../utils/db";
 import type { Product } from "../../utils/store";
 
 export default function ProductCatalog() {
@@ -12,15 +12,22 @@ export default function ProductCatalog() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const updateProducts = () => {
-      const stored = getStoredProducts();
-      setProducts(stored);
+    const updateProducts = async () => {
+      try {
+        const stored = await fetchProducts();
+        setProducts(stored);
+      } catch (err) {
+        console.error("Failed to load products from database:", err);
+      }
     };
 
     updateProducts();
-    window.addEventListener("mahizham_products_updated", updateProducts);
+    
+    // Optional: Keep listening for custom events if the catalog needs to update dynamically in the same tab
+    const handleUpdateEvent = () => updateProducts();
+    window.addEventListener("mahizham_products_updated", handleUpdateEvent);
     return () =>
-      window.removeEventListener("mahizham_products_updated", updateProducts);
+      window.removeEventListener("mahizham_products_updated", handleUpdateEvent);
   }, []);
 
   const handleOpenModal = (product: Product) => {

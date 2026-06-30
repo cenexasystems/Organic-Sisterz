@@ -20,6 +20,25 @@ export interface Product {
   nutritionalInfo?: { label: string; value: string }[];
 }
 
+export interface Coupon {
+  code: string;
+  discount: number;
+  minOrder: number;
+  expiryDate?: string;
+  usageLimit?: number;
+  usedCount: number;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  mobile: string;
+  joinedDate: string;
+  role: 'Admin' | 'Customer';
+}
+
 export interface OrderItem {
   productId: string;
   name: string;
@@ -35,6 +54,7 @@ export interface Order {
   customerEmail: string;
   customerAddress: string;
   items: OrderItem[];
+  subtotal: number;
   totalPrice: number;
   status: 'Pending' | 'Processing' | 'Completed' | 'Cancelled';
   createdAt: string;
@@ -159,6 +179,7 @@ const initialOrders: Order[] = [
       { productId: 'herbal-hair-oil', name: 'Herbal Hair Oil', size: '200ml', price: 350, quantity: 2 },
       { productId: 'shikakai-powder', name: 'Herbal Shikakai Powder (Bio Hair Wash)', size: '250g', price: 280, quantity: 1 }
     ],
+    subtotal: 980,
     totalPrice: 980,
     status: 'Processing',
     createdAt: new Date(Date.now() - 3600000 * 24).toISOString() // 1 day ago
@@ -173,6 +194,7 @@ const initialOrders: Order[] = [
       { productId: 'face-pack-bath-powder', name: 'Face Pack & Bath Powder', size: '100g', price: 150, quantity: 1 },
       { productId: 'multi-millet-mix', name: 'Wellness Mix', size: '500g', price: 380, quantity: 2 }
     ],
+    subtotal: 910,
     totalPrice: 910,
     status: 'Pending',
     createdAt: new Date(Date.now() - 3600000 * 4).toISOString() // 4 hours ago
