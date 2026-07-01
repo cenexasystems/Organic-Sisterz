@@ -67,6 +67,8 @@ export interface Order {
   changeReturned?: number;
   isGift?: boolean;
   giftMessage?: string;
+  invoiceId?: string;
+  userId?: string;
 }
 
 // Exact product details and text from the packaging labels, plus the handwritten pricing
@@ -76,7 +78,7 @@ const initialProducts: Product[] = [
     name: 'Herbal Hair Oil',
     category: 'Hair Care',
     description: 'An ancient lipid formula infused with 40 premium traditional herbs including Amla, Neem, Vetiver, and Karisalankanni to arrest hair fall, stimulate growth, and cool the scalp.',
-    image: '/herbal-hair-oil.jpeg',
+    image: '/mahizham_hair_oil.png',
     herbs: 'Hibiscus, Rosemary, Rose Petals, Jatamansi Flax Seeds, Bhringraj, Amla, Alovera, Henna, Avuri, Fenugreek with unique & rare herbs.',
     tamilName: 'மூலிகை கூந்தல் எண்ணெய்',
     details: 'NO Chemicals\nArtificial Scents\nArtificial Flavours\n\nMRP : 220/-\nBest before 6 months from the Mfd.\nPacked & Marketed by :\nMahizham Natural Products Pvt. Ltd., Chennai\nEmail : caremahizham@gmail.com',
@@ -100,7 +102,7 @@ const initialProducts: Product[] = [
     name: 'Herbal Shikakai Powder (Bio Hair Wash)',
     category: 'Hair Care',
     description: 'A 100% natural, chemical-free foaming cleanser made from 40 select herbs like Shikakai, Arappu, Methi, and Hibiscus. Preserves natural oils and strengthens hair roots.',
-    image: '/herbal shikakai powder.jpeg',
+    image: '/mahizham_shikakai_powder.png',
     herbs: 'Shitakai, Methi Reetha, Avuri, Hibiscus, Green Garam, Vetiver, Aloe, Curry Leaves, Bringaraj, Neem,Amla, Kadukkai, Poolankizhangu, Avaram Flower,Rose Flower, Henna, Karisalankani With Unique and rare Herbs.',
     tamilName: 'சிகைக்காய் பொடி',
     details: 'Net Weight : 100 gm\nMRP : 140/-\nPacked & Marketed by :\nMahizham Natural Products\nEmail : caremahizham@gmail.com\nBest before 6 months from the date of packing',
@@ -121,7 +123,7 @@ const initialProducts: Product[] = [
     name: 'Face Pack & Bath Powder',
     category: 'Skin Care',
     description: 'A botanical daily bath powder blending 50 luxury herbs like Aavaram Senna, Wild Turmeric, Vetiver, and Red Sandalwood. Cleanses and softens skin without stripping lipids.',
-    image: '/face-pack-and-bath-powder.jpeg',
+    image: '/mahizham_bath_powder.png',
     herbs: 'Green Gram, Uraddhal, Wheat, Rosemary, Hibiscus,Manjista, Dhriviya Pattai, Neeradi Muthu, Badham, Kadukaai, Mahizham Flower, Shenbaga Flower, Dry Aloevera, Red Sandal, Beetroot Dry with unique & rare herbs.',
     tamilName: 'குளியல் பொடி & ஃபேஸ் பேக்',
     details: 'Net Weight : 100gm\nMRP : 180/-\nPacked & Marketed by :\nMahizham Natural Products Pvt. Ltd., Chennai\nEmail : caremahizham@gmail.com\nBest before 6 months from the date of packing',
@@ -144,7 +146,7 @@ const initialProducts: Product[] = [
     name: 'Wellness Mix',
     category: 'Nutrition',
     description: 'A nutrient-dense traditional health drink compounding 45 natural ingredients, roasted millets, and enriched with 15% nuts. Perfect daily energy porridge for all age groups.',
-    image: '/multi-millet-health-mix.jpeg',
+    image: '/mahizham_wellness_mix.png',
     herbs: 'Moongil Rice, Raagi, Red Rice, Thooyamalli Rice, Naattu Kambu, Saamai, Thinai, Kaatu Yanam, Mappillai Samba, Black Kavuni , Navara Rice, Kuthiraivaali, Moongdhal, Black Urad Dhal, Kuzhiadichan Rice, Kadaikani Rice, Panivaragu, Samba Wheat, Badham, Pista, Cashew, Black Channa, White Channa, Rajma,Kollu, Red Aval, Red Corn,Red Karamani, Makka Cholam, Elachi, Sukku, Fried Gram, Varagu, Barley, Javarasi, Flax Seed, Poongaar Rice, Karunkuravai Rice,Neelam Zamba, Pumpkin Seed, Kullakaar Rice, Soya Beans, Valan Zamba, Double Beans, Kudavazhai Rice',
     tamilName: 'சத்து மாவு',
     details: 'MRP : 220/-\nNET WEIGHT : 250gm\nBEST BEFORE : 6 Months\nBATCH NO. 13.06.2026\nPacked & Marketed by :\nMahizham Natural Products\nChennai\nContact : 87783 11671 / 98406 23527\nSTORAGE INSTRUCTION : Transfer the contents Into a clean dry airtight container & Refrigerate.',
