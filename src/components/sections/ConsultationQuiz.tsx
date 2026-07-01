@@ -79,36 +79,36 @@ export default function ConsultationQuiz({ isOpen, onClose }: ConsultationQuizPr
     }
   };
 
-  const generateDiagnosis = () => {
-    const concern = answers[2]; // concern value
-    let recommendation = {
-      product: "Herbal Hair Oil",
-      routine: "Apply a small quantity directly to hair roots and scalp. Massage gently in circular motions, leave on for 10 to 15 minutes, then wash off.",
-      actives: "Amla, Neem, Vetiver & Karisalankanni (40 Herbs)",
-      focus: "Arresting active hair fall, cooling scalp tension, and nourishing deep hair roots.",
-      efficacy: "42% increase in hair density, 99% organic bioavailability",
-      image: "/herbal-hair-oil.jpeg"
-    };
-
-    if (concern === "dryness" || concern === "sebum") {
-      recommendation = {
-        product: "Herbal Shikakai Powder (Bio Hair Wash)",
-        routine: "Take a small quantity of Shikakai powder, mix with water to form a smooth paste. Apply evenly to wet hair and scalp, massage gently, wait 10 minutes, and rinse thoroughly.",
-        actives: "Shikakai, Arappu, Methi, Amla & Hibiscus (40 Herbs)",
-        focus: "Mild natural foaming cleansing, balancing scalp sebum pH, and eradicating active dandruff flakes.",
-        efficacy: "100% sulfate-free organic wash, natural anti-dandruff protection",
-        image: "/herbal shikakai powder.jpeg"
+    const generateDiagnosis = () => {
+      const concern = answers[2]; // concern value
+      let recommendation = {
+        product: "Herbal Hair Oil",
+        routine: "Apply a small quantity directly to hair roots and scalp. Massage gently in circular motions, leave on for 10 to 15 minutes, then wash off.",
+        actives: "Amla, Neem, Vetiver & Karisalankanni (40 Herbs)",
+        focus: "Arresting active hair fall, cooling scalp tension, and nourishing deep hair roots.",
+        efficacy: "42% increase in hair density, 99% organic bioavailability",
+        image: "/mahizham_hair_oil.png"
       };
-    } else if (concern === "breakage") {
-      recommendation = {
-        product: "Face Pack & Bath Powder",
-        routine: "Mix powder with water or coconut oil to form a paste. Apply to skin or face, let sit for 10 minutes, and rinse off. Safe to use daily in place of soap.",
-        actives: "Aavaram Senna, Wild Turmeric, Vetiver & Red Sandal (50 Herbs)",
-        focus: "Deep skin barrier cleansing, clearing acne/pimples, tan removal, and skin softening.",
-        efficacy: "65% accelerated skin lipid replenishment, 100% soap-free daily wash",
-        image: "/face-pack-and-bath-powder.jpeg"
-      };
-    }
+  
+      if (concern === "dryness" || concern === "sebum") {
+        recommendation = {
+          product: "Herbal Shikakai Powder (Bio Hair Wash)",
+          routine: "Take a small quantity of Shikakai powder, mix with water to form a smooth paste. Apply evenly to wet hair and scalp, massage gently, wait 10 minutes, and rinse thoroughly.",
+          actives: "Shikakai, Arappu, Methi, Amla & Hibiscus (40 Herbs)",
+          focus: "Mild natural foaming cleansing, balancing scalp sebum pH, and eradicating active dandruff flakes.",
+          efficacy: "100% sulfate-free organic wash, natural anti-dandruff protection",
+          image: "/mahizham_shikakai_powder.png"
+        };
+      } else if (concern === "breakage") {
+        recommendation = {
+          product: "Face Pack & Bath Powder",
+          routine: "Mix powder with water or coconut oil to form a paste. Apply to skin or face, let sit for 10 minutes, and rinse off. Safe to use daily in place of soap.",
+          actives: "Aavaram Senna, Wild Turmeric, Vetiver & Red Sandal (50 Herbs)",
+          focus: "Deep skin barrier cleansing, clearing acne/pimples, tan removal, and skin softening.",
+          efficacy: "65% accelerated skin lipid replenishment, 100% soap-free daily wash",
+          image: "/mahizham_bath_powder.png"
+        };
+      }
 
     setResult(recommendation);
   };
