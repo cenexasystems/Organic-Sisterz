@@ -196,7 +196,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
             data-lenis-prevent
-            className="relative bg-white w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh] z-10 border border-outline-variant/20"
+            className="relative bg-white w-full max-w-6xl rounded-3xl overflow-y-auto md:overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh] z-10 border border-outline-variant/20"
           >
             {/* Close Button */}
             <button
@@ -219,7 +219,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
               </div>
 
               {/* Main Product Image Card */}
-              <div className="relative h-60 sm:h-72 md:h-auto md:aspect-square w-full rounded-2xl overflow-hidden border border-outline-variant/35 bg-white p-6 shadow-sm flex items-center justify-center my-auto group">
+              <div className="relative h-48 sm:h-64 md:h-auto md:aspect-square w-full rounded-2xl overflow-hidden border border-outline-variant/35 bg-white p-6 shadow-sm flex items-center justify-center my-auto group">
                 <img
                   src={product.image}
                   alt={product.name}
@@ -243,9 +243,9 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             </div>
 
             {/* Right Column: details and specifications */}
-            <div className="w-full md:w-1/2 flex flex-col overflow-hidden bg-white">
+            <div className="w-full md:w-1/2 flex flex-col md:overflow-hidden bg-white shrink-0">
               {/* Scrolling details content */}
-              <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6">
+              <div className="flex-1 md:overflow-y-auto overflow-visible p-6 md:p-10 space-y-6">
                 {/* Green Subtitle & Title */}
                 <div className="space-y-2">
                   <span className="font-body text-xs font-bold text-secondary tracking-widest uppercase block">
@@ -334,18 +334,18 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                 </div>
 
                 {/* Grid of 4 Attributes */}
-                <div className="grid grid-cols-2 gap-4 mt-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-8">
                   {spec.features.map((feat, index) => (
                     <div 
                       key={index} 
-                      className="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/15 flex gap-3 items-center"
+                      className="p-3 sm:p-4 bg-surface-container-low rounded-2xl border border-outline-variant/15 flex gap-3 items-center min-w-0"
                     >
                       <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
                         {renderIcon(feat.icon)}
                       </div>
-                      <div>
-                        <span className="block font-display text-xs font-bold text-primary">{feat.title}</span>
-                        <span className="block font-body text-[10px] text-on-surface-variant">{feat.subtitle}</span>
+                      <div className="min-w-0">
+                        <span className="block font-display text-xs font-bold text-primary break-words">{feat.title}</span>
+                        <span className="block font-body text-[10px] text-on-surface-variant break-words">{feat.subtitle}</span>
                       </div>
                     </div>
                   ))}
@@ -510,7 +510,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                 </div>
               </div>
               {/* Bottom Sticky Action Bar */}
-              <div className="p-6 md:px-10 md:py-6 border-t border-outline-variant/20 flex flex-col sm:flex-row gap-4 items-center justify-between bg-[#FAF9F5]/40 backdrop-blur-sm shrink-0">
+              <div className="p-6 md:px-10 md:py-6 border-t border-outline-variant/20 flex flex-col sm:flex-row gap-4 items-center justify-between bg-[#FAF9F5] md:bg-[#FAF9F5]/40 backdrop-blur-sm shrink-0 sticky bottom-0 z-20">
                 <div>
                   <span className="text-[10px] font-bold text-on-surface-variant/70 uppercase block">Total</span>
                   <span className="font-display text-2xl font-extrabold text-primary">₹{currentPrice}</span>

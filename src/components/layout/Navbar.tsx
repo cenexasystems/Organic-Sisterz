@@ -142,11 +142,45 @@ export default function Navbar({
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const navLinks = [
+    { name: "Home", href: "/#hero", id: "hero" },
     { name: "Products", href: "/#products-catalog", id: "products-catalog" },
     { name: "Results", href: "/#before-after", id: "before-after" },
     { name: "Story", href: "/#herbarium", id: "herbarium" },
     { name: "Reviews", href: "/#testimonials", id: "testimonials" },
   ];
+
+  // Handle hash scrolling on page load/navigate
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const id = hash.substring(1);
+      const timer = setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        } else if (id === "hero") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }, 300); // give it a moment to render/initialize Lenis
+      return () => clearTimeout(timer);
+    }
+  }, [window.location.hash, window.location.pathname]);
+
+  const handleNavLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, link: typeof navLinks[0]) => {
+    e.preventDefault();
+    if (window.location.pathname === "/") {
+      const targetId = link.id;
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      } else if (targetId === "hero") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } else {
+      navigate(link.href);
+    }
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -175,6 +209,7 @@ export default function Navbar({
               <a
                 key={link.name}
                 href={link.href}
+                onClick={(e) => handleNavLinkClick(e, link)}
                 className={`relative font-body text-[10px] font-bold tracking-[0.2em] uppercase transition-colors duration-300 py-1.5 ${
                   link.id === activeSection
                     ? "text-primary"
@@ -252,7 +287,7 @@ export default function Navbar({
                   <a
                     key={link.name}
                     href={link.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={(e) => handleNavLinkClick(e, link)}
                     className={`font-body text-sm font-semibold tracking-widest uppercase py-2 ${
                       link.id === activeSection
                         ? "text-primary font-bold"
