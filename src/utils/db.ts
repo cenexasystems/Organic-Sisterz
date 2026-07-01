@@ -150,17 +150,29 @@ export async function insertWhatsappRequest(order: Omit<Order, 'id' | 'createdAt
 export async function fetchWhatsappRequests() {
   const { data, error } = await supabase.from('whatsapp_requests').select('*').order('created_at', { ascending: false });
   if (error) throw error;
-  return data.map(o => ({
-    id: o.id,
-    customerName: o.customer_name,
-    customerPhone: o.customer_phone,
-    customerEmail: o.customer_email,
-    customerAddress: o.customer_address,
-    items: o.items,
-    totalPrice: o.total_price,
-    status: o.status,
-    createdAt: o.created_at
-  }));
+  return (data || []).map(o => {
+    let parsedItems: any[] = [];
+    try {
+      if (Array.isArray(o.items)) {
+        parsedItems = o.items;
+      } else if (typeof o.items === 'string') {
+        parsedItems = JSON.parse(o.items);
+      }
+    } catch (e) {
+      console.error("Failed to parse whatsapp request items:", e);
+    }
+    return {
+      id: o.id,
+      customerName: o.customer_name,
+      customerPhone: o.customer_phone,
+      customerEmail: o.customer_email,
+      customerAddress: o.customer_address,
+      items: parsedItems,
+      totalPrice: typeof o.total_price === 'number' ? o.total_price : parseFloat(o.total_price || '0'),
+      status: o.status || 'Pending',
+      createdAt: o.created_at
+    };
+  });
 }
 
 export async function updateWhatsappRequestStatus(id: string, status: string) {
@@ -186,17 +198,29 @@ export async function insertGiftRequest(senderName: string, recipientName: strin
 export async function fetchGiftRequests() {
   const { data, error } = await supabase.from('gift_requests').select('*').order('created_at', { ascending: false });
   if (error) throw error;
-  return data.map(o => ({
-    id: o.id,
-    senderName: o.sender_name,
-    recipientName: o.recipient_name,
-    recipientPhone: o.customer_phone,
-    giftMessage: o.message,
-    items: o.items,
-    totalPrice: o.total_price,
-    status: o.status,
-    createdAt: o.created_at
-  }));
+  return (data || []).map(o => {
+    let parsedItems: any[] = [];
+    try {
+      if (Array.isArray(o.items)) {
+        parsedItems = o.items;
+      } else if (typeof o.items === 'string') {
+        parsedItems = JSON.parse(o.items);
+      }
+    } catch (e) {
+      console.error("Failed to parse gift request items:", e);
+    }
+    return {
+      id: o.id,
+      senderName: o.sender_name,
+      recipientName: o.recipient_name,
+      recipientPhone: o.customer_phone,
+      giftMessage: o.message,
+      items: parsedItems,
+      totalPrice: typeof o.total_price === 'number' ? o.total_price : parseFloat(o.total_price || '0'),
+      status: o.status || 'Pending',
+      createdAt: o.created_at
+    };
+  });
 }
 
 export async function updateGiftRequestStatus(id: string, status: string) {
@@ -208,25 +232,37 @@ export async function updateGiftRequestStatus(id: string, status: string) {
 export async function fetchOrders() {
   const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
   if (error) throw error;
-  return data.map(o => ({
-    id: o.id,
-    customerName: o.customer_name,
-    customerPhone: o.customer_phone,
-    customerEmail: "",
-    customerAddress: o.source === 'OFFLINE' ? 'Offline POS Shop' : 'Online Shipping Address',
-    source: o.source,
-    items: o.items,
-    subtotal: o.subtotal,
-    couponCode: o.coupon_code,
-    couponDiscount: o.coupon_discount,
-    manualDiscount: o.manual_discount,
-    deliveryCharge: o.delivery_charge,
-    totalPrice: o.total_price,
-    cashReceived: o.cash_received,
-    changeReturned: o.change_returned,
-    status: o.status,
-    createdAt: o.created_at
-  }));
+  return (data || []).map(o => {
+    let parsedItems: any[] = [];
+    try {
+      if (Array.isArray(o.items)) {
+        parsedItems = o.items;
+      } else if (typeof o.items === 'string') {
+        parsedItems = JSON.parse(o.items);
+      }
+    } catch (e) {
+      console.error("Failed to parse official order items:", e);
+    }
+    return {
+      id: o.id,
+      customerName: o.customer_name,
+      customerPhone: o.customer_phone,
+      customerEmail: "",
+      customerAddress: o.source === 'OFFLINE' ? 'Offline POS Shop' : 'Online Shipping Address',
+      source: o.source,
+      items: parsedItems,
+      subtotal: typeof o.subtotal === 'number' ? o.subtotal : parseFloat(o.subtotal || '0'),
+      couponCode: o.coupon_code,
+      couponDiscount: typeof o.coupon_discount === 'number' ? o.coupon_discount : parseFloat(o.coupon_discount || '0'),
+      manualDiscount: typeof o.manual_discount === 'number' ? o.manual_discount : parseFloat(o.manual_discount || '0'),
+      deliveryCharge: typeof o.delivery_charge === 'number' ? o.delivery_charge : parseFloat(o.delivery_charge || '0'),
+      totalPrice: typeof o.total_price === 'number' ? o.total_price : parseFloat(o.total_price || '0'),
+      cashReceived: typeof o.cash_received === 'number' ? o.cash_received : parseFloat(o.cash_received || '0'),
+      changeReturned: typeof o.change_returned === 'number' ? o.change_returned : parseFloat(o.change_returned || '0'),
+      status: o.status || 'Completed',
+      createdAt: o.created_at
+    };
+  });
 }
 
 export async function insertOrder(order: any) {

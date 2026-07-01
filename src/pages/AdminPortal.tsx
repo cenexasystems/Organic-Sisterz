@@ -74,6 +74,7 @@ export default function AdminPortal() {
   // Filter state for dashboard/whatsapp center
   const [periodFilter, setPeriodFilter] = useState<'all' | 'today' | 'week' | 'month' | 'year' | 'custom'>('all');
   const [whatsappSearch, setWhatsappSearch] = useState('');
+  const [giftSearch, setGiftSearch] = useState('');
   const [whatsappCustomStart, setWhatsappCustomStart] = useState('');
   const [whatsappCustomEnd, setWhatsappCustomEnd] = useState('');
 
@@ -116,6 +117,40 @@ export default function AdminPortal() {
   // Gift requests and Whatsapp requests state
   const [whatsappRequests, setWhatsappRequests] = useState<any[]>([]);
   const [giftRequests, setGiftRequests] = useState<any[]>([]);
+
+  // Helper to generate Invoice ID for WhatsApp requests
+  const getWhatsAppInvoice = (orderId: string) => {
+    const index = whatsappRequests.findIndex(r => r.id === orderId);
+    if (index === -1) return "ORD-2026-0000";
+    const seq = whatsappRequests.length - index;
+    const seqStr = String(seq).padStart(4, '0');
+    const request = whatsappRequests[index];
+    const year = request.createdAt ? new Date(request.createdAt).getFullYear() : 2026;
+    return `ORD-${year}-${seqStr}`;
+  };
+
+  // Helper to generate Invoice ID for Gift requests
+  const getGiftInvoice = (giftId: string) => {
+    const index = giftRequests.findIndex(g => g.id === giftId);
+    if (index === -1) return "GIFT-2026-0000";
+    const seq = giftRequests.length - index;
+    const seqStr = String(seq).padStart(4, '0');
+    const gift = giftRequests[index];
+    const year = gift.createdAt ? new Date(gift.createdAt).getFullYear() : 2026;
+    return `GIFT-${year}-${seqStr}`;
+  };
+
+  // Filtered Gift requests
+  const filteredGiftRequests = giftRequests.filter(g => {
+    if (!giftSearch.trim()) return true;
+    const term = giftSearch.toLowerCase();
+    const senderMatch = g.senderName?.toLowerCase().includes(term) || g.senderMobile?.toLowerCase().includes(term);
+    const recipientMatch = g.recipientName?.toLowerCase().includes(term) || g.recipientPhone?.toLowerCase().includes(term) || g.recipientAddress?.toLowerCase().includes(term);
+    const invoiceId = getGiftInvoice(g.id);
+    const invoiceMatch = invoiceId.toLowerCase().includes(term);
+    const productsMatch = g.items?.some((it: any) => it.name?.toLowerCase().includes(term));
+    return senderMatch || recipientMatch || invoiceMatch || productsMatch;
+  });
 
   const loadData = async () => {
     try {
@@ -1191,6 +1226,7 @@ export default function AdminPortal() {
                       <table className="w-full text-left text-sm min-w-[900px]">
                         <thead>
                           <tr className="bg-surface-container-low text-primary font-bold border-b border-outline-variant/25">
+                            <th className="px-6 py-5">Invoice</th>
                             <th className="px-6 py-5">Customer</th>
                             <th className="px-6 py-5">Phone</th>
                             <th className="px-6 py-5">Address</th>
@@ -1205,6 +1241,7 @@ export default function AdminPortal() {
                           {filteredOrdersList.map(o => (
                             <Fragment key={o.id}>
                               <tr className="hover:bg-[#FAF9F5]/20 transition-colors">
+                                <td className="px-6 py-5 font-bold text-primary">{getWhatsAppInvoice(o.id)}</td>
                                 <td className="px-6 py-5 font-semibold text-primary">{o.customerName}</td>
                                 <td className="px-6 py-5 font-medium">{o.customerPhone.split('_')[0]}</td>
                                 <td className="px-6 py-5 max-w-xs truncate text-on-surface-variant">{o.customerAddress}</td>
@@ -1261,7 +1298,7 @@ export default function AdminPortal() {
                               </tr>
                               {expandedOrderId === o.id && (
                                 <tr className="bg-white">
-                                  <td colSpan={8} className="px-8 py-6 border-b border-outline-variant/20 bg-white">
+                                  <td colSpan={9} className="px-8 py-6 border-b border-outline-variant/20 bg-white">
                                     <div className="border border-outline-variant/30 rounded-2xl p-6 space-y-6 text-left">
                                       {/* Row 1: Name, Phone, Address */}
                                       <div className="text-sm font-semibold text-[#1F2937] flex flex-wrap gap-x-6 gap-y-2 pb-4 border-b border-outline-variant/10">
@@ -2474,15 +2511,29 @@ export default function AdminPortal() {
             {/* TAB: GIFTS RECEIVED */}
             {activeTab === 'gifts' && (
               <div className="space-y-6 w-full">
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-primary font-poppins">Gifts Received</h1>
-                  <p className="text-sm text-on-surface-variant mt-1 font-medium">
-                    Track and manage gift orders sent from customers to their loved ones.
-                  </p>
+                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                  <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-primary font-poppins">Gifts Received</h1>
+                    <p className="text-sm text-on-surface-variant mt-1 font-medium">
+                      Track and manage gift orders sent from customers to their loved ones.
+                    </p>
+                  </div>
+                  
+                  {/* Styled Search Bar matching theme */}
+                  <div className="relative w-full md:w-64">
+                    <Search className="w-4 h-4 text-[#2B3E2F] absolute left-4 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search gifts..."
+                      value={giftSearch}
+                      onChange={(e) => setGiftSearch(e.target.value)}
+                      className="pl-11 pr-4 py-2.5 bg-[#F5F2EB] border border-[#2B3E2F]/30 hover:border-[#2B3E2F]/60 focus:border-[#2B3E2F] rounded-full text-xs font-semibold focus:outline-none w-full text-primary shadow-sm"
+                    />
+                  </div>
                 </div>
                 
                 <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
-                  {giftRequests.length === 0 ? (
+                  {filteredGiftRequests.length === 0 ? (
                     <div className="p-12 text-center text-on-surface-variant text-sm italic">
                       No gift orders found.
                     </div>
@@ -2498,9 +2549,9 @@ export default function AdminPortal() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-outline-variant/10">
-                        {giftRequests.map(o => (
+                        {filteredGiftRequests.map(o => (
                           <tr key={o.id} className="hover:bg-[#FAF9F5]/40 transition-colors">
-                            <td className="px-6 py-4 font-bold text-primary">{o.id}</td>
+                            <td className="px-6 py-4 font-bold text-primary">{getGiftInvoice(o.id)}</td>
                             <td className="px-6 py-4">
                                                               <div className="font-semibold text-primary">{o.recipientName}</div>
                                                               <div className="text-xs text-on-surface-variant mt-0.5">{o.recipientPhone} | Gift from: {o.senderName}</div>

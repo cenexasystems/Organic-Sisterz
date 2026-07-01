@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Gift, Sparkles, Check, Heart, Plus, Minus, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Gift, Sparkles, Check, Heart, Plus, Minus, MessageSquare, X, ChevronDown, Trash2 } from 'lucide-react';
 import { fetchProducts, insertGiftRequest } from '../utils/db';
 import type { Product } from '../utils/store';
 import ProductDetailModal from '../components/ui/ProductDetailModal';
@@ -47,8 +47,12 @@ export default function GiftCustomization() {
     setSelectedProducts(prev => {
       const next = { ...prev };
       if (next[id]) {
-        const newQuantity = Math.max(1, next[id].quantity + delta);
-        next[id] = { ...next[id], quantity: newQuantity };
+        const newQuantity = next[id].quantity + delta;
+        if (newQuantity <= 0) {
+          delete next[id];
+        } else {
+          next[id] = { ...next[id], quantity: newQuantity };
+        }
       }
       return next;
     });
@@ -198,6 +202,18 @@ export default function GiftCustomization() {
                             : 'bg-white border-outline-variant/30 hover:border-[#1B3022]/30 hover:shadow-sm'
                         }`}
                       >
+                        {isSelected && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleProduct(product);
+                            }}
+                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center transition-all duration-300 cursor-pointer z-10 shadow-sm"
+                            title="Discard from Gift Box"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                         <div 
                           className="flex flex-col items-center w-full"
                         >
@@ -223,16 +239,21 @@ export default function GiftCustomization() {
                         {isSelected ? (
                           <div className="flex flex-col gap-2 mt-2 w-full px-2">
                             {product.sizes.length > 1 && (
-                              <select 
-                                value={selectedProducts[product.id].size}
-                                onChange={(e) => updateSize(product.id, e.target.value)}
-                                onClick={e => e.stopPropagation()}
-                                className="w-full bg-white/20 border border-white/30 rounded-lg text-xs p-1.5 text-white font-body focus:outline-none appearance-none text-center cursor-pointer hover:bg-white/30 transition-colors"
-                              >
-                                {product.sizes.map(s => (
-                                  <option key={s.size} value={s.size} className="text-[#1B3022]">{s.size} - ₹{s.price}</option>
-                                ))}
-                              </select>
+                              <div className="relative w-full">
+                                <select 
+                                  value={selectedProducts[product.id].size}
+                                  onChange={(e) => updateSize(product.id, e.target.value)}
+                                  onClick={e => e.stopPropagation()}
+                                  className="w-full bg-white/20 border border-white/30 rounded-lg text-xs py-1.5 pl-3 pr-8 text-white font-body focus:outline-none appearance-none text-left cursor-pointer hover:bg-white/30 transition-colors"
+                                >
+                                  {product.sizes.map(s => (
+                                    <option key={s.size} value={s.size} className="text-[#1B3022]">{s.size} - ₹{s.price}</option>
+                                  ))}
+                                </select>
+                                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-white/70">
+                                  <ChevronDown className="w-3.5 h-3.5" />
+                                </div>
+                              </div>
                             )}
                             <div className="flex items-center justify-between bg-white/10 p-1.5 rounded-full border border-white/20">
                               <button onClick={(e) => { e.stopPropagation(); updateQuantity(product.id, -1); }} className="w-6 h-6 rounded-full bg-white text-[#1B3022] flex items-center justify-center hover:bg-[#D4AF37] transition-colors"><Minus className="w-3 h-3" /></button>
@@ -251,6 +272,79 @@ export default function GiftCustomization() {
                       </div>
                     );
                   })}
+                </div>
+
+                {/* Gift Box Basket Summary */}
+                {Object.keys(selectedProducts).length > 0 && (
+                  <div className="bg-white p-6 rounded-[20px] border border-outline-variant/30 mt-4 shadow-sm space-y-4">
+                    <h4 className="font-display text-sm font-bold text-[#1B3022] uppercase tracking-wider border-b border-outline-variant/20 pb-3">
+                      Your Gift Box Basket
+                    </h4>
+                    <div className="space-y-3.5 max-h-60 overflow-y-auto pr-1">
+                      {Object.entries(selectedProducts).map(([id, data]) => {
+                        const product = products.find(p => p.id === id);
+                        if (!product) return null;
+                        return (
+                          <div key={id} className="flex items-center justify-between gap-4 p-3 rounded-xl bg-[#FAF9F5] border border-outline-variant/10 hover:shadow-sm transition-all duration-300">
+                            {/* Left: Product Info */}
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-12 h-12 bg-white rounded-lg border border-outline-variant/20 flex items-center justify-center p-1.5 shrink-0">
+                                <img src={data.image} alt={product.name} className="max-w-full max-h-full object-contain" />
+                              </div>
+                              <div className="min-w-0">
+                                <h5 className="font-display font-bold text-xs text-[#1B3022] truncate">{product.name}</h5>
+                                <span className="block text-[9px] text-[#6B7280] font-bold uppercase tracking-wider mt-0.5">
+                                  Size: {data.size} • Qty: {data.quantity}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            {/* Right: Price & Delete */}
+                            <div className="flex items-center gap-4 shrink-0">
+                              <span className="font-display font-extrabold text-sm text-[#1B3022]">
+                                ₹{data.price * data.quantity}
+                              </span>
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  setSelectedProducts(prev => {
+                                    const next = { ...prev };
+                                    delete next[id];
+                                    return next;
+                                  });
+                                }}
+                                className="text-[#EF4444] hover:text-red-700 transition-colors p-1 cursor-pointer"
+                                title="Remove from Gift Box"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="3 6 5 6 21 6"></polyline>
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Gift Subtotal / Total Amount Display */}
+                <div className="bg-white p-6 rounded-[20px] border border-outline-variant/30 mt-4 flex justify-between items-center shadow-sm">
+                  <div>
+                    <span className="block font-display text-[10px] font-bold text-[#1B3022]/60 uppercase tracking-[0.15em] mb-1">
+                      Total Amount ({Object.values(selectedProducts).reduce((sum, p) => sum + p.quantity, 0)} items)
+                    </span>
+                    <span className="font-display text-2xl font-extrabold text-[#1B3022]">
+                      ₹{Object.entries(selectedProducts).reduce((sum, [_, data]) => sum + data.price * data.quantity, 0)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[#1B3022]">
+                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                    <span>Free Premium Packaging</span>
+                  </div>
                 </div>
               </div>
 
