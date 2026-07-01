@@ -24,7 +24,7 @@ const ingredients: Ingredient[] = [
     bioavailability: "96%",
     clinicalBenefit:
       "Mild natural surfactant that cleanses scalp build-up while preserving healthy follicle lipids.",
-    image: "/herbarium-shikakai.jpg",
+    image: "/shikaki.jpeg",
     details:
       "Shikakai (literally meaning \"fruit for hair\") has been India's premier hair wash for centuries. The bark and pods contain natural saponins which lather mildly when mixed with water. It dissolves sebum, prevents dandruff, and conditions the cuticle without stripping the scalp's delicate acid mantle.",
   },
@@ -37,7 +37,7 @@ const ingredients: Ingredient[] = [
     bioavailability: "94%",
     clinicalBenefit:
       "Soothes sunburn, eliminates dark spots, and reduces skin pigmentation naturally.",
-    image: "/herbarium-senna.jpg",
+    image: "/avaram_senna.jpeg",
     details:
       "Aavaram Senna (Aavarampoo) is a brilliant golden-yellow flower celebrated for its skin hydrating properties. Our low-temperature vacuum milling ensures its polyphenolic antioxidants remain stable, allowing them to treat acne, prevent body odor, and clear facial tan when used daily.",
   },
@@ -50,7 +50,7 @@ const ingredients: Ingredient[] = [
     bioavailability: "98%",
     clinicalBenefit:
       "Neutralizes root oxidative stress, delaying premature greying and strengthening the keratin sheath.",
-    image: "/herbarium-amla.jpg",
+    image: "/amla.jpeg",
     details:
       "Amla is a powerful organic source of Vitamin C. It strengthens hair follicles from within by promoting collagen synthesis, helping to keep hair roots firmly anchored while maintaining natural dark pigment cells.",
   },
@@ -63,7 +63,7 @@ const ingredients: Ingredient[] = [
     bioavailability: "92%",
     clinicalBenefit:
       "Regulates skin sebum, suppresses acne-causing pathogens, and brightens complexion.",
-    image: "/herbarium-kasthuri.jpg",
+    image: "/kasturi_manjal.jpeg",
     details:
       "Wild Turmeric (Kasthuri Manjal) is renowned for its cosmetic efficacy. Unlike cooking turmeric, it does not stain the skin yellow. It acts as a powerful natural antibiotic and anti-inflammatory, resolving deep acne and protecting the skin barrier.",
   },
@@ -102,7 +102,6 @@ export default function Herbarium() {
           {ingredients.map((ingredient) => (
             <motion.div
               key={ingredient.id}
-              layoutId={`card-${ingredient.id}`}
               onClick={() => setSelectedIngredient(ingredient)}
               whileHover={{ y: -6, scale: 1.02 }}
               transition={{ duration: 0.3 }}
@@ -150,7 +149,10 @@ export default function Herbarium() {
               {/* Modal Container */}
               <div className="fixed inset-0 flex items-center justify-center p-4 z-50 pointer-events-none">
                 <motion.div
-                  layoutId={`card-${selectedIngredient.id}`}
+                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                  transition={{ duration: 0.3 }}
                   className="bg-white rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/30 w-full max-w-4xl h-[90vh] md:h-auto max-h-[85vh] flex flex-col md:flex-row pointer-events-auto relative"
                 >
                   <button
@@ -160,14 +162,13 @@ export default function Herbarium() {
                     <X className="w-5 h-5" />
                   </button>
 
-                  {/* Left Column: Image/Visual */}
-                  <div className="w-full md:w-1/2 relative h-48 md:h-auto min-h-[250px]">
+                  {/* Left Column: Image/Visual (No-zoom containment) */}
+                  <div className="w-full md:w-1/2 bg-[#FAF9F6] flex items-center justify-center p-6 h-64 md:h-auto min-h-[300px]">
                     <img
                       src={selectedIngredient.image}
                       alt={selectedIngredient.name}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="max-w-full max-h-full object-contain rounded-2xl shadow-sm"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-white via-transparent to-transparent md:from-transparent" />
                   </div>
 
                   {/* Right Column: Scientific Details */}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, User, LogOut, Leaf, ShoppingBag, Settings } from 'lucide-react';
-import { fetchWhatsappRequests } from '../utils/db';
+import { fetchWhatsappRequests, fetchGiftRequests } from '../utils/db';
 import type { Order } from '../utils/store';
 import { useAuth } from '../hooks/useAuth';
 
@@ -15,16 +15,57 @@ export default function CustomerProfile() {
   useEffect(() => {
     const fetchOrdersData = async () => {
       try {
-        const storedOrders = await fetchWhatsappRequests() as unknown as Order[];
-        if (user?.email) {
-          // Find orders matching user email or prefix
-          const userOrders = storedOrders.filter(o => 
-            o.customerEmail === user.email || 
-            (o.customerName && o.customerName.toLowerCase().includes((user.email || '').split('@')[0].toLowerCase()))
+        const [storedOrders, storedGifts] = await Promise.all([
+          fetchWhatsappRequests() as unknown as Order[],
+          fetchGiftRequests()
+        ]);
+
+        // Normalize gift requests to fit Order structure for rendering
+        const normalizedGifts = storedGifts.map((g, idx) => {
+          const seq = storedGifts.length - idx;
+          const seqStr = String(seq).padStart(4, '0');
+          const year = g.createdAt ? new Date(g.createdAt).getFullYear() : 2026;
+          return {
+            id: g.id,
+            invoiceId: `GIFT-${year}-${seqStr}`,
+            customerName: `${g.senderName} (Gift to ${g.recipientName})`,
+            customerPhone: g.recipientPhone,
+            customerEmail: '',
+            customerAddress: `Recipient: ${g.recipientName}\nAddress: ${g.giftMessage}`, // Store gift-specific info
+            items: g.items,
+            totalPrice: g.totalPrice,
+            status: g.status as any,
+            createdAt: g.createdAt,
+            userId: g.userId,
+            isGift: true
+          };
+        });
+
+        const normalizedWhatsapps = storedOrders.map((o, idx) => {
+          const seq = storedOrders.length - idx;
+          const seqStr = String(seq).padStart(4, '0');
+          const year = o.createdAt ? new Date(o.createdAt).getFullYear() : 2026;
+          return {
+            ...o,
+            invoiceId: `ORD-${year}-${seqStr}`
+          };
+        });
+
+        const combined = [...normalizedWhatsapps, ...normalizedGifts] as any[];
+
+        if (user) {
+          const emailPrefix = user.email ? user.email.split('@')[0].toLowerCase() : '';
+          const userOrders = combined.filter(o => 
+            (o.userId && o.userId === user.id) ||
+            (o.customerEmail && user.email && o.customerEmail === user.email) || 
+            (o.customerName && emailPrefix && o.customerName.toLowerCase().includes(emailPrefix))
           );
+          
+          userOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           setOrders(userOrders);
         } else {
-          setOrders(storedOrders);
+          combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          setOrders(combined);
         }
       } catch (err) {
         console.error("Failed to load user orders:", err);
@@ -37,6 +78,20 @@ export default function CustomerProfile() {
   const handleLogout = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const handleReorder = (items: any[]) => {
+    if (!items || items.length === 0) return;
+    const cartItems = items.map(it => ({
+      productId: it.productId,
+      name: it.name,
+      size: it.size,
+      price: Number(it.price) || 0,
+      quantity: Number(it.quantity) || 1
+    }));
+    localStorage.setItem('mahizham_cart', JSON.stringify(cartItems));
+    window.dispatchEvent(new Event("cart_updated"));
+    navigate('/cart');
   };
 
   return (
@@ -135,11 +190,20 @@ export default function CustomerProfile() {
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-8">
                           <div>
                             <span className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Order Placed</span>
-                            <span className="text-sm font-semibold text-primary">{new Date(order.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
+                            <span className="text-sm font-semibold text-primary">
+                              {(() => {
+                                try {
+                                  const d = new Date(order.createdAt);
+                                  return isNaN(d.getTime()) ? "—" : d.toLocaleDateString(undefined, { dateStyle: 'medium' });
+                                } catch (e) {
+                                  return "—";
+                                }
+                              })()}
+                            </span>
                           </div>
                           <div>
                             <span className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Total</span>
-                            <span className="text-sm font-bold text-primary">₹{order.totalPrice.toFixed(2)}</span>
+                            <span className="text-sm font-bold text-primary">₹{(Number(order.totalPrice) || 0).toFixed(2)}</span>
                           </div>
                           <div>
                             <span className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Ship To</span>
@@ -148,7 +212,7 @@ export default function CustomerProfile() {
                         </div>
                         <div className="text-left sm:text-right">
                           <span className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Order #</span>
-                          <span className="text-sm font-bold text-primary">{order.id}</span>
+                          <span className="text-sm font-bold text-primary">{order.invoiceId || order.id}</span>
                         </div>
                       </div>
 
@@ -161,7 +225,7 @@ export default function CustomerProfile() {
                           </div>
                           
                           <div className="space-y-4">
-                            {order.items.map((item, idx) => (
+                            {(order.items || []).map((item, idx) => (
                               <div key={idx} className="flex items-center gap-4">
                                 <div className="w-16 h-16 rounded-xl bg-[#FAF9F5] border border-outline-variant/30 flex items-center justify-center shrink-0">
                                   <Leaf className="w-6 h-6 text-[#2B3E2F]/40" />
@@ -176,11 +240,11 @@ export default function CustomerProfile() {
                         </div>
 
                         <div className="w-full md:w-48 shrink-0 flex flex-col gap-3">
-                          <button className="w-full bg-[#FAF9F5] border border-outline-variant/50 hover:bg-[#1B3022] hover:text-white hover:border-[#1B3022] text-[#1B3022] text-xs font-bold tracking-widest uppercase py-3 rounded-xl transition-all cursor-pointer">
+                          <button 
+                            onClick={() => handleReorder(order.items)}
+                            className="w-full bg-[#FAF9F5] border border-outline-variant/50 hover:bg-[#1B3022] hover:text-white hover:border-[#1B3022] text-[#1B3022] text-xs font-bold tracking-widest uppercase py-3 rounded-xl transition-all cursor-pointer"
+                          >
                             Reorder
-                          </button>
-                          <button className="w-full bg-white border border-outline-variant/30 hover:border-primary text-primary text-xs font-bold tracking-widest uppercase py-3 rounded-xl transition-all cursor-pointer">
-                            View Receipt
                           </button>
                         </div>
                       </div>

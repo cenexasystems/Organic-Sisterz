@@ -170,7 +170,8 @@ export async function fetchWhatsappRequests() {
       items: parsedItems,
       totalPrice: typeof o.total_price === 'number' ? o.total_price : parseFloat(o.total_price || '0'),
       status: o.status || 'Pending',
-      createdAt: o.created_at
+      createdAt: o.created_at,
+      userId: o.user_id
     };
   });
 }
@@ -218,7 +219,8 @@ export async function fetchGiftRequests() {
       items: parsedItems,
       totalPrice: typeof o.total_price === 'number' ? o.total_price : parseFloat(o.total_price || '0'),
       status: o.status || 'Pending',
-      createdAt: o.created_at
+      createdAt: o.created_at,
+      userId: o.user_id
     };
   });
 }
@@ -260,7 +262,8 @@ export async function fetchOrders() {
       cashReceived: typeof o.cash_received === 'number' ? o.cash_received : parseFloat(o.cash_received || '0'),
       changeReturned: typeof o.change_returned === 'number' ? o.change_returned : parseFloat(o.change_returned || '0'),
       status: o.status || 'Completed',
-      createdAt: o.created_at
+      createdAt: o.created_at,
+      userId: o.user_id
     };
   });
 }

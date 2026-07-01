@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Gift, Sparkles, Check, Heart, Plus, Minus, MessageSquare, X, ChevronDown, Trash2 } from 'lucide-react';
+import { ArrowLeft, Gift, Sparkles, Check, Heart, Plus, Minus, MessageSquare, ChevronDown, Trash2 } from 'lucide-react';
 import { fetchProducts, insertGiftRequest } from '../utils/db';
 import type { Product } from '../utils/store';
 import ProductDetailModal from '../components/ui/ProductDetailModal';
