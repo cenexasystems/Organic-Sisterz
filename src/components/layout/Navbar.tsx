@@ -119,7 +119,7 @@ export default function Navbar({
       
       saveStoredCart(updatedCart);
       setCartItems(updatedCart);
-      navigate('/cart');
+      // Removed navigate('/cart') to allow user to continue shopping
     };
 
     window.addEventListener("mahizham_add_to_cart_triggered", handleAddEvent);

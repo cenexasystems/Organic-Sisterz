@@ -70,7 +70,7 @@ function Storefront() {
         <FaqAccordion />
       </main>
 
-      <Footer onAdminClick={() => navigate("/admin")} />
+      <Footer />
 
       <ConsultationQuiz isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
     </motion.div>
