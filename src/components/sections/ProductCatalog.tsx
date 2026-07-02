@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
-import { ArrowRight, Heart } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { ArrowRight, Heart, CheckCircle } from "lucide-react";
 import ProductDetailModal from "../ui/ProductDetailModal";
 import { fetchProducts } from "../../utils/db";
 import type { Product } from "../../utils/store";
@@ -10,12 +10,18 @@ export default function ProductCatalog() {
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const updateProducts = async () => {
       try {
         const stored = await fetchProducts();
-        setProducts(stored);
+        const sorted = [...stored].sort((a, b) => {
+          if (a.id === 'herbal-hair-oil') return -1;
+          if (b.id === 'herbal-hair-oil') return 1;
+          return 0;
+        });
+        setProducts(sorted);
       } catch (err) {
         console.error("Failed to load products from database:", err);
       }
@@ -40,6 +46,8 @@ export default function ProductCatalog() {
       detail: { productId: id, size: size || "" },
     });
     window.dispatchEvent(event);
+    setToastMessage("Added to cart successfully!");
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const toggleFavorite = (id: string) => {
@@ -132,10 +140,19 @@ export default function ProductCatalog() {
                     </button>
                   </div>
 
-                  <div className="absolute top-4 left-4 bg-white/85 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1 border border-outline-variant/10">
-                    <span className="font-body text-[10px] font-bold tracking-widest uppercase text-on-surface-variant">
-                      {product.category}
-                    </span>
+                  <div className="absolute top-4 left-4 flex flex-col gap-2">
+                    <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1 border border-outline-variant/10 shadow-sm w-fit">
+                      <span className="font-body text-[10px] font-bold tracking-widest uppercase text-on-surface-variant">
+                        {product.category}
+                      </span>
+                    </div>
+                    {product.id === 'herbal-hair-oil' && (
+                      <div className="bg-secondary text-white px-3 py-1.5 rounded-full flex items-center gap-1 border border-secondary/20 shadow-sm w-fit">
+                        <span className="font-body text-[10px] font-bold tracking-widest uppercase">
+                          🔥 Most Selling
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -199,6 +216,20 @@ export default function ProductCatalog() {
           handleAddToCart(id, size);
         }}
       />
+      
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1B3022] text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-white/10"
+          >
+            <CheckCircle className="w-5 h-5 text-secondary" />
+            <span className="font-body text-sm font-semibold tracking-wide">{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

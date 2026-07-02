@@ -3,15 +3,15 @@ import { Link } from "react-router-dom";
 export default function Footer() {
   return (
     <footer className="bg-primary pt-16 pb-8 px-6 lg:px-12 border-t border-primary-container">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-12 text-white font-body text-sm opacity-95 mb-16">
-        <div className="flex-1 max-w-sm">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-white font-body text-sm opacity-95 mb-16">
+        <div className="max-w-sm">
           <h2 className="text-3xl font-display font-bold mb-4">Organic Sisterz</h2>
           <p className="opacity-90 leading-relaxed text-base">
             Clinical Botanical Excellence. Bridging the gap between earth and science.
           </p>
         </div>
 
-        <div className="flex-[0.5]">
+        <div className="flex flex-col md:items-center">
           <h3 className="tracking-widest uppercase text-xs font-bold mb-6 text-inverse-primary">Navigation</h3>
           <ul className="space-y-4 opacity-90 font-medium">
             <li><a href="#" className="hover:text-inverse-primary transition-colors">Home</a></li>
@@ -22,7 +22,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div className="flex-1">
+        <div className="flex flex-col md:items-end">
           <h3 className="tracking-widest uppercase text-xs font-bold mb-6 text-inverse-primary">Shop Details</h3>
           <ul className="space-y-4 opacity-90 font-medium">
             <li className="flex flex-col">
@@ -49,12 +49,12 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left text-white font-body text-sm opacity-95">
-        <div className="flex-1 text-left opacity-90">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-center text-center md:text-left text-white font-body text-sm opacity-95">
+        <div className="opacity-90">
           © {new Date().getFullYear()} Organic Sisterz. All Rights Reserved
         </div>
 
-        <div className="flex-1 flex justify-center items-center gap-1.5 opacity-90">
+        <div className="flex justify-center items-center gap-1.5 opacity-90">
           <span>Powered by</span>
           <a
             href="https://cenexasystems.com/"
@@ -67,7 +67,8 @@ export default function Footer() {
           © {new Date().getFullYear()}
         </div>
 
-        <div className="flex-1 text-right tracking-widest uppercase text-xs font-bold text-inverse-primary opacity-90">
+
+        <div className="md:text-right tracking-widest uppercase text-xs font-bold text-inverse-primary opacity-90">
           Pure • Organic • Proven
         </div>
       </div>

@@ -19,6 +19,7 @@ import {
 } from '../utils/db';
 import type { Product, Order, Coupon, UserProfile } from '../utils/store';
 
+
 export default function AdminPortal() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -561,9 +562,9 @@ export default function AdminPortal() {
   const formatWhatsAppMessage = (order: Order) => {
     const itemsText = order.items.map(it => {
       const sizeStr = it.size && it.size !== '—' ? ` - ${it.size}` : '';
-      return `• ${it.name}${sizeStr} x ${it.quantity} - ₹${it.price * it.quantity}`;
+      return `- ${it.name}${sizeStr} x ${it.quantity} (Rs. ${it.price * it.quantity})`;
     }).join('\n');
-    return `🌿 *Order Request - Naatu Marundhu*\n👤 ${order.customerName}\n📞 ${order.customerPhone}\n📍 ${order.customerAddress}\n📦 *Items:*\n${itemsText}\n💰 *Estimated Total: ₹${order.totalPrice}*`;
+    return `*Order Request - Organic Sisterz*\nCustomer: ${order.customerName}\nPhone: ${order.customerPhone}\nAddress: ${order.customerAddress}\n*Items:*\n${itemsText}\n*Estimated Total: Rs. ${order.totalPrice}*`;
   };
 
 
@@ -752,9 +753,9 @@ export default function AdminPortal() {
     if (!excludeSearch && whatsappSearch) {
       const s = whatsappSearch.toLowerCase();
       list = list.filter(o => 
-        o.customerName.toLowerCase().includes(s) || 
-        o.customerPhone.toLowerCase().includes(s) || 
-        o.id.toLowerCase().includes(s)
+        (o.customerName || '').toLowerCase().includes(s) || 
+        (o.customerPhone || '').toLowerCase().includes(s) || 
+        getWhatsAppInvoice(o.id).toLowerCase().includes(s)
       );
     }
     
@@ -888,9 +889,7 @@ export default function AdminPortal() {
 
   // Calculated stats metrics for WhatsApp center (storefront ORD- orders only)
   const ordersFilteredByPeriod = getFilteredOrders(true);
-  const totalRevenue = ordersFilteredByPeriod
-    .filter(o => o.status === 'Completed')
-    .reduce((sum, o) => sum + Number(o.total_price), 0);
+
   const totalRequestsCount = ordersFilteredByPeriod.length;
   const pendingOrdersCount = ordersFilteredByPeriod.filter(o => o.status === 'Pending').length;
   const contactedOrdersCount = ordersFilteredByPeriod.filter(o => o.status === 'Processing').length;
@@ -1122,7 +1121,7 @@ export default function AdminPortal() {
           </div>
 
           {/* MAIN DASHBOARD CONTENT AREA */}
-          <div className="flex-grow pt-5 px-6 pb-6 md:pt-6 md:px-10 md:pb-8 overflow-y-auto w-full">
+          <div className="flex-grow flex flex-col pt-5 px-6 pb-6 md:pt-6 md:px-10 md:pb-8 overflow-y-auto w-full">
             
             {/* TAB 1: WHATSAPP CENTER (Matches Vercel Screenshot layout) */}
             {activeTab === 'whatsapp' && (
@@ -1223,9 +1222,6 @@ export default function AdminPortal() {
                     <div className="flex flex-wrap items-center gap-3">
                       <MessageSquare className="w-5 h-5 text-green-500" />
                       <h3 className="text-lg font-bold text-primary">Customer Requests</h3>
-                      <span className="text-xs text-[#2B3E2F] font-semibold bg-[#2B3E2F]/5 border border-[#2B3E2F]/10 py-1 px-3 rounded-full">
-                        ₹{totalRevenue} revenue - status updates only
-                      </span>
                       <span className="text-xs font-bold text-[#4B5563] bg-gray-100 py-1 px-3 rounded-full">
                         {filteredOrdersList.length} requests
                       </span>
@@ -1250,35 +1246,35 @@ export default function AdminPortal() {
                         No requests found in this period filter.
                       </div>
                     ) : (
-                      <table className="w-full text-left text-sm min-w-[900px]">
+                      <table className="w-full text-left text-xs min-w-[900px]">
                         <thead>
                           <tr className="bg-surface-container-low text-primary font-bold border-b border-outline-variant/25">
-                            <th className="px-6 py-5">Invoice</th>
-                            <th className="px-6 py-5">Customer</th>
-                            <th className="px-6 py-5">Phone</th>
-                            <th className="px-6 py-5">Address</th>
-                            <th className="px-6 py-5 text-center">Products</th>
-                            <th className="px-6 py-5">Est. Total</th>
-                            <th className="px-6 py-5">Date & Time</th>
-                            <th className="px-6 py-5">Status</th>
-                            <th className="px-6 py-5 text-right">Details</th>
+                            <th className="px-4 py-3">Order ID</th>
+                            <th className="px-4 py-3">Customer</th>
+                            <th className="px-4 py-3">Phone</th>
+                            <th className="px-4 py-3 text-center">Address</th>
+                            <th className="px-4 py-3 text-center">Products</th>
+                            <th className="px-4 py-3">Est. Total</th>
+                            <th className="px-4 py-3">Date & Time</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3 text-right">Details</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-outline-variant/10">
                           {filteredOrdersList.map(o => (
                             <Fragment key={o.id}>
                               <tr className="hover:bg-[#FAF9F5]/20 transition-colors">
-                                <td className="px-6 py-5 font-bold text-primary">{getWhatsAppInvoice(o.id)}</td>
-                                <td className="px-6 py-5 font-semibold text-primary">{o.customerName}</td>
-                                <td className="px-6 py-5 font-medium">{o.customerPhone.split('_')[0]}</td>
-                                <td className="px-6 py-5 max-w-xs truncate text-on-surface-variant">{o.customerAddress}</td>
-                                <td className="px-6 py-5 text-center">
-                                  <span className="bg-primary/5 text-primary border border-primary/10 px-3 py-1 rounded-full font-bold text-xs">
+                                <td className="px-4 py-3 font-bold text-primary">{getWhatsAppInvoice(o.id)}</td>
+                                <td className="px-4 py-3 font-semibold text-primary">{o.customerName}</td>
+                                <td className="px-4 py-3 font-medium">{o.customerPhone.split('_')[0]}</td>
+                                <td className="px-4 py-3 max-w-[120px] truncate text-center text-on-surface-variant mx-auto">{o.customerAddress}</td>
+                                <td className="px-4 py-3 text-center">
+                                  <span className="bg-primary/5 text-primary border border-primary/10 px-2 py-0.5 rounded-full font-bold text-[10px]">
                                     {o.items.reduce((sum: number, it: any) => sum + it.quantity, 0)}
                                   </span>
                                 </td>
-                                <td className="px-6 py-5 font-bold text-primary">₹{o.totalPrice}</td>
-                                <td className="px-6 py-5 text-on-surface-variant font-medium">
+                                <td className="px-4 py-3 font-bold text-primary">₹{o.totalPrice}</td>
+                                <td className="px-4 py-3 text-on-surface-variant font-medium text-[11px]">
                                   {new Date(o.createdAt).toLocaleDateString(undefined, { 
                                     day: '2-digit', 
                                     month: 'short', 
@@ -1288,7 +1284,7 @@ export default function AdminPortal() {
                                     minute: '2-digit' 
                                   })}
                                 </td>
-                                <td className="px-6 py-5">
+                                <td className="px-4 py-3">
                                   <select
                                     value={o.status}
                                     onChange={(e) => updateOrderStatus(o.id, e.target.value as Order['status'])}
@@ -1308,7 +1304,7 @@ export default function AdminPortal() {
                                     <option value="Cancelled">Cancelled</option>
                                   </select>
                                 </td>
-                                <td className="px-6 py-5 text-right">
+                                <td className="px-4 py-3 text-right">
                                   <button
                                     onClick={() => {
                                       setExpandedOrderId(expandedOrderId === o.id ? null : o.id);
@@ -2025,7 +2021,10 @@ export default function AdminPortal() {
                   const getYearlyMonthlyRevenue = () => {
                     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                     const now = new Date();
-                    const currentYear = now.getFullYear();
+                    let currentYear = now.getFullYear();
+                    if (currentYear === 2026 && now.getMonth() >= 9) {
+                      currentYear = 2027;
+                    }
                     return months.map((m, idx) => {
                       const rev = orders
                         .filter(o => {
@@ -2042,25 +2041,75 @@ export default function AdminPortal() {
                   const maxYearlyVal = Math.max(...yearlyTrend.map(d => d.value), 1);
                   const totalYearlyRevenue = yearlyTrend.reduce((sum, d) => sum + d.value, 0);
 
+                  // Weekly revenue calculation
+                  const getWeeklyRevenue = () => {
+                    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    const now = new Date();
+                    // get current week's Monday
+                    const dayOfWeek = now.getDay() || 7; 
+                    const monday = new Date(now);
+                    monday.setDate(monday.getDate() - dayOfWeek + 1);
+                    monday.setHours(0,0,0,0);
+                    
+                    return days.map((d, idx) => {
+                      const dayStart = new Date(monday);
+                      dayStart.setDate(dayStart.getDate() + idx);
+                      const dayEnd = new Date(dayStart);
+                      dayEnd.setDate(dayEnd.getDate() + 1);
+                      
+                      const rev = orders
+                        .filter(o => {
+                          if (!o.id.startsWith('POS-') && !o.id.startsWith('INV-')) return false;
+                          const oDate = new Date(o.createdAt);
+                          return oDate >= dayStart && oDate < dayEnd;
+                        })
+                        .reduce((sum, o) => sum + o.totalPrice, 0);
+                      return { label: d, value: rev };
+                    });
+                  };
+
+                  const weeklyTrend = getWeeklyRevenue();
+                  const maxWeeklyVal = Math.max(...weeklyTrend.map(d => d.value), 1);
+                  const totalWeeklyRevenue = weeklyTrend.reduce((sum, d) => sum + d.value, 0);
+
                   // Render Revenue subtab
                   if (analyticsSubTab === 'revenue') {
                     const cards = [
                       { title: 'Total Revenue', value: `₹${totalRevVal.toLocaleString()}`, subtext: 'POS + manual combined', icon: Receipt, bg: 'bg-[#ECFDF5]', fg: 'text-[#10B981]' },
                       { title: 'Completed Bills', value: `${completedBillsCount}`, subtext: 'POS + manual bills', icon: CheckCircle2, bg: 'bg-[#F0FDF4]', fg: 'text-[#16A34A]' },
                       { title: 'Offline Bills', value: `₹${offlineBillsVal.toLocaleString()}`, subtext: 'Walk-in POS sales', icon: Receipt, bg: 'bg-[#EFF6FF]', fg: 'text-[#2563EB]' },
-                      { title: 'Online Bills', value: `₹${onlineBillsVal.toLocaleString()}`, subtext: 'Online POS sales', icon: Receipt, bg: 'bg-[#ECFDF5]', fg: 'text-[#059669]' },
+                      { title: 'Online Bills', value: `₹${onlineBillsVal.toLocaleString()}`, subtext: 'Online POS sales', icon: Receipt, bg: 'bg-[#F3E8FF]', fg: 'text-[#A855F7]' },
                       { title: 'Total Offline Bills', value: `${offlineBillsCount}`, subtext: 'Walk-in POS orders', icon: ShoppingBag, bg: 'bg-[#FFF5F5]', fg: 'text-[#FF4D4D]' },
-                      { title: 'Total Online Bills', value: `${onlineBillsCount}`, subtext: 'Online channel orders', icon: Globe, bg: 'bg-[#EFF6FF]', fg: 'text-[#2563EB]' },
+                      { title: 'Total Online Bills', value: `${onlineBillsCount}`, subtext: 'Online channel orders', icon: Globe, bg: 'bg-[#EEF2FF]', fg: 'text-[#4F46E5]' },
                       { title: 'Total Items Sold', value: `${totalItemsSold}`, subtext: 'From completed bills', icon: Package, bg: 'bg-[#F3E8FF]', fg: 'text-[#A855F7]' },
                       { title: 'Avg Order Value', value: `₹${avgOrderValue.toLocaleString()}`, subtext: 'Per completed order', icon: TrendingUp, bg: 'bg-[#FFF7ED]', fg: 'text-[#EA580C]' },
                       { title: 'Top Product', value: topProduct.length > 15 ? `${topProduct.slice(0, 15)}...` : topProduct, subtext: 'Most sold item', icon: Award, bg: 'bg-[#FFF1F2]', fg: 'text-[#E11D48]' },
                     ];
 
                     return (
-                      <div className="space-y-8">
-                        {/* 9 cards grid */}
+                      <div className="space-y-4">
+                        {/* 4 cards grid (Top Row) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                          {cards.slice(0, 4).map((c, i) => (
+                            <div key={i} className="bg-white border border-outline-variant/20 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-3 hover:border-primary/25 transition-all">
+                              <div className="flex justify-between items-start">
+                                <div className="space-y-1">
+                                  <span className="block text-[9px] font-bold text-[#6B7280] uppercase tracking-wider">{c.title}</span>
+                                  <span className="block text-xl font-extrabold text-primary font-poppins">{c.value}</span>
+                                </div>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${c.bg}`}>
+                                  <c.icon className={`w-4 h-4 ${c.fg}`} />
+                                </div>
+                              </div>
+                              <div className="text-[10px] font-semibold text-on-surface-variant/80 border-t border-outline-variant/10 pt-2">
+                                <span>{c.subtext}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        {/* 5 cards grid (Bottom Row) */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                          {cards.map((c, i) => (
+                          {cards.slice(4).map((c, i) => (
                             <div key={i} className="bg-white border border-outline-variant/20 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-3 hover:border-primary/25 transition-all">
                               <div className="flex justify-between items-start">
                                 <div className="space-y-1">
@@ -2080,50 +2129,106 @@ export default function AdminPortal() {
 
                         {/* Trend & Order Details Grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                          {/* Left: Revenue Trend This Year */}
-                          <div className="lg:col-span-8 bg-white border border-outline-variant/20 rounded-3xl p-6 shadow-sm space-y-6">
-                            <div className="flex justify-between items-center pb-2 border-b border-outline-variant/10">
-                              <div>
-                                <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider font-poppins">Revenue Trend This Year</h3>
-                                <div className="flex items-baseline gap-2 mt-1">
-                                  <span className="text-2xl font-extrabold text-primary">₹{totalYearlyRevenue.toLocaleString()}</span>
-                                  <span className="bg-[#FFF7ED] text-[#EA580C] px-2 py-0.5 rounded text-[10px] font-bold">Avg ₹{Math.round(totalYearlyRevenue / 12).toLocaleString()}/mo</span>
+                          <div className="lg:col-span-8 space-y-6">
+                            {/* Card 1: Revenue Trend This Year */}
+                            <div className="bg-white border border-outline-variant/20 rounded-3xl p-6 shadow-sm space-y-6">
+                              <div className="flex justify-between items-center pb-2 border-b border-outline-variant/10">
+                                <div>
+                                  <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider font-poppins">Revenue Trend This Year <span className="text-[#B91C1C] ml-1">{new Date().getFullYear()}</span></h3>
+                                  <div className="flex items-baseline gap-2 mt-1">
+                                    <span className="text-2xl font-extrabold text-primary">₹{totalYearlyRevenue.toLocaleString()}</span>
+                                    <span className="bg-[#FFF7ED] text-[#EA580C] px-2 py-0.5 rounded text-[10px] font-bold">Avg ₹{Math.round(totalYearlyRevenue / 12).toLocaleString()}/mo</span>
+                                  </div>
                                 </div>
+                              </div>
+
+                              {/* Bar Chart Container */}
+                              <div className="h-56 flex items-end justify-between gap-1 pt-6 px-2">
+                                {yearlyTrend.map((d, idx) => {
+                                  const heightPercent = maxYearlyVal > 0 ? (d.value / maxYearlyVal) * 100 : 0;
+                                  const isCurrentMonth = new Date().getMonth() === idx;
+                                  return (
+                                    <div key={idx} className="flex flex-col items-center flex-grow h-full justify-end">
+                                      <div className="relative w-full max-w-[28px] group flex flex-col justify-end items-center cursor-pointer" style={{ height: `${Math.max(4, heightPercent)}%` }}>
+                                        {/* Tooltip on Hover */}
+                                        <div className="absolute bottom-full mb-2 bg-primary text-white text-[10px] font-bold py-1 px-2 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                          ₹{d.value.toLocaleString()}
+                                        </div>
+                                        
+                                        {/* Optional percentage header for selected or highest value */}
+                                        {d.value > 0 && d.value === maxYearlyVal && (
+                                          <span className="text-[8px] font-bold text-[#EA580C] absolute bottom-full mb-1">Max</span>
+                                        )}
+
+                                        {/* The Bar */}
+                                        <div 
+                                          className={`w-full h-full rounded-t-lg transition-all duration-500 ${
+                                            isCurrentMonth 
+                                              ? 'bg-[#881337] hover:bg-[#6b0f2b]' 
+                                              : 'bg-[#B91C1C]/15 group-hover:bg-[#B91C1C]/35'
+                                          }`}
+                                        />
+                                      </div>
+                                      {/* Month Label */}
+                                      <span className="text-[10px] font-bold text-[#6B7280] mt-2 uppercase">{d.label}</span>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
 
-                            {/* Bar Chart Container */}
-                            <div className="h-56 flex items-end justify-between gap-1 pt-6 px-2">
-                              {yearlyTrend.map((d, idx) => {
-                                const heightPercent = maxYearlyVal > 0 ? (d.value / maxYearlyVal) * 100 : 0;
-                                const isCurrentMonth = new Date().getMonth() === idx;
-                                return (
-                                  <div key={idx} className="flex flex-col items-center flex-grow group relative h-full justify-end">
-                                    {/* Tooltip on Hover */}
-                                    <div className="absolute -top-10 bg-primary text-white text-[10px] font-bold py-1 px-2 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                                      ₹{d.value.toLocaleString()}
-                                    </div>
-                                    
-                                    {/* Optional percentage header for selected or highest value */}
-                                    {d.value > 0 && d.value === maxYearlyVal && (
-                                      <span className="text-[9px] font-bold text-[#EA580C] absolute -top-4">Max</span>
-                                    )}
-
-                                    {/* The Bar */}
-                                    <div 
-                                      className={`w-full max-w-[28px] rounded-t-lg transition-all duration-500 cursor-pointer ${
-                                        isCurrentMonth 
-                                          ? 'bg-[#881337] hover:bg-[#6b0f2b]' 
-                                          : 'bg-[#B91C1C]/15 group-hover:bg-[#B91C1C]/35'
-                                      }`}
-                                      style={{ height: `${Math.max(4, heightPercent)}%` }}
-                                    />
-
-                                    {/* Month Label */}
-                                    <span className="text-[10px] font-bold text-[#6B7280] mt-2 uppercase">{d.label}</span>
+                            {/* Card 2: Revenue This Week */}
+                            <div className="bg-white border border-outline-variant/20 rounded-3xl p-6 shadow-sm space-y-6">
+                              <div className="flex justify-between items-center pb-2 border-b border-outline-variant/10">
+                                <div>
+                                  <h3 className="text-sm font-bold text-primary font-poppins uppercase tracking-wider font-poppins">Revenue This Week <span className="text-[#B91C1C] ml-1">{(() => {
+                                    const d = new Date();
+                                    d.setHours(0, 0, 0, 0);
+                                    d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+                                    const week1 = new Date(d.getFullYear(), 0, 4);
+                                    const weekNum = 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+                                    return `(Week ${weekNum} of ${d.getFullYear()})`;
+                                  })()}</span></h3>
+                                  <div className="flex items-baseline gap-2 mt-1">
+                                    <span className="text-xs text-on-surface-variant">₹{totalWeeklyRevenue.toLocaleString()} total</span>
                                   </div>
-                                );
-                              })}
+                                </div>
+                              </div>
+
+                              {/* Bar Chart Container */}
+                              <div className="h-56 flex items-end justify-between gap-1 pt-6 px-2">
+                                {weeklyTrend.map((d, idx) => {
+                                  const heightPercent = maxWeeklyVal > 0 ? (d.value / maxWeeklyVal) * 100 : 0;
+                                  const dayOfWeek = (new Date().getDay() || 7) - 1; // 0 for Mon
+                                  const isCurrentDay = dayOfWeek === idx;
+                                  return (
+                                    <div key={idx} className="flex flex-col items-center flex-grow h-full justify-end">
+                                      <div className="relative w-full max-w-[28px] group flex flex-col justify-end items-center cursor-pointer" style={{ height: `${Math.max(4, heightPercent)}%` }}>
+                                        {/* Tooltip on Hover */}
+                                        <div className="absolute bottom-full mb-2 bg-primary text-white text-[10px] font-bold py-1 px-2 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                          ₹{d.value.toLocaleString()}
+                                        </div>
+                                        
+                                        {/* Optional max marker */}
+                                        {d.value > 0 && d.value === maxWeeklyVal && (
+                                          <span className="text-[8px] font-bold text-[#EA580C] absolute bottom-full mb-1">Max</span>
+                                        )}
+
+                                        {/* The Bar */}
+                                        <div 
+                                          className={`w-full h-full rounded-t-lg transition-all duration-500 ${
+                                            isCurrentDay
+                                              ? 'bg-[#881337] hover:bg-[#6b0f2b]' 
+                                              : 'bg-[#D5CBAE] group-hover:bg-[#C5BBAE]'
+                                          }`}
+                                        />
+                                      </div>
+                                      {/* Day Label */}
+                                      <span className="text-[10px] font-bold text-[#6B7280] mt-2 uppercase">{d.label}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             </div>
                           </div>
 
@@ -2620,77 +2725,79 @@ export default function AdminPortal() {
                       No gift orders found.
                     </div>
                   ) : (
-                    <table className="w-full text-left text-sm min-w-[900px]">
-                      <thead>
-                        <tr className="bg-[#FAF9F5] text-primary font-bold border-b border-outline-variant/25 uppercase text-[10px] tracking-wider">
-                          <th className="px-6 py-4">Invoice ID</th>
-                          <th className="px-6 py-4">Date & Time</th>
-                          <th className="px-6 py-4">Sender / Recipient</th>
-                          <th className="px-6 py-4">Personal Message</th>
-                          <th className="px-6 py-4">Products</th>
-                          <th className="px-6 py-4">Status</th>
-                          <th className="px-6 py-4 text-right">Total</th>
-                        </tr>
-                      </thead>
+                    <div className="overflow-x-auto w-full">
+                      <table className="w-full text-left text-xs min-w-[900px]">
+                        <thead>
+                          <tr className="bg-[#FAF9F5] text-primary font-bold border-b border-outline-variant/25 uppercase text-[10px] tracking-wider">
+                            <th className="px-4 py-3">Invoice ID</th>
+                            <th className="px-4 py-3">Date & Time</th>
+                            <th className="px-4 py-3">Sender / Recipient</th>
+                            <th className="px-4 py-3">Personal Message</th>
+                            <th className="px-4 py-3">Products</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3 text-right">Total</th>
+                          </tr>
+                        </thead>
                       <tbody className="divide-y divide-outline-variant/10">
                         {filteredGiftRequests.map(o => (
                           <tr key={o.id} className="hover:bg-[#FAF9F5]/40 transition-colors">
-                            <td className="px-6 py-4 font-bold text-primary">{getGiftInvoice(o.id)}</td>
-                            <td className="px-6 py-4 text-on-surface-variant font-medium">
-                              {o.createdAt ? (
-                                <>
-                                  {new Date(o.createdAt).toLocaleDateString(undefined, { 
-                                    day: '2-digit', 
-                                    month: 'short', 
-                                    year: 'numeric' 
-                                  })} {new Date(o.createdAt).toLocaleTimeString(undefined, { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit' 
-                                  })}
-                                </>
-                              ) : '—'}
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="font-semibold text-primary">{o.recipientName}</div>
-                              <div className="text-xs text-on-surface-variant mt-0.5">{o.recipientPhone} | Gift from: {o.senderName}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="bg-[#FAF9F5] p-3 rounded-lg border border-[#D4AF37]/30 text-xs italic text-[#1B3022]">
-                                "{o.giftMessage || 'No message provided'}"
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <ul className="text-xs space-y-1 text-on-surface-variant">
-                                {o.items.map((it: any, idx: number) => (
-                                  <li key={idx}>• {it.name} ({it.size}) x{it.quantity}</li>
-                                ))}
-                              </ul>
-                            </td>
-                            <td className="px-6 py-4">
-                              <select
-                                value={o.status}
-                                onChange={(e) => updateOrderStatus(o.id, e.target.value as Order['status'])}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase border bg-white focus:outline-none transition-all cursor-pointer ${
-                                  o.status === 'Completed'
-                                    ? 'text-green-700 border-green-200 bg-green-50'
-                                    : o.status === 'Processing'
-                                    ? 'text-blue-700 border-blue-200 bg-[#EFF6FF]'
-                                    : o.status === 'Cancelled'
-                                    ? 'text-red-700 border-red-200 bg-red-50'
-                                    : 'text-yellow-700 border-yellow-200 bg-[#FEFCE8]'
-                                }`}
-                              >
-                                <option value="Pending">Pending</option>
-                                <option value="Processing">Processing</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Cancelled">Cancelled</option>
-                              </select>
-                            </td>
-                            <td className="px-6 py-4 font-bold text-primary text-right">₹{o.totalPrice}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                              <td className="px-4 py-3 font-bold text-primary">{getGiftInvoice(o.id)}</td>
+                              <td className="px-4 py-3 text-on-surface-variant font-medium">
+                                {o.createdAt ? (
+                                  <>
+                                    {new Date(o.createdAt).toLocaleDateString(undefined, { 
+                                      day: '2-digit', 
+                                      month: 'short', 
+                                      year: 'numeric' 
+                                    })} {new Date(o.createdAt).toLocaleTimeString(undefined, { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit' 
+                                    })}
+                                  </>
+                                ) : '—'}
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="font-semibold text-primary">{o.recipientName}</div>
+                                <div className="text-[10px] text-on-surface-variant mt-0.5">{o.recipientPhone} | Gift from: {o.senderName}</div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="bg-[#FAF9F5] p-2 rounded-lg border border-[#D4AF37]/30 text-[10px] italic text-[#1B3022] max-w-[150px] truncate hover:whitespace-normal hover:max-w-xs transition-all">
+                                  "{o.giftMessage || 'No message provided'}"
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <ul className="text-[10px] space-y-1 text-on-surface-variant">
+                                  {o.items.map((it: any, idx: number) => (
+                                    <li key={idx}>• {it.name} ({it.size}) x{it.quantity}</li>
+                                  ))}
+                                </ul>
+                              </td>
+                              <td className="px-4 py-3">
+                                <select
+                                  value={o.status}
+                                  onChange={(e) => updateOrderStatus(o.id, e.target.value as Order['status'])}
+                                  className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase border bg-white focus:outline-none transition-all cursor-pointer ${
+                                    o.status === 'Completed'
+                                      ? 'text-green-700 border-green-200 bg-green-50'
+                                      : o.status === 'Processing'
+                                      ? 'text-blue-700 border-blue-200 bg-[#EFF6FF]'
+                                      : o.status === 'Cancelled'
+                                      ? 'text-red-700 border-red-200 bg-red-50'
+                                      : 'text-yellow-700 border-yellow-200 bg-[#FEFCE8]'
+                                  }`}
+                                >
+                                  <option value="Pending">Pending</option>
+                                  <option value="Processing">Processing</option>
+                                  <option value="Completed">Completed</option>
+                                  <option value="Cancelled">Cancelled</option>
+                                </select>
+                              </td>
+                              <td className="px-4 py-3 font-bold text-primary text-right">₹{o.totalPrice}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   )}
                 </div>
               </div>
@@ -2837,8 +2944,9 @@ export default function AdminPortal() {
                         No billing records found matching the active filters.
                       </div>
                     ) : (
-                      <table className="w-full text-left text-sm">
-                        <thead>
+                      <div className="overflow-x-auto w-full">
+                        <table className="w-full text-left text-sm min-w-[800px]">
+                          <thead>
                           <tr className="bg-surface-container-low text-primary font-bold border-b border-outline-variant/25">
                             <th className="px-6 py-4">Bill ID</th>
                             <th className="px-6 py-4">Customer</th>
@@ -2897,6 +3005,7 @@ export default function AdminPortal() {
                           })}
                         </tbody>
                       </table>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -2918,32 +3027,6 @@ export default function AdminPortal() {
                             <span className="text-xs text-on-surface-variant">
                               Placed: {new Date(selectedOrder.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                             </span>
-                          </div>
-                        </div>
-
-                        {/* Status Controls */}
-                        <div className="space-y-2.5">
-                          <span className="block text-xs font-bold text-primary uppercase tracking-wider">Order Status</span>
-                          <div className="flex flex-wrap gap-2">
-                            {(['Pending', 'Processing', 'Completed', 'Cancelled'] as Order['status'][]).map(st => (
-                              <button
-                                key={st}
-                                onClick={() => updateOrderStatus(selectedOrder.id, st)}
-                                className={`flex-grow py-2.5 px-2 rounded-xl text-xs font-bold tracking-wider uppercase border transition-all cursor-pointer ${
-                                  selectedOrder.status === st
-                                    ? st === 'Completed'
-                                      ? 'bg-green-700 text-white border-green-700'
-                                      : st === 'Processing'
-                                      ? 'bg-blue-700 text-white border-blue-700'
-                                      : st === 'Cancelled'
-                                      ? 'bg-error text-white border-error'
-                                      : 'bg-[#D97706] text-white border-[#D97706]'
-                                    : 'bg-white text-on-surface-variant border-outline-variant/30 hover:border-secondary'
-                                }`}
-                              >
-                                {st}
-                              </button>
-                            ))}
                           </div>
                         </div>
 
@@ -3766,6 +3849,27 @@ export default function AdminPortal() {
               </div>
             )}
 
+            {/* Admin Footer */}
+            <div className="mt-auto pt-10 border-t border-outline-variant/20 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-bold text-gray-400 shrink-0">
+              <div className="flex-1 text-left sm:text-left text-center">
+                © 2026 Organic Sisterz. All Rights Reserved
+              </div>
+              <div className="flex-1 flex justify-center items-center gap-1.5">
+                <span>Powered by</span>
+                <a
+                  href="https://cenexasystems.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:text-[#2B3E2F] transition-colors"
+                >
+                  Cenexa Systems
+                </a>{" "}
+                © 2026
+              </div>
+              <div className="flex-1 text-right sm:text-right text-center tracking-widest uppercase text-primary/70">
+                Pure • Organic • Proven
+              </div>
+            </div>
           </div>
         </>
       )}
