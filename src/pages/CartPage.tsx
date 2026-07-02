@@ -81,11 +81,21 @@ export default function CartPage() {
       whatsappNumber = `91${whatsappNumber}`;
     }
 
-    const orderLines = cartItems.map(it => `${it.quantity}x ${it.name} (${it.size}) - ₹${it.price * it.quantity}`).join("\n");
-    const text = `*New Store Order!*\n\n*Customer:* ${custName}\n*Phone:* ${custPhone}\n*Address:* ${custAddress}\n\n*Products:*\n${orderLines}\n\n*Total:* ₹${totalAmount}`;
+    const emojiSeedling = String.fromCodePoint(0x1F33F);
+    const emojiUser = String.fromCodePoint(0x1F464);
+    const emojiPhone = String.fromCodePoint(0x1F4DE);
+    const emojiPin = String.fromCodePoint(0x1F4CD);
+    const emojiBox = String.fromCodePoint(0x1F4E6);
+    const emojiMoney = String.fromCodePoint(0x1F4B0);
+    const emojiSparkles = String.fromCodePoint(0x2728);
+    const bullet = String.fromCodePoint(0x2022);
+    const rupee = String.fromCodePoint(0x20B9);
+
+    const orderLines = cartItems.map(it => `${bullet} ${it.quantity}x *${it.name}* (${it.size}) - ${rupee}${it.price * it.quantity}`).join("\n");
+    const text = `${emojiSeedling} *ORGANIC SISTERZ - NEW ORDER* ${emojiSeedling}\n----------------------------------\n${emojiUser} *Customer:* ${custName}\n${emojiPhone} *Phone:* ${custPhone}\n${emojiPin} *Delivery Address:* ${custAddress}\n\n${emojiBox} *Products Ordered:*\n${orderLines}\n\n${emojiMoney} *Total Amount:* *${rupee}${totalAmount}*\n----------------------------------\n${emojiSparkles} Thank you for choosing organic, clean, botanical solutions! ${emojiSparkles}`;
     
     // Bulletproof Redirect
-    const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+    const whatsappLink = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(text)}`;
     const a = document.createElement("a");
     a.href = whatsappLink;
     a.target = "_blank";

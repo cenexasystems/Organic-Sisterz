@@ -101,10 +101,22 @@ export default function GiftCustomization() {
       whatsappNumber = `91${whatsappNumber}`;
     }
 
-    const orderLines = items.map(it => `${it.quantity}x ${it.name} (${it.size}) - ₹${it.price * it.quantity}`).join("\n");
-    const text = `*New Gift Order!*\n\n*From:* ${senderName} (${senderMobile})\n*To:* ${recipientName}\n*Phone:* ${recipientPhone || "N/A"}\n*Address:* ${recipientAddress}\n\n*Products:*\n${orderLines}\n*Total:* ₹${totalPrice}\n\n*Gift Message:*\n"${giftMessage}"`;
+    const emojiGift = String.fromCodePoint(0x1F381);
+    const emojiHeartRibbon = String.fromCodePoint(0x1F49D);
+    const emojiUser = String.fromCodePoint(0x1F464);
+    const emojiPhone = String.fromCodePoint(0x1F4DE);
+    const emojiPin = String.fromCodePoint(0x1F4CD);
+    const emojiBox = String.fromCodePoint(0x1F4E6);
+    const emojiMoney = String.fromCodePoint(0x1F4B0);
+    const emojiMail = String.fromCodePoint(0x1F4E9);
+    const emojiSparkles = String.fromCodePoint(0x2728);
+    const bullet = String.fromCodePoint(0x2022);
+    const rupee = String.fromCodePoint(0x20B9);
+
+    const orderLines = items.map(it => `${bullet} ${it.quantity}x *${it.name}* (${it.size}) - ${rupee}${it.price * it.quantity}`).join("\n");
+    const text = `${emojiGift} *ORGANIC SISTERZ - NEW GIFT ORDER* ${emojiGift}\n----------------------------------\n${emojiHeartRibbon} *From (Sender):* ${senderName} (${senderMobile})\n${emojiUser} *To (Recipient):* ${recipientName}\n${emojiPhone} *Phone:* ${recipientPhone || "N/A"}\n${emojiPin} *Delivery Address:* ${recipientAddress}\n\n${emojiBox} *Gift Box Selections:*\n${orderLines}\n\n${emojiMoney} *Total Amount:* *${rupee}${totalPrice}* (includes Premium Packaging)\n----------------------------------\n${emojiMail} *Personal Message:*\n_"${giftMessage || "No message provided"}"_\n----------------------------------\n${emojiSparkles} Delivering organic magic to your loved ones! ${emojiSparkles}`;
     
-    setWhatsappLink(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`);
+    setWhatsappLink(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(text)}`);
 
     window.scrollTo(0, 0);
     setAnimState('boxing');
@@ -655,10 +667,22 @@ export default function GiftCustomization() {
                         if (whatsappNumber.length === 10) {
                           whatsappNumber = `91${whatsappNumber}`;
                         }
-                        const orderLines = items.map(it => `${it.quantity}x ${it.name} (${it.size}) - ₹${it.price * it.quantity}`).join("\n");
-                        const text = `*New Gift Order!*\n\n*From:* ${senderName} (${senderMobile})\n*To:* ${recipientName}\n*Phone:* ${recipientPhone || "N/A"}\n*Address:* ${recipientAddress}\n\n*Products:*\n${orderLines}\n*Total:* ₹${totalPrice}\n\n*Gift Message:*\n"${giftMessage}"`;
+                        const emojiGift = String.fromCodePoint(0x1F381);
+                        const emojiHeartRibbon = String.fromCodePoint(0x1F49D);
+                        const emojiUser = String.fromCodePoint(0x1F464);
+                        const emojiPhone = String.fromCodePoint(0x1F4DE);
+                        const emojiPin = String.fromCodePoint(0x1F4CD);
+                        const emojiBox = String.fromCodePoint(0x1F4E6);
+                        const emojiMoney = String.fromCodePoint(0x1F4B0);
+                        const emojiMail = String.fromCodePoint(0x1F4E9);
+                        const emojiSparkles = String.fromCodePoint(0x2728);
+                        const bullet = String.fromCodePoint(0x2022);
+                        const rupee = String.fromCodePoint(0x20B9);
+
+                        const orderLines = items.map(it => `${bullet} ${it.quantity}x *${it.name}* (${it.size}) - ${rupee}${it.price * it.quantity}`).join("\n");
+                        const text = `${emojiGift} *ORGANIC SISTERZ - NEW GIFT ORDER* ${emojiGift}\n----------------------------------\n${emojiHeartRibbon} *From (Sender):* ${senderName} (${senderMobile})\n${emojiUser} *To (Recipient):* ${recipientName}\n${emojiPhone} *Phone:* ${recipientPhone || "N/A"}\n${emojiPin} *Delivery Address:* ${recipientAddress}\n\n${emojiBox} *Gift Box Selections:*\n${orderLines}\n\n${emojiMoney} *Total Amount:* *${rupee}${totalPrice}* (includes Premium Packaging)\n----------------------------------\n${emojiMail} *Personal Message:*\n_"${giftMessage || "No message provided"}"_\n----------------------------------\n${emojiSparkles} Delivering organic magic to your loved ones! ${emojiSparkles}`;
                         
-                        const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+                        const link = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(text)}`;
                         window.open(link, '_blank');
                       }
                       setTimeout(() => navigate('/'), 500);
