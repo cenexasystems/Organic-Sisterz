@@ -268,6 +268,50 @@ export async function fetchOrders() {
   });
 }
 
+export async function fetchOrderById(id: string): Promise<Order | null> {
+  const { data, error } = await supabase.from('orders').select('*').eq('id', id).single();
+  
+  if (error || !data) {
+    if (error?.code !== 'PGRST116') { // PGRST116 is "Row not found"
+      console.error("Error fetching order by ID:", error);
+    }
+    return null;
+  }
+  
+  let parsedItems: any[] = [];
+  try {
+    if (Array.isArray(data.items)) {
+      parsedItems = data.items;
+    } else if (typeof data.items === 'string') {
+      parsedItems = JSON.parse(data.items);
+    }
+  } catch (e) {
+    console.error("Failed to parse official order items:", e);
+  }
+
+  return {
+    id: data.id,
+    customerName: data.customer_name,
+    customerPhone: data.customer_phone,
+    customerEmail: "",
+    customerAddress: data.source === 'OFFLINE' ? 'Offline POS Shop' : 'Online Shipping Address',
+    source: data.source,
+    items: parsedItems,
+    subtotal: typeof data.subtotal === 'number' ? data.subtotal : parseFloat(data.subtotal || '0'),
+    couponCode: data.coupon_code,
+    couponDiscount: typeof data.coupon_discount === 'number' ? data.coupon_discount : parseFloat(data.coupon_discount || '0'),
+    manualDiscount: typeof data.manual_discount === 'number' ? data.manual_discount : parseFloat(data.manual_discount || '0'),
+    deliveryCharge: typeof data.delivery_charge === 'number' ? data.delivery_charge : parseFloat(data.delivery_charge || '0'),
+    totalPrice: typeof data.total_price === 'number' ? data.total_price : parseFloat(data.total_price || '0'),
+    cashReceived: typeof data.cash_received === 'number' ? data.cash_received : parseFloat(data.cash_received || '0'),
+    changeReturned: typeof data.change_returned === 'number' ? data.change_returned : parseFloat(data.change_returned || '0'),
+    status: data.status || 'Completed',
+    createdAt: data.created_at,
+    userId: data.user_id
+  } as Order;
+}
+
+
 export async function insertOrder(order: any) {
   const { data: { session } } = await supabase.auth.getSession();
   const { error } = await supabase.from('orders').insert({
