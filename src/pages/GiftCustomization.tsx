@@ -9,7 +9,9 @@ import ProductDetailModal from '../components/ui/ProductDetailModal';
 export default function GiftCustomization() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<Record<string, { size: string, price: number, quantity: number, image: string }>>({});
+  const [selectedProducts, setSelectedProducts] = useState<Record<string, { productId: string, name: string, size: string, price: number, quantity: number, image: string }>>({});
+  const [productSelections, setProductSelections] = useState<Record<string, string>>({});
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   
   // "From" Details
   const [senderName, setSenderName] = useState('');
@@ -31,41 +33,33 @@ export default function GiftCustomization() {
     fetchProducts().then(setProducts).catch(console.error);
   }, []);
 
-  const toggleProduct = (product: Product) => {
+  const addToBasket = (product: Product) => {
+    const currentSize = productSelections[product.id] || product.sizes[0].size;
+    const currentPrice = product.sizes.find(s => s.size === currentSize)?.price || product.sizes[0].price;
+    const key = `${product.id}-${currentSize}`;
+    
     setSelectedProducts(prev => {
       const next = { ...prev };
-      if (next[product.id]) {
-        delete next[product.id];
+      if (next[key]) {
+        next[key].quantity += 1;
       } else {
-        next[product.id] = { size: product.sizes[0].size, price: product.sizes[0].price, quantity: 1, image: product.image };
+        next[key] = { productId: product.id, name: product.name, size: currentSize, price: currentPrice, quantity: 1, image: product.image };
       }
       return next;
     });
+    setToastMessage("Added to gift basket!");
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const updateQuantity = (id: string, delta: number) => {
+  const updateBasketQuantity = (key: string, delta: number) => {
     setSelectedProducts(prev => {
       const next = { ...prev };
-      if (next[id]) {
-        const newQuantity = next[id].quantity + delta;
+      if (next[key]) {
+        const newQuantity = next[key].quantity + delta;
         if (newQuantity <= 0) {
-          delete next[id];
+          delete next[key];
         } else {
-          next[id] = { ...next[id], quantity: newQuantity };
-        }
-      }
-      return next;
-    });
-  };
-
-  const updateSize = (id: string, newSize: string) => {
-    setSelectedProducts(prev => {
-      const next = { ...prev };
-      if (next[id]) {
-        const product = products.find(p => p.id === id);
-        const sizeObj = product?.sizes.find(s => s.size === newSize);
-        if (sizeObj) {
-          next[id] = { ...next[id], size: newSize, price: sizeObj.price };
+          next[key] = { ...next[key], quantity: newQuantity };
         }
       }
       return next;
@@ -82,11 +76,10 @@ export default function GiftCustomization() {
       return;
     }
 
-    const items = Object.entries(selectedProducts).map(([id, data]) => {
-      const p = products.find(p => p.id === id)!;
+    const items = Object.values(selectedProducts).map(data => {
       return {
-        productId: p.id,
-        name: p.name,
+        productId: data.productId,
+        name: data.name,
         size: data.size,
         price: data.price,
         quantity: data.quantity
@@ -114,7 +107,7 @@ export default function GiftCustomization() {
     const rupee = String.fromCodePoint(0x20B9);
 
     const orderLines = items.map(it => `${bullet} ${it.quantity}x *${it.name}* (${it.size}) - ${rupee}${it.price * it.quantity}`).join("\n");
-    const text = `${emojiGift} *ORGANIC SISTERZ - NEW GIFT ORDER* ${emojiGift}\n----------------------------------\n${emojiHeartRibbon} *From (Sender):* ${senderName} (${senderMobile})\n${emojiUser} *To (Recipient):* ${recipientName}\n${emojiPhone} *Phone:* ${recipientPhone || "N/A"}\n${emojiPin} *Delivery Address:* ${recipientAddress}\n\n${emojiBox} *Gift Box Selections:*\n${orderLines}\n\n${emojiMoney} *Total Amount:* *${rupee}${totalPrice}* (includes Premium Packaging)\n----------------------------------\n${emojiMail} *Personal Message:*\n_"${giftMessage || "No message provided"}"_\n----------------------------------\n${emojiSparkles} Delivering organic magic to your loved ones! ${emojiSparkles}`;
+    const text = `${emojiGift} *ORGANIC SISTERZ - NEW GIFT ORDER* ${emojiGift}\n----------------------------------\n${emojiHeartRibbon} *From (Sender):* ${senderName} (${senderMobile})\n${emojiUser} *To (Recipient):* ${recipientName}\n${emojiPhone} *Phone:* ${recipientPhone || "N/A"}\n${emojiPin} *Delivery Address:* ${recipientAddress}\n\n${emojiBox} *Gift Box Selections:*\n${orderLines}\n\n${emojiMoney} *Total Amount:* *${rupee}${totalPrice}* (+ Premium Packaging Charges)\n----------------------------------\n${emojiMail} *Personal Message:*\n_"${giftMessage || "No message provided"}"_\n----------------------------------\n${emojiSparkles} Delivering organic magic to your loved ones! ${emojiSparkles}`;
     
     setWhatsappLink(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(text)}`);
 
@@ -203,34 +196,15 @@ export default function GiftCustomization() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {products.map(product => {
-                    const isSelected = !!selectedProducts[product.id];
-                    const qty = isSelected ? selectedProducts[product.id].quantity : 0;
+                    const currentSize = productSelections[product.id] || product.sizes[0].size;
                     return (
                       <div 
                         key={product.id}
-                        className={`group relative p-6 rounded-[20px] border transition-all duration-300 flex flex-col items-center text-center gap-4 overflow-hidden ${
-                          isSelected 
-                            ? 'bg-[#1B3022] border-[#1B3022] shadow-[0_15px_30px_rgba(27,48,34,0.15)]' 
-                            : 'bg-white border-outline-variant/30 hover:border-[#1B3022]/30 hover:shadow-sm'
-                        }`}
+                        className="group relative p-6 rounded-[20px] border border-outline-variant/30 hover:border-[#1B3022]/30 bg-white hover:shadow-sm transition-all duration-300 flex flex-col items-center text-center gap-4 overflow-hidden"
                       >
-                        {isSelected && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleProduct(product);
-                            }}
-                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center transition-all duration-300 cursor-pointer z-10 shadow-sm"
-                            title="Discard from Gift Box"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                        <div 
-                          className="flex flex-col items-center w-full"
-                        >
+                        <div className="flex flex-col items-center w-full">
                           <div 
-                            className={`w-28 h-28 rounded-2xl overflow-hidden border-2 transition-all duration-500 bg-white p-2 flex items-center justify-center cursor-pointer ${isSelected ? 'border-[#D4AF37] scale-105' : 'border-outline-variant/20 group-hover:border-outline-variant/40'}`}
+                            className="w-44 h-44 sm:w-48 sm:h-48 rounded-2xl overflow-hidden border-2 border-outline-variant/20 group-hover:border-outline-variant/40 bg-white p-1 flex items-center justify-center cursor-pointer transition-all duration-300 group-hover:scale-105"
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedDetailProduct(product);
@@ -238,49 +212,39 @@ export default function GiftCustomization() {
                             }}
                             title="Click to view details"
                           >
-                            <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain" />
+                            <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain drop-shadow-sm" />
                           </div>
-                          <span 
-                            className={`font-display text-sm font-bold tracking-wide mt-4 cursor-pointer text-center ${isSelected ? 'text-[#FAF9F5]' : 'text-[#1B3022]'}`}
-                            onClick={() => toggleProduct(product)}
-                          >
+                          <span className="font-display text-sm font-bold tracking-wide mt-4 text-[#1B3022]">
                             {product.name}
                           </span>
                         </div>
                         
-                        {isSelected ? (
-                          <div className="flex flex-col gap-2 mt-2 w-full px-2">
-                            {product.sizes.length > 1 && (
-                              <div className="relative w-full">
-                                <select 
-                                  value={selectedProducts[product.id].size}
-                                  onChange={(e) => updateSize(product.id, e.target.value)}
-                                  onClick={e => e.stopPropagation()}
-                                  className="w-full bg-white/20 border border-white/30 rounded-lg text-xs py-1.5 pl-3 pr-8 text-white font-body focus:outline-none appearance-none text-left cursor-pointer hover:bg-white/30 transition-colors"
-                                >
-                                  {product.sizes.map(s => (
-                                    <option key={s.size} value={s.size} className="text-[#1B3022]">{s.size} - ₹{s.price}</option>
-                                  ))}
-                                </select>
-                                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-white/70">
-                                  <ChevronDown className="w-3.5 h-3.5" />
-                                </div>
+                        <div className="flex flex-col gap-3 mt-1 w-full px-2">
+                          {product.sizes.length > 1 && (
+                            <div className="relative w-full">
+                              <select 
+                                value={currentSize}
+                                onChange={(e) => setProductSelections(prev => ({ ...prev, [product.id]: e.target.value }))}
+                                onClick={e => e.stopPropagation()}
+                                className="w-full bg-[#FAF9F5] border border-outline-variant/30 rounded-lg text-xs py-2 pl-3 pr-8 text-[#1B3022] font-body focus:outline-none focus:border-[#D4AF37] appearance-none text-left cursor-pointer transition-colors"
+                              >
+                                {product.sizes.map(s => (
+                                  <option key={s.size} value={s.size}>{s.size} - ₹{s.price}</option>
+                                ))}
+                              </select>
+                              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#1B3022]/50">
+                                <ChevronDown className="w-3.5 h-3.5" />
                               </div>
-                            )}
-                            <div className="flex items-center justify-between bg-white/10 p-1.5 rounded-full border border-white/20">
-                              <button onClick={(e) => { e.stopPropagation(); updateQuantity(product.id, -1); }} className="w-6 h-6 rounded-full bg-white text-[#1B3022] flex items-center justify-center hover:bg-[#D4AF37] transition-colors"><Minus className="w-3 h-3" /></button>
-                              <span className="text-white font-body text-xs font-bold">{qty}</span>
-                              <button onClick={(e) => { e.stopPropagation(); updateQuantity(product.id, 1); }} className="w-6 h-6 rounded-full bg-white text-[#1B3022] flex items-center justify-center hover:bg-[#D4AF37] transition-colors"><Plus className="w-3 h-3" /></button>
                             </div>
-                          </div>
-                        ) : (
+                          )}
+                          
                           <button 
-                            onClick={() => toggleProduct(product)}
-                            className="mt-2 text-[10px] uppercase tracking-widest font-extrabold px-5 py-2.5 rounded-full transition-all duration-300 cursor-pointer bg-[#FAF9F5] border border-[#1B3022]/20 text-[#1B3022] hover:bg-[#1B3022] hover:text-[#FAF9F5] hover:border-[#1B3022] shadow-sm hover:shadow-md"
+                            onClick={() => addToBasket(product)}
+                            className="w-full text-[10px] uppercase tracking-widest font-extrabold px-5 py-2.5 rounded-full transition-all duration-300 cursor-pointer bg-[#FAF9F5] border border-[#1B3022]/20 text-[#1B3022] hover:bg-[#1B3022] hover:text-[#FAF9F5] hover:border-[#1B3022] shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                           >
-                            Add to Gift
+                            <Plus className="w-3 h-3" /> Add to Basket
                           </button>
-                        )}
+                        </div>
                       </div>
                     );
                   })}
@@ -293,48 +257,50 @@ export default function GiftCustomization() {
                       Your Gift Box Basket
                     </h4>
                     <div className="space-y-3.5 max-h-60 overflow-y-auto pr-1">
-                      {Object.entries(selectedProducts).map(([id, data]) => {
-                        const product = products.find(p => p.id === id);
-                        if (!product) return null;
+                      {Object.entries(selectedProducts).map(([key, data]) => {
                         return (
-                          <div key={id} className="flex items-center justify-between gap-4 p-3 rounded-xl bg-[#FAF9F5] border border-outline-variant/10 hover:shadow-sm transition-all duration-300">
-                            {/* Left: Product Info */}
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-12 h-12 bg-white rounded-lg border border-outline-variant/20 flex items-center justify-center p-1.5 shrink-0">
-                                <img src={data.image} alt={product.name} className="max-w-full max-h-full object-contain" />
-                              </div>
-                              <div className="min-w-0">
-                                <h5 className="font-display font-bold text-xs text-[#1B3022] truncate">{product.name}</h5>
-                                <span className="block text-[9px] text-[#6B7280] font-bold uppercase tracking-wider mt-0.5">
-                                  Size: {data.size} • Qty: {data.quantity}
+                          <div key={key} className="flex gap-4 p-4 rounded-xl bg-[#FAF9F5] border border-outline-variant/20 hover:shadow-md transition-all duration-300">
+                            {/* Left: Image */}
+                            <div className="w-16 h-16 bg-white rounded-xl border border-outline-variant/30 flex items-center justify-center p-2 shrink-0 shadow-sm">
+                              <img src={data.image} alt={data.name} className="max-w-full max-h-full object-contain" />
+                            </div>
+
+                            {/* Right: Info & Controls */}
+                            <div className="flex flex-col flex-1 min-w-0">
+                              {/* Top Row: Title & Price */}
+                              <div className="flex justify-between items-start gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <h5 className="font-display font-bold text-sm sm:text-base text-[#1B3022] truncate">{data.name}</h5>
+                                  <span className="text-[10px] text-[#6B7280] font-bold uppercase tracking-wider block mt-0.5">
+                                    Size: <span className="text-[#1B3022] text-sm ml-1">{data.size}</span>
+                                  </span>
+                                </div>
+                                <span className="font-display font-extrabold text-base text-[#1B3022] shrink-0">
+                                  ₹{data.price * data.quantity}
                                 </span>
                               </div>
-                            </div>
-                            
-                            {/* Right: Price & Delete */}
-                            <div className="flex items-center gap-4 shrink-0">
-                              <span className="font-display font-extrabold text-sm text-[#1B3022]">
-                                ₹{data.price * data.quantity}
-                              </span>
-                              <button 
-                                type="button"
-                                onClick={() => {
-                                  setSelectedProducts(prev => {
-                                    const next = { ...prev };
-                                    delete next[id];
-                                    return next;
-                                  });
-                                }}
-                                className="text-[#EF4444] hover:text-red-700 transition-colors p-1 cursor-pointer"
-                                title="Remove from Gift Box"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="3 6 5 6 21 6"></polyline>
-                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                  <line x1="10" y1="11" x2="10" y2="17"></line>
-                                  <line x1="14" y1="11" x2="14" y2="17"></line>
-                                </svg>
-                              </button>
+
+                              {/* Bottom Row: Quantity & Remove */}
+                              <div className="flex items-center justify-between mt-3">
+                                <div className="flex items-center gap-3 bg-white px-3 py-1 rounded-full border border-outline-variant/30 shadow-sm">
+                                  <button onClick={(e) => { e.stopPropagation(); updateBasketQuantity(key, -1); }} className="text-[#1B3022] hover:text-[#D4AF37] transition-colors"><Minus className="w-3.5 h-3.5" /></button>
+                                  <span className="text-[#1B3022] font-body text-base font-extrabold w-4 text-center">{data.quantity}</span>
+                                  <button onClick={(e) => { e.stopPropagation(); updateBasketQuantity(key, 1); }} className="text-[#1B3022] hover:text-[#D4AF37] transition-colors"><Plus className="w-3.5 h-3.5" /></button>
+                                </div>
+                                <button 
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedProducts(prev => {
+                                      const next = { ...prev };
+                                      delete next[key];
+                                      return next;
+                                    });
+                                  }}
+                                  className="text-[#EF4444] hover:text-red-700 transition-colors p-1.5 cursor-pointer flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-red-50 hover:bg-red-100 rounded-lg"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Remove</span>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         );
@@ -342,22 +308,6 @@ export default function GiftCustomization() {
                     </div>
                   </div>
                 )}
-
-                {/* Gift Subtotal / Total Amount Display */}
-                <div className="bg-white p-6 rounded-[20px] border border-outline-variant/30 mt-4 flex justify-between items-center shadow-sm">
-                  <div>
-                    <span className="block font-display text-[10px] font-bold text-[#1B3022]/60 uppercase tracking-[0.15em] mb-1">
-                      Total Amount ({Object.values(selectedProducts).reduce((sum, p) => sum + p.quantity, 0)} items)
-                    </span>
-                    <span className="font-display text-2xl font-extrabold text-[#1B3022]">
-                      ₹{Object.entries(selectedProducts).reduce((sum, [_, data]) => sum + data.price * data.quantity, 0)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[#1B3022]">
-                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-                    <span>Free Premium Packaging</span>
-                  </div>
-                </div>
               </div>
 
               {/* RIGHT: From & To Details */}
@@ -443,6 +393,24 @@ export default function GiftCustomization() {
                       className="w-full bg-black/20 border border-[#D4AF37]/50 rounded-xl px-5 py-4 font-body text-[#D4AF37] placeholder-[#D4AF37]/30 focus:outline-none focus:border-[#D4AF37] focus:bg-black/40 transition-all resize-none h-24 italic"
                       placeholder="Write a beautiful note that will be hand-written on our premium card..."
                     />
+                  </div>
+                </div>
+
+                {/* Gift Subtotal / Total Amount Display */}
+                <div className="bg-white p-6 rounded-[20px] border border-outline-variant/30 flex justify-between items-center shadow-sm mt-2">
+                  <div>
+                    <span className="block font-display text-[10px] font-bold text-[#1B3022]/60 uppercase tracking-[0.15em] mb-1">
+                      Total ({Object.values(selectedProducts).reduce((sum, p) => sum + p.quantity, 0)} items)
+                    </span>
+                    <span className="font-display text-3xl font-extrabold text-[#1B3022]">
+                      ₹{Object.entries(selectedProducts).reduce((sum, [_, data]) => sum + data.price * data.quantity, 0)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5 text-right">
+                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                    <span className="text-[9px] font-bold text-[#1B3022]/60 uppercase tracking-widest max-w-[130px] leading-relaxed">
+                      Premium Packaging Charges Will Apply
+                    </span>
                   </div>
                 </div>
 
@@ -651,11 +619,10 @@ export default function GiftCustomization() {
                     onClick={(e) => {
                       if (!whatsappLink) {
                         e.preventDefault();
-                        const items = Object.entries(selectedProducts).map(([id, data]) => {
-                          const p = products.find(p => p.id === id)!;
+                        const items = Object.values(selectedProducts).map(data => {
                           return {
-                            productId: p.id,
-                            name: p.name,
+                            productId: data.productId,
+                            name: data.name,
                             size: data.size,
                             price: data.price,
                             quantity: data.quantity
@@ -680,7 +647,7 @@ export default function GiftCustomization() {
                         const rupee = String.fromCodePoint(0x20B9);
 
                         const orderLines = items.map(it => `${bullet} ${it.quantity}x *${it.name}* (${it.size}) - ${rupee}${it.price * it.quantity}`).join("\n");
-                        const text = `${emojiGift} *ORGANIC SISTERZ - NEW GIFT ORDER* ${emojiGift}\n----------------------------------\n${emojiHeartRibbon} *From (Sender):* ${senderName} (${senderMobile})\n${emojiUser} *To (Recipient):* ${recipientName}\n${emojiPhone} *Phone:* ${recipientPhone || "N/A"}\n${emojiPin} *Delivery Address:* ${recipientAddress}\n\n${emojiBox} *Gift Box Selections:*\n${orderLines}\n\n${emojiMoney} *Total Amount:* *${rupee}${totalPrice}* (includes Premium Packaging)\n----------------------------------\n${emojiMail} *Personal Message:*\n_"${giftMessage || "No message provided"}"_\n----------------------------------\n${emojiSparkles} Delivering organic magic to your loved ones! ${emojiSparkles}`;
+                        const text = `${emojiGift} *ORGANIC SISTERZ - NEW GIFT ORDER* ${emojiGift}\n----------------------------------\n${emojiHeartRibbon} *From (Sender):* ${senderName} (${senderMobile})\n${emojiUser} *To (Recipient):* ${recipientName}\n${emojiPhone} *Phone:* ${recipientPhone || "N/A"}\n${emojiPin} *Delivery Address:* ${recipientAddress}\n\n${emojiBox} *Gift Box Selections:*\n${orderLines}\n\n${emojiMoney} *Total Amount:* *${rupee}${totalPrice}* (+ Premium Packaging Charges)\n----------------------------------\n${emojiMail} *Personal Message:*\n_"${giftMessage || "No message provided"}"_\n----------------------------------\n${emojiSparkles} Delivering organic magic to your loved ones! ${emojiSparkles}`;
                         
                         const link = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(text)}`;
                         window.open(link, '_blank');
@@ -709,20 +676,36 @@ export default function GiftCustomization() {
         onAddToCart={(id, size) => {
           const product = products.find(p => p.id === id);
           if (product) {
+            const currentSize = size || product.sizes[0].size;
+            const currentPrice = product.sizes.find(s => s.size === currentSize)?.price || product.sizes[0].price;
+            const key = `${product.id}-${currentSize}`;
+            
             setSelectedProducts(prev => {
               const next = { ...prev };
-              const sizeObj = product.sizes.find(s => s.size === size) || product.sizes[0];
-              next[id] = {
-                size: sizeObj.size,
-                price: sizeObj.price,
-                quantity: 1,
-                image: product.image
-              };
+              if (next[key]) {
+                next[key].quantity += 1;
+              } else {
+                next[key] = { productId: product.id, name: product.name, size: currentSize, price: currentPrice, quantity: 1, image: product.image };
+              }
               return next;
             });
           }
         }}
       />
+
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1B3022] text-[#FAF9F5] px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-[#3E5247]"
+          >
+            <Check className="w-5 h-5 text-[#D4AF37]" />
+            <span className="font-body text-sm font-semibold tracking-wide">{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
