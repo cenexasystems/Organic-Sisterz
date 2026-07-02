@@ -19,6 +19,7 @@ export default function CartPage() {
   const [productsList, setProductsList] = useState<Product[]>([]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     setCartItems(getStoredCart());
     fetchProducts().then(setProductsList).catch(console.error);
   }, [user]);
@@ -141,7 +142,7 @@ export default function CartPage() {
             </div>
           </div>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/#products-catalog")}
             className="flex items-center gap-2 text-[#4A5D52] hover:text-[#1B3022] transition-colors font-display uppercase tracking-widest text-[10px] font-bold self-start sm:self-center"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Continue Shopping
@@ -165,7 +166,7 @@ export default function CartPage() {
               your cart yet.
             </p>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/#products-catalog")}
               className="mt-8 bg-primary hover:bg-primary-container text-on-primary text-xs font-bold uppercase tracking-widest px-8 py-4 rounded-full transition-all shadow-sm hover:shadow-md cursor-pointer"
             >
               Explore Collection
@@ -184,7 +185,7 @@ export default function CartPage() {
                 {cartItems.length === 1 ? "item" : "items"})
               </h2>
 
-              <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-4">
                 {cartItems.map((item, idx) => {
                   const product = productsList.find(
                     (p) => p.id === item.productId,
@@ -198,11 +199,11 @@ export default function CartPage() {
                       {/* Left: Thumbnail & Details */}
                       <div className="flex items-center gap-3.5 sm:gap-4 flex-grow min-w-0">
                         {/* Product Thumbnail */}
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white p-2 flex items-center justify-center border border-outline-variant/20 shrink-0 shadow-sm">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-white flex items-center justify-center border border-outline-variant/20 shrink-0 shadow-sm">
                           <img
                             src={productImage}
                             alt={item.name}
-                            className="max-w-full max-h-full object-contain"
+                            className="w-full h-full object-contain"
                           />
                         </div>
 
@@ -211,8 +212,11 @@ export default function CartPage() {
                           <h4 className="font-display font-bold text-[#1B3022] text-sm sm:text-base leading-snug break-words">
                             {item.name}
                           </h4>
-                          <span className="text-[10px] text-on-surface-variant/80 font-bold uppercase tracking-wider mt-1 block">
-                            Size: {item.size} • Unit Price: ₹{item.price}
+                          <span className="text-xs sm:text-sm text-secondary font-bold uppercase tracking-wider mt-1.5 block">
+                            Size: {item.size}
+                          </span>
+                          <span className="text-[10px] sm:text-xs text-on-surface-variant/80 font-bold uppercase tracking-wider mt-0.5 block">
+                            Unit Price: ₹{item.price}
                           </span>
                         </div>
                       </div>
@@ -240,7 +244,7 @@ export default function CartPage() {
                         </div>
 
                         <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-1.5 min-w-[80px] justify-end">
-                          <span className="font-display font-extrabold text-base text-[#1B3022]">
+                          <span className="font-display font-extrabold text-lg sm:text-xl text-[#1B3022]">
                             ₹{item.price * item.quantity}
                           </span>
                           <button
@@ -373,6 +377,31 @@ export default function CartPage() {
           </div>
         )}
       </main>
+
+      {/* Minimal Footer for Cart Page */}
+      <footer className="w-full bg-primary mt-auto">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left text-white/90 font-body text-xs py-6 px-6 lg:px-8">
+          <div className="flex-1 md:text-left text-center">
+            © {new Date().getFullYear()} Organic Sisterz. All Rights Reserved
+          </div>
+          
+          <div className="flex-1 flex justify-center items-center gap-1.5 text-[10px] tracking-wider uppercase">
+            <span className="opacity-70">Powered by</span>
+            <a
+              href="https://cenexasystems.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-display font-bold hover:text-white transition-colors text-inverse-primary"
+            >
+              Cenexa Systems 
+            </a>  © {new Date().getFullYear()}
+          </div>
+          
+          <div className="flex-1 md:text-right text-center tracking-widest uppercase text-[10px] font-bold text-inverse-primary">
+            Pure • Organic • Proven
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

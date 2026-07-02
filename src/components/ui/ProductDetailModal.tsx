@@ -112,10 +112,12 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [activeAccordion, setActiveAccordion] = useState<string | null>('details');
   const [isSaved, setIsSaved] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     if (product && product.sizes.length > 0) {
       setSelectedSize(product.sizes[0].size);
+      setQuantity(1);
     }
   }, [product]);
 
@@ -196,7 +198,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
             data-lenis-prevent
-            className="relative bg-white w-full max-w-6xl rounded-3xl overflow-y-auto md:overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh] z-10 border border-outline-variant/20"
+            className="relative bg-white w-full h-[100dvh] md:h-auto md:max-h-[90vh] md:max-w-6xl md:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-y-auto z-10 md:border md:border-outline-variant/20"
           >
             {/* Close Button */}
             <button
@@ -207,9 +209,9 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             </button>
 
             {/* Left Column: Image Area */}
-            <div className="w-full md:w-1/2 bg-[#F9F7F0] p-6 md:p-10 flex flex-col justify-between relative shrink-0 md:shrink border-b md:border-b-0 md:border-r border-outline-variant/20">
+            <div className="w-full md:w-1/2 bg-[#F9F7F0] pt-16 pb-6 px-4 md:p-10 flex flex-col relative shrink-0 border-b md:border-b-0 md:border-r border-outline-variant/20 md:h-full">
               {/* Badges */}
-              <div className="flex justify-between items-center mb-4 md:mb-6">
+              <div className="flex flex-wrap gap-2 justify-start mb-2 md:mb-6">
                 <span className="font-body text-[10px] font-bold tracking-widest uppercase bg-primary/10 text-primary px-3 py-1.5 rounded-full border border-primary/20">
                   Premium Selection
                 </span>
@@ -219,33 +221,19 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
               </div>
 
               {/* Main Product Image Card */}
-              <div className="relative h-48 sm:h-64 md:h-auto md:aspect-square w-full rounded-2xl overflow-hidden border border-outline-variant/35 bg-white p-6 shadow-sm flex items-center justify-center my-auto group">
+              <div className="relative aspect-square w-full max-w-[240px] md:max-w-full mx-auto rounded-2xl overflow-hidden border border-outline-variant/35 bg-white p-2 shadow-sm flex items-center justify-center my-auto group">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="max-h-full max-w-full object-contain group-hover:scale-103 transition-transform duration-700"
+                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
                 />
-                
-                {/* Botanical leaves watermarking overlay (aesthetic) */}
-                <div className="absolute top-4 right-4 opacity-5 pointer-events-none">
-                  <svg width="100" height="100" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17 8C8 10 7 19 7 19S11 11 17 8M17 8C19.7 7 21 4 21 4S19.5 7 17 8M7 19S6 20 4 21C4 21 5 19 7 19Z"/>
-                  </svg>
-                </div>
-              </div>
-
-              {/* Thumbnail Bar */}
-              <div className="flex gap-3 mt-4 md:mt-6">
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl border-2 border-secondary bg-white p-1 overflow-hidden cursor-pointer shadow-sm">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-contain" />
-                </div>
               </div>
             </div>
 
             {/* Right Column: details and specifications */}
-            <div className="w-full md:w-1/2 flex flex-col md:overflow-hidden bg-white shrink-0">
+            <div className="w-full md:w-1/2 flex flex-col bg-white shrink-0 md:h-full md:max-h-[90vh]">
               {/* Scrolling details content */}
-              <div className="flex-1 md:overflow-y-auto overflow-visible p-6 md:p-10 space-y-6">
+              <div className="flex-1 md:overflow-y-auto p-5 md:p-10 space-y-6">
                 {/* Green Subtitle & Title */}
                 <div className="space-y-2">
                   <span className="font-body text-xs font-bold text-secondary tracking-widest uppercase block">
@@ -256,19 +244,8 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                   </h2>
                 </div>
 
-                {/* Ratings Row */}
-                <div className="flex items-center gap-3 mt-4">
-                  <div className="flex items-center gap-1 bg-[#FDF8E2] text-[#B8860B] px-2.5 py-1 rounded-full text-xs font-bold border border-[#EEDB88]">
-                    <span>★</span>
-                    <span>{spec.rating}</span>
-                  </div>
-                  <span className="font-body text-xs text-on-surface-variant/80">
-                    Trusted by 1000+ customers & families
-                  </span>
-                </div>
-
-                {/* Price Display */}
-                <div className="bg-[#FAF9F5] p-5 rounded-2xl border border-outline-variant/30 mt-6 flex justify-between items-center">
+                {/* Price Display Moved Up */}
+                <div className="bg-[#FAF9F5] p-5 rounded-2xl border border-outline-variant/30 flex justify-between items-center">
                   <div>
                     <span className="font-body text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-wider block mb-1">
                       MRP (INCLUSIVE OF TAXES)
@@ -510,24 +487,33 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                 </div>
               </div>
               {/* Bottom Sticky Action Bar */}
-              <div className="p-6 md:px-10 md:py-6 border-t border-outline-variant/20 flex flex-col sm:flex-row gap-4 items-center justify-between bg-[#FAF9F5] md:bg-[#FAF9F5]/40 backdrop-blur-sm shrink-0 sticky bottom-0 z-20">
-                <div>
+              <div className="p-4 md:px-10 md:py-6 border-t border-outline-variant/20 flex flex-row gap-3 items-center justify-between bg-[#FAF9F5] md:bg-[#FAF9F5]/40 backdrop-blur-sm shrink-0 sticky bottom-0 z-20">
+                <div className="flex flex-col min-w-[70px]">
                   <span className="text-[10px] font-bold text-on-surface-variant/70 uppercase block">Total</span>
-                  <span className="font-display text-2xl font-extrabold text-primary">₹{currentPrice}</span>
+                  <span className="font-display text-lg md:text-2xl font-extrabold text-primary">₹{currentPrice * quantity}</span>
                 </div>
+                
+                {/* Quantity Controls */}
+                <div className="flex items-center bg-white rounded-full border border-outline-variant/30 h-10 md:h-12 px-1">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-primary font-bold hover:bg-surface-container-low rounded-full cursor-pointer">-</button>
+                  <span className="w-5 md:w-6 text-center font-bold text-sm">{quantity}</span>
+                  <button onClick={() => setQuantity(quantity + 1)} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-primary font-bold hover:bg-surface-container-low rounded-full cursor-pointer">+</button>
+                </div>
+
                 <button
                   disabled={product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false)}
                   onClick={() => {
-                    onAddToCart(product.id, activeSizeStr);
-                    onClose();
+                    for(let i=0; i<quantity; i++) {
+                       onAddToCart(product.id, activeSizeStr);
+                    }
                   }}
-                  className={`w-full sm:w-auto font-body text-xs font-bold tracking-widest uppercase px-12 py-4 rounded-full flex items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
+                  className={`font-body text-[10px] md:text-xs font-bold tracking-widest uppercase px-5 md:px-8 py-3.5 md:py-4 rounded-full flex items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
                     product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false)
                       ? 'bg-gray-400 text-white cursor-not-allowed shadow-none'
                       : 'bg-primary hover:bg-primary-container text-on-primary cursor-pointer'
                   }`}
                 >
-                  <ShoppingBag className="w-4 h-4" />
+                  <ShoppingBag className="w-4 h-4 hidden sm:block" />
                   <span>
                     {product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false)
                       ? 'Out of Stock'
