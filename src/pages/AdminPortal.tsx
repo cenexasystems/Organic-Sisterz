@@ -306,7 +306,7 @@ export default function AdminPortal() {
       name: prodName,
       category: prodCategory,
       description: prodDesc,
-      image: editingProduct ? editingProduct.image : '/herbal-hair-oil.jpeg',
+      image: editingProduct ? editingProduct.image : '/mahizham_hair_oil.png',
       herbs: prodHerbs,
       benefits: benefitsArray,
       sizes: cleanSizes,
