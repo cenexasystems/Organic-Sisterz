@@ -78,6 +78,11 @@ export default function AdminPortal() {
   const [whatsappCustomStart, setWhatsappCustomStart] = useState('');
   const [whatsappCustomEnd, setWhatsappCustomEnd] = useState('');
 
+  // Filter state for Gifts Received tab
+  const [giftPeriodFilter, setGiftPeriodFilter] = useState<'all' | 'today' | 'week' | 'month' | 'year' | 'custom'>('all');
+  const [giftCustomStart, setGiftCustomStart] = useState('');
+  const [giftCustomEnd, setGiftCustomEnd] = useState('');
+
   // Filters for Orders Hub tab (Bills)
   const [ordersSourceFilter, setOrdersSourceFilter] = useState<'ALL' | 'OFFLINE' | 'ONLINE' | 'MANUAL'>('ALL');
   const [ordersDateFilter, setOrdersDateFilter] = useState<'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'CUSTOM'>('ALL');
@@ -140,17 +145,59 @@ export default function AdminPortal() {
     return `GIFT-${year}-${seqStr}`;
   };
 
-  // Filtered Gift requests
-  const filteredGiftRequests = giftRequests.filter(g => {
-    if (!giftSearch.trim()) return true;
-    const term = giftSearch.toLowerCase();
-    const senderMatch = g.senderName?.toLowerCase().includes(term) || g.senderMobile?.toLowerCase().includes(term);
-    const recipientMatch = g.recipientName?.toLowerCase().includes(term) || g.recipientPhone?.toLowerCase().includes(term) || g.recipientAddress?.toLowerCase().includes(term);
-    const invoiceId = getGiftInvoice(g.id);
-    const invoiceMatch = invoiceId.toLowerCase().includes(term);
-    const productsMatch = g.items?.some((it: any) => it.name?.toLowerCase().includes(term));
-    return senderMatch || recipientMatch || invoiceMatch || productsMatch;
-  });
+  // Filtered Gift requests by period and search
+  const getFilteredGiftRequests = (excludeSearch = false) => {
+    const now = new Date();
+    let list = [...giftRequests];
+
+    // Period filter
+    list = list.filter(g => {
+      const gDate = new Date(g.createdAt);
+      if (giftPeriodFilter === 'today') {
+        return gDate.toDateString() === now.toDateString();
+      }
+      if (giftPeriodFilter === 'week') {
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return gDate >= oneWeekAgo;
+      }
+      if (giftPeriodFilter === 'month') {
+        return gDate.getMonth() === now.getMonth() && gDate.getFullYear() === now.getFullYear();
+      }
+      if (giftPeriodFilter === 'year') {
+        return gDate.getFullYear() === now.getFullYear();
+      }
+      if (giftPeriodFilter === 'custom') {
+        if (giftCustomStart) {
+          const start = new Date(giftCustomStart);
+          start.setHours(0, 0, 0, 0);
+          if (gDate < start) return false;
+        }
+        if (giftCustomEnd) {
+          const end = new Date(giftCustomEnd);
+          end.setHours(23, 59, 59, 999);
+          if (gDate > end) return false;
+        }
+      }
+      return true; // all
+    });
+
+    // Search filter
+    if (!excludeSearch && giftSearch.trim()) {
+      const term = giftSearch.toLowerCase();
+      list = list.filter(g => {
+        const senderMatch = g.senderName?.toLowerCase().includes(term) || g.senderMobile?.toLowerCase().includes(term);
+        const recipientMatch = g.recipientName?.toLowerCase().includes(term) || g.recipientPhone?.toLowerCase().includes(term) || g.recipientAddress?.toLowerCase().includes(term);
+        const invoiceId = getGiftInvoice(g.id);
+        const invoiceMatch = invoiceId.toLowerCase().includes(term);
+        const productsMatch = g.items?.some((it: any) => it.name?.toLowerCase().includes(term));
+        return senderMatch || recipientMatch || invoiceMatch || productsMatch;
+      });
+    }
+
+    return list;
+  };
+
+  const filteredGiftRequests = getFilteredGiftRequests();
 
   const loadData = async () => {
     try {
@@ -688,7 +735,7 @@ export default function AdminPortal() {
     
     // Period filter
     list = list.filter(o => {
-      const oDate = new Date(o.created_at);
+      const oDate = new Date(o.createdAt);
       if (periodFilter === 'today') {
         return oDate.toDateString() === now.toDateString();
       }
@@ -703,16 +750,9 @@ export default function AdminPortal() {
         return oDate.getFullYear() === now.getFullYear();
       }
       if (periodFilter === 'custom') {
-        if (whatsappCustomStart) {
-          const start = new Date(whatsappCustomStart);
-          start.setHours(0, 0, 0, 0);
-          if (oDate < start) return false;
-        }
-        if (whatsappCustomEnd) {
-          const end = new Date(whatsappCustomEnd);
-          end.setHours(23, 59, 59, 999);
-          if (oDate > end) return false;
-        }
+        const oDateStr = o.createdAt.split('T')[0];
+        if (whatsappCustomStart && oDateStr < whatsappCustomStart) return false;
+        if (whatsappCustomEnd && oDateStr > whatsappCustomEnd) return false;
       }
       return true; // all
     });
@@ -721,8 +761,8 @@ export default function AdminPortal() {
     if (!excludeSearch && whatsappSearch) {
       const s = whatsappSearch.toLowerCase();
       list = list.filter(o => 
-        o.customer_name.toLowerCase().includes(s) || 
-        o.customer_phone.toLowerCase().includes(s) || 
+        o.customerName.toLowerCase().includes(s) || 
+        o.customerPhone.toLowerCase().includes(s) || 
         o.id.toLowerCase().includes(s)
       );
     }
@@ -759,14 +799,10 @@ export default function AdminPortal() {
       });
     } else if (ordersDateFilter === 'CUSTOM') {
       if (ordersStartDate) {
-        const start = new Date(ordersStartDate);
-        start.setHours(0, 0, 0, 0);
-        list = list.filter(o => new Date(o.createdAt) >= start);
+        list = list.filter(o => o.createdAt.split('T')[0] >= ordersStartDate);
       }
       if (ordersEndDate) {
-        const end = new Date(ordersEndDate);
-        end.setHours(23, 59, 59, 999);
-        list = list.filter(o => new Date(o.createdAt) <= end);
+        list = list.filter(o => o.createdAt.split('T')[0] <= ordersEndDate);
       }
     }
 
@@ -1923,14 +1959,10 @@ export default function AdminPortal() {
                       list = list.filter(o => new Date(o.createdAt).getFullYear() === now.getFullYear());
                     } else if (analyticsPeriodFilter === 'custom') {
                       if (analyticsStartDate) {
-                        const start = new Date(analyticsStartDate);
-                        start.setHours(0,0,0,0);
-                        list = list.filter(o => new Date(o.createdAt) >= start);
+                        list = list.filter(o => o.createdAt.split('T')[0] >= analyticsStartDate);
                       }
                       if (analyticsEndDate) {
-                        const end = new Date(analyticsEndDate);
-                        end.setHours(23,59,59,999);
-                        list = list.filter(o => new Date(o.createdAt) <= end);
+                        list = list.filter(o => o.createdAt.split('T')[0] <= analyticsEndDate);
                       }
                     }
                     return list;
@@ -2519,18 +2551,77 @@ export default function AdminPortal() {
                     </p>
                   </div>
                   
-                  {/* Styled Search Bar matching theme */}
-                  <div className="relative w-full md:w-64">
-                    <Search className="w-4 h-4 text-[#2B3E2F] absolute left-4 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      placeholder="Search gifts..."
-                      value={giftSearch}
-                      onChange={(e) => setGiftSearch(e.target.value)}
-                      className="pl-11 pr-4 py-2.5 bg-[#F5F2EB] border border-[#2B3E2F]/30 hover:border-[#2B3E2F]/60 focus:border-[#2B3E2F] rounded-full text-xs font-semibold focus:outline-none w-full text-primary shadow-sm"
-                    />
+                  {/* Filters Container */}
+                  <div className="flex flex-col xl:flex-row items-end xl:items-center gap-4 self-start sm:self-auto w-full xl:w-auto">
+                    {/* Period selection filters and Refresh button */}
+                    <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto pb-1 xl:pb-0">
+                      <div className="bg-[#ECEEEB] p-1.5 rounded-full flex gap-1 shrink-0">
+                        {(['all', 'today', 'week', 'month', 'year', 'custom'] as const).map(f => (
+                          <button
+                            key={f}
+                            onClick={() => setGiftPeriodFilter(f)}
+                            className={`text-[10px] sm:text-xs font-semibold py-2 px-3 sm:px-4 rounded-full transition-all cursor-pointer uppercase whitespace-nowrap ${
+                              giftPeriodFilter === f
+                                ? 'bg-[#2B3E2F] text-white shadow-sm'
+                                : 'text-on-surface-variant hover:text-primary'
+                            }`}
+                          >
+                            {f === 'all' ? 'All' : f === 'today' ? 'Today' : f === 'week' ? 'Week' : f === 'month' ? 'Month' : f === 'year' ? 'Year' : 'Custom'}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={handleRefresh}
+                        className="bg-white border border-outline-variant/35 hover:border-secondary text-primary font-bold text-xs py-3 px-4 rounded-full flex items-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                      </button>
+                    </div>
+
+                    {/* Styled Search Bar matching theme */}
+                    <div className="relative w-full md:w-64">
+                      <Search className="w-4 h-4 text-[#2B3E2F] absolute left-4 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        placeholder="Search gifts..."
+                        value={giftSearch}
+                        onChange={(e) => setGiftSearch(e.target.value)}
+                        className="pl-11 pr-4 py-2.5 bg-[#F5F2EB] border border-[#2B3E2F]/30 hover:border-[#2B3E2F]/60 focus:border-[#2B3E2F] rounded-full text-xs font-semibold focus:outline-none w-full text-primary shadow-sm"
+                      />
+                    </div>
                   </div>
                 </div>
+
+                {/* Custom Date Pickers */}
+                <AnimatePresence>
+                  {giftPeriodFilter === 'custom' && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                      animate={{ opacity: 1, height: 'auto', marginTop: -8 }}
+                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                      className="flex flex-wrap items-center gap-4 bg-[#FAF9F5] p-4 rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">From:</span>
+                        <input
+                          type="date"
+                          value={giftCustomStart}
+                          onChange={(e) => setGiftCustomStart(e.target.value)}
+                          className="text-sm font-medium bg-white border border-outline-variant/30 rounded-lg px-3 py-2 focus:outline-none focus:border-secondary"
+                        />
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">To:</span>
+                        <input
+                          type="date"
+                          value={giftCustomEnd}
+                          onChange={(e) => setGiftCustomEnd(e.target.value)}
+                          className="text-sm font-medium bg-white border border-outline-variant/30 rounded-lg px-3 py-2 focus:outline-none focus:border-secondary"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 
                 <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
                   {filteredGiftRequests.length === 0 ? (
@@ -2538,13 +2629,15 @@ export default function AdminPortal() {
                       No gift orders found.
                     </div>
                   ) : (
-                    <table className="w-full text-left text-sm">
+                    <table className="w-full text-left text-sm min-w-[900px]">
                       <thead>
                         <tr className="bg-[#FAF9F5] text-primary font-bold border-b border-outline-variant/25 uppercase text-[10px] tracking-wider">
                           <th className="px-6 py-4">Invoice ID</th>
+                          <th className="px-6 py-4">Date & Time</th>
                           <th className="px-6 py-4">Sender / Recipient</th>
                           <th className="px-6 py-4">Personal Message</th>
                           <th className="px-6 py-4">Products</th>
+                          <th className="px-6 py-4">Status</th>
                           <th className="px-6 py-4 text-right">Total</th>
                         </tr>
                       </thead>
@@ -2552,9 +2645,23 @@ export default function AdminPortal() {
                         {filteredGiftRequests.map(o => (
                           <tr key={o.id} className="hover:bg-[#FAF9F5]/40 transition-colors">
                             <td className="px-6 py-4 font-bold text-primary">{getGiftInvoice(o.id)}</td>
+                            <td className="px-6 py-4 text-on-surface-variant font-medium">
+                              {o.createdAt ? (
+                                <>
+                                  {new Date(o.createdAt).toLocaleDateString(undefined, { 
+                                    day: '2-digit', 
+                                    month: 'short', 
+                                    year: 'numeric' 
+                                  })} {new Date(o.createdAt).toLocaleTimeString(undefined, { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </>
+                              ) : '—'}
+                            </td>
                             <td className="px-6 py-4">
-                                                              <div className="font-semibold text-primary">{o.recipientName}</div>
-                                                              <div className="text-xs text-on-surface-variant mt-0.5">{o.recipientPhone} | Gift from: {o.senderName}</div>
+                              <div className="font-semibold text-primary">{o.recipientName}</div>
+                              <div className="text-xs text-on-surface-variant mt-0.5">{o.recipientPhone} | Gift from: {o.senderName}</div>
                             </td>
                             <td className="px-6 py-4">
                               <div className="bg-[#FAF9F5] p-3 rounded-lg border border-[#D4AF37]/30 text-xs italic text-[#1B3022]">
@@ -2567,6 +2674,26 @@ export default function AdminPortal() {
                                   <li key={idx}>• {it.name} ({it.size}) x{it.quantity}</li>
                                 ))}
                               </ul>
+                            </td>
+                            <td className="px-6 py-4">
+                              <select
+                                value={o.status}
+                                onChange={(e) => updateOrderStatus(o.id, e.target.value as Order['status'])}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase border bg-white focus:outline-none transition-all cursor-pointer ${
+                                  o.status === 'Completed'
+                                    ? 'text-green-700 border-green-200 bg-green-50'
+                                    : o.status === 'Processing'
+                                    ? 'text-blue-700 border-blue-200 bg-[#EFF6FF]'
+                                    : o.status === 'Cancelled'
+                                    ? 'text-red-700 border-red-200 bg-red-50'
+                                    : 'text-yellow-700 border-yellow-200 bg-[#FEFCE8]'
+                                }`}
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Processing">Processing</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                              </select>
                             </td>
                             <td className="px-6 py-4 font-bold text-primary text-right">₹{o.totalPrice}</td>
                           </tr>
