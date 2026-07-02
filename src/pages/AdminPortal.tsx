@@ -697,20 +697,11 @@ export default function AdminPortal() {
     }
 
     // Format WhatsApp invoice
-    const dateStr = new Date().toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
-    const itemsText = billingItems.map(it => {
-      const sizeStr = it.size && it.size !== '—' ? ` - ${it.size}` : '';
-      return `• ${it.name || 'Item'}${sizeStr} x ${it.quantity} - ₹${it.price * it.quantity}`;
-    }).join('\n');
-
-    const discountText = couponDisc > 0 ? `🏷️ *Coupon:* ${billingCoupon} (-₹${couponDisc.toFixed(2)})\n` : '';
-    const manualDiscText = manualDisc > 0 ? `💸 *Discount:* -₹${manualDisc.toFixed(2)}\n` : '';
-    const deliveryText = billingDeliveryFee > 0 ? `🚚 *Delivery:* ₹${billingDeliveryFee.toFixed(2)}\n` : '';
-
-    const invoiceMessage = `🌿 *POS BILLING INVOICE - ORGANIC SISTERZ*\n----------------------------------\n👤 *Customer:* ${billingCustomerName || 'Walk-in Customer'}\n📞 *Phone:* ${billingCustomerPhone || '-'}\n🛒 *Type:* ${billingSource}\n📅 *Date:* ${dateStr}\n\n📦 *Items:*\n${itemsText}\n\n💵 *Subtotal:* ₹${subtotal.toFixed(2)}\n${discountText}${manualDiscText}${deliveryText}----------------------------------\n💰 *GRAND TOTAL:* ₹${grandTotal.toFixed(2)}\n----------------------------------\n💵 *Cash Paid:* ₹${billingAmountReceived.toFixed(2)}\n🔄 *Change Return:* ₹${balance.toFixed(2)}\n\nThank you for shopping at Organic Sisterz! 🌿`;
+    const invoiceUrl = `${window.location.origin}/invoice/${newOrder.id}`;
+    const invoiceMessage = `🌿 *Organic Sisterz - Purchase Successful!*\n\nHi ${billingCustomerName || 'Customer'},\nThank you for shopping with us! You can view, download, or print your official digital invoice here:\n\n${invoiceUrl}\n\nHave a great day!`;
 
     // Copy to clipboard
-    navigator.clipboard.writeText(invoiceMessage);
+    navigator.clipboard.writeText(invoiceUrl);
 
     // Open WhatsApp Web targeting the input customer number or default to 7904199050
     const targetPhone = billingCustomerPhone ? billingCustomerPhone : '7904199050';
