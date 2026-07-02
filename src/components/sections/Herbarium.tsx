@@ -24,7 +24,7 @@ const ingredients: Ingredient[] = [
     bioavailability: "96%",
     clinicalBenefit:
       "Mild natural surfactant that cleanses scalp build-up while preserving healthy follicle lipids.",
-    image: "/shikaki.jpeg",
+    image: "/shikaki.png",
     details:
       "Shikakai (literally meaning \"fruit for hair\") has been India's premier hair wash for centuries. The bark and pods contain natural saponins which lather mildly when mixed with water. It dissolves sebum, prevents dandruff, and conditions the cuticle without stripping the scalp's delicate acid mantle.",
   },
@@ -37,7 +37,7 @@ const ingredients: Ingredient[] = [
     bioavailability: "94%",
     clinicalBenefit:
       "Soothes sunburn, eliminates dark spots, and reduces skin pigmentation naturally.",
-    image: "/avaram_senna.jpeg",
+    image: "/avaram_senna.png",
     details:
       "Aavaram Senna (Aavarampoo) is a brilliant golden-yellow flower celebrated for its skin hydrating properties. Our low-temperature vacuum milling ensures its polyphenolic antioxidants remain stable, allowing them to treat acne, prevent body odor, and clear facial tan when used daily.",
   },
@@ -50,7 +50,7 @@ const ingredients: Ingredient[] = [
     bioavailability: "98%",
     clinicalBenefit:
       "Neutralizes root oxidative stress, delaying premature greying and strengthening the keratin sheath.",
-    image: "/amla.jpeg",
+    image: "/amla.png",
     details:
       "Amla is a powerful organic source of Vitamin C. It strengthens hair follicles from within by promoting collagen synthesis, helping to keep hair roots firmly anchored while maintaining natural dark pigment cells.",
   },
@@ -63,7 +63,7 @@ const ingredients: Ingredient[] = [
     bioavailability: "92%",
     clinicalBenefit:
       "Regulates skin sebum, suppresses acne-causing pathogens, and brightens complexion.",
-    image: "/kasturi_manjal.jpeg",
+    image: "/kasturi_manjal.png",
     details:
       "Wild Turmeric (Kasthuri Manjal) is renowned for its cosmetic efficacy. Unlike cooking turmeric, it does not stain the skin yellow. It acts as a powerful natural antibiotic and anti-inflammatory, resolving deep acne and protecting the skin barrier.",
   },
