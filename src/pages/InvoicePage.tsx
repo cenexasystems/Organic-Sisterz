@@ -170,8 +170,10 @@ export default function InvoicePage() {
               {order.items.map((item, index) => (
                 <tr key={index} className="group">
                   <td className="py-6 pr-4 print:py-3">
-                    <p className="text-sm font-bold text-[#1B3022]">{item.name}</p>
-                    {item.size && <p className="text-xs text-[#4B5563] mt-0.5">{item.size}</p>}
+                    <p className="text-sm font-bold text-[#1B3022]">
+                      {item.name}
+                      {item.size && item.size !== '—' && ` - ${item.size}`}
+                    </p>
                   </td>
                   <td className="py-6 px-4 print:py-3 text-center text-sm font-bold text-[#4B5563]">{item.quantity}</td>
                   <td className="py-6 pl-4 print:py-3 text-right text-sm font-bold text-[#4B5563]">₹{item.price.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
