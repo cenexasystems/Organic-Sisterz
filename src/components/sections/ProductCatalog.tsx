@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowRight, Heart, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
 import ProductDetailModal from "../ui/ProductDetailModal";
 import { fetchProducts } from "../../utils/db";
 import type { Product } from "../../utils/store";

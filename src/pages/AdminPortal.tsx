@@ -1,8 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  X, Lock, Plus, Trash2, Edit3, Settings, Eye, Search, Shield,
-  MessageSquare, BarChart3, ShoppingCart, Receipt, 
+  X, Lock, Plus, Trash2, Edit3, Settings, Eye, Search, Shield, BarChart3, ShoppingCart, Receipt, 
   Package, FolderTree, Ticket, Users, RefreshCw, Award, CheckCircle2, TrendingUp,
   Globe, ShoppingBag, Gift, ChevronLeft, ChevronRight, Download
 } from 'lucide-react';

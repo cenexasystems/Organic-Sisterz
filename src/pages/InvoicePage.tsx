@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchOrderById } from "../utils/db";
 import type { Order } from "../utils/store";
-import { ShoppingBag, MapPin, Phone, Printer, Copy, Check, Leaf } from "lucide-react";
+import {  MapPin, Phone, Printer, Copy, Check, Leaf } from "lucide-react";
 
 export default function InvoicePage() {
   const { id } = useParams<{ id: string }>();
