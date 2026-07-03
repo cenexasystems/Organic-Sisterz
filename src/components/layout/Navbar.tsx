@@ -20,8 +20,7 @@ interface NavbarProps {
 
 
 export default function Navbar({
-  onConsultationClick,
-  onAdminClick,
+ 
   onGiftClick,
 }: NavbarProps) {
   const navigate = useNavigate();
@@ -277,62 +276,66 @@ export default function Navbar({
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-white border-b border-outline-variant/30 overflow-hidden"
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed inset-0 z-[60] bg-[#FAF9F5] md:hidden flex flex-col pt-8 px-8 pb-8 h-[100dvh] overflow-y-auto"
             >
-              <div className="px-6 py-4 space-y-4 flex flex-col">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    onClick={(e) => handleNavLinkClick(e, link)}
-                    className={`font-body text-sm font-semibold tracking-widest uppercase py-2 ${
-                      link.id === activeSection
-                        ? "text-primary font-bold"
-                        : "text-on-surface-variant"
-                    }`}
+              {/* Drawer Header with Close Button */}
+              <div className="flex justify-end mb-10">
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-[#1B3022] p-2 hover:bg-[#1B3022]/10 rounded-full transition-colors cursor-pointer"
+                  aria-label="Close menu"
+                >
+                  <X className="w-8 h-8" />
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-6 w-full h-full">
+                <div className="flex flex-col gap-4 border-b border-outline-variant/20 pb-6">
+                  {navLinks.map((link) => (
+                    <a
+                      key={link.name}
+                      href={link.href}
+                      onClick={(e) => handleNavLinkClick(e, link)}
+                      className={`font-display text-2xl font-bold uppercase tracking-widest transition-colors ${
+                        link.id === activeSection
+                          ? "text-[#1B3022]"
+                          : "text-[#6B7280] hover:text-[#1B3022]"
+                      }`}
+                    >
+                      {link.name}
+                    </a>
+                  ))}
+                </div>
+                
+                <div className="flex flex-col gap-4 pt-2">
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate(user ? '/profile' : '/login');
+                    }}
+                    className="font-body text-sm font-semibold tracking-widest uppercase text-[#1B3022] border border-[#1B3022]/20 rounded-full py-4 w-full flex items-center justify-center gap-2 hover:bg-[#1B3022]/5 transition-colors"
                   >
-                    {link.name}
-                  </a>
-                ))}
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    navigate(user ? '/profile' : '/login');
-                  }}
-                  className="font-body text-sm font-semibold tracking-widest uppercase text-primary border border-outline-variant/30 rounded-xl py-3 w-full flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors"
-                >
-                  <User className="w-4 h-4" /> {user ? "Profile" : "Login"}
-                </button>
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    onAdminClick();
-                  }}
-                  className="font-body text-sm font-semibold tracking-widest uppercase py-2 text-left text-on-surface-variant hover:text-primary"
-                >
-                  Admin Console
-                </button>
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    if (onGiftClick) onGiftClick();
-                  }}
-                  className="font-body text-sm font-semibold tracking-widest uppercase py-2 text-left text-secondary hover:text-[#1b3022] flex items-center gap-2"
-                >
-                  <Gift className="w-4 h-4" /> Gift a Friend
-                </button>
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    onConsultationClick();
-                  }}
-                  className="bg-primary text-on-primary font-body text-xs font-semibold tracking-widest uppercase px-6 py-4 rounded-full mt-4 w-full cursor-pointer"
-                >
-                  Consultation
-                </button>
+                    <User className="w-4 h-4" /> {user ? "Profile" : "Login"}
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      if (onGiftClick) onGiftClick();
+                    }}
+                    className="font-body text-sm font-semibold tracking-widest uppercase text-[#D4AF37] border border-[#D4AF37]/30 rounded-full py-4 w-full flex items-center justify-center gap-2 hover:bg-[#D4AF37]/10 transition-colors"
+                  >
+                    <Gift className="w-4 h-4" /> Gift a Friend
+                  </button>
+
+                  
+                  
+                  
+                </div>
               </div>
             </motion.div>
           )}

@@ -7,7 +7,6 @@ import type { Product } from "../../utils/store";
 
 export default function ProductCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -17,8 +16,10 @@ export default function ProductCatalog() {
       try {
         const stored = await fetchProducts();
         const sorted = [...stored].sort((a, b) => {
-          if (a.id === 'herbal-hair-oil') return -1;
-          if (b.id === 'herbal-hair-oil') return 1;
+          const aName = a.name.toLowerCase();
+          const bName = b.name.toLowerCase();
+          if (a.id === 'herbal-hair-oil' || aName.includes('herbal hair oil') || aName.includes('hair oil')) return -1;
+          if (b.id === 'herbal-hair-oil' || bName.includes('herbal hair oil') || bName.includes('hair oil')) return 1;
           return 0;
         });
         setProducts(sorted);
@@ -47,11 +48,6 @@ export default function ProductCatalog() {
     });
     window.dispatchEvent(event);
     setToastMessage("Added to cart successfully!");
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
-  const toggleFavorite = (id: string) => {
-    setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
@@ -76,17 +72,7 @@ export default function ProductCatalog() {
               Clinical Botanical Solutions
             </h2>
           </motion.div>
-          <motion.a
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            href="#"
-            className="group flex items-center gap-2 font-body text-xs font-semibold tracking-widest uppercase text-primary hover:text-secondary-container transition-colors duration-300"
-          >
-            View Full Collection
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </motion.a>
+          
         </div>
 
         {/* Product Grid */}
@@ -94,7 +80,6 @@ export default function ProductCatalog() {
           {products.map((product, index) => {
             const prices = product.sizes.map((s) => s.price);
             const lowestPrice = prices.length > 0 ? Math.min(...prices) : 0;
-            const isFav = !!favorites[product.id];
 
             return (
               <motion.div
@@ -120,25 +105,6 @@ export default function ProductCatalog() {
                     className="max-h-full max-w-full object-contain transition-transform duration-[2s] group-hover:scale-103"
                   />
                   <div className="absolute inset-0 bg-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-
-                  {/* Floating Action Buttons */}
-                  <div className="absolute top-4 right-4 flex flex-col gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFavorite(product.id);
-                      }}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
-                        isFav
-                          ? "bg-secondary text-white"
-                          : "bg-white/80 text-primary hover:bg-white border border-outline-variant/20"
-                      }`}
-                    >
-                      <Heart
-                        className={`w-4 h-4 ${isFav ? "fill-current" : ""}`}
-                      />
-                    </button>
-                  </div>
 
                   <div className="absolute top-4 left-4 flex flex-col gap-2">
                     <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1 border border-outline-variant/10 shadow-sm w-fit">
