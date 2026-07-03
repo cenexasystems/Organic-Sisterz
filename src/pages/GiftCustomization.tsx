@@ -152,9 +152,10 @@ export default function GiftCustomization() {
     }, 4000);
   };
 
-  const selectedImages = Object.values(selectedProducts).flatMap(p => 
-    Array(p.quantity).fill(p.image)
-  ).slice(0, 5); // Limit falling images to max 5 for performance
+  const selectedImages = Object.values(selectedProducts)
+    .map(p => p.image)
+    .filter((img, index, arr) => arr.indexOf(img) === index) // Unique product images only
+    .slice(0, 5);
 
   return (
     <div className="min-h-screen bg-[#FAF9F5] text-[#1B3022] font-body relative overflow-hidden selection:bg-[#1B3022]/20">
@@ -245,18 +246,18 @@ export default function GiftCustomization() {
                               value={currentSize}
                               onChange={(e) => setProductSelections(prev => ({ ...prev, [product.id]: e.target.value }))}
                               onClick={e => e.stopPropagation()}
-                              className="w-full bg-[#FAF9F5] border border-outline-variant/30 rounded-md text-[10px] sm:text-xs py-1.5 pl-2 pr-6 text-[#6B7280] font-body focus:outline-none focus:border-[#D4AF37] appearance-none text-left cursor-pointer transition-colors"
+                              className="w-full bg-[#FAF9F5] border border-outline-variant/40 rounded-lg text-sm py-2 pl-3 pr-8 text-[#4A5D52] font-body focus:outline-none focus:border-[#D4AF37] appearance-none text-left cursor-pointer transition-colors shadow-sm font-medium"
                             >
                               {product.sizes.map(s => (
                                 <option key={s.size} value={s.size}>{s.size}</option>
                               ))}
                             </select>
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#6B7280]">
-                              <ChevronDown className="w-3 h-3" />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#4A5D52]">
+                              <ChevronDown className="w-4 h-4" />
                             </div>
                           </div>
                         ) : (
-                          <span className="text-[10px] sm:text-xs text-[#6B7280] font-body mb-1 text-left">{currentSize}</span>
+                          <span className="text-xs sm:text-sm text-[#4A5D52] font-body mb-1 text-left font-medium">{currentSize}</span>
                         )}
 
                         <div className="flex items-center justify-between mt-auto pt-2 border-t border-outline-variant/20">
@@ -528,16 +529,16 @@ export default function GiftCustomization() {
                       <motion.div
                         key={idx}
                         initial={{ y: -300, opacity: 0, rotate: -20 + Math.random() * 40 }}
-                        animate={{ y: 350, opacity: 1, rotate: 0 }}
+                        animate={{ y: 200, opacity: 1, rotate: 0 }}
                         transition={{ 
                           type: "spring", 
                           damping: 15, 
                           stiffness: 80, 
                           delay: idx * 0.3 
                         }}
-                        className="w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center z-10 drop-shadow-2xl"
+                        className="w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center z-10 bg-white rounded-2xl border-4 border-white shadow-2xl overflow-hidden"
                       >
-                        <img src={src} className="w-full h-full object-contain" alt="gift product" />
+                        <img src={src} className="w-full h-full object-cover" alt="gift product" />
                       </motion.div>
                     ))}
                   </div>
