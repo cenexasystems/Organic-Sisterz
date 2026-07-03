@@ -112,6 +112,9 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [activeAccordion, setActiveAccordion] = useState<string | null>('details');
   const [quantity, setQuantity] = useState(1);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     if (product && product.sizes.length > 0) {
@@ -219,12 +222,12 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                 </span>
               </div>
 
-              {/* Main Product Image Card */}
-              <div className="relative aspect-square w-full max-w-[240px] md:max-w-full mx-auto rounded-2xl overflow-hidden border border-outline-variant/35 bg-white p-2 shadow-sm flex items-center justify-center my-auto group">
+              {/* Main Product Image */}
+              <div className="relative w-full flex-1 mx-auto flex items-center justify-center my-auto group p-2 md:p-8">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full max-h-[250px] md:max-h-[450px] object-contain group-hover:scale-105 transition-transform duration-700 drop-shadow-2xl mix-blend-multiply"
                 />
               </div>
             </div>
@@ -488,15 +491,23 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                   <button onClick={() => setQuantity(quantity + 1)} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-primary font-bold hover:bg-surface-container-low rounded-full cursor-pointer">+</button>
                 </div>
 
-                <button
-                  disabled={product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false)}
+                  <button
+                  disabled={product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false) || isAdding}
                   onClick={() => {
+                    if (isAdding) return;
+                    setIsAdding(true);
                     for(let i=0; i<quantity; i++) {
                        onAddToCart(product.id, activeSizeStr);
                     }
+                    setToastMessage(`Added ${quantity} ${product.name} to box`);
+                    setShowToast(true);
+                    setTimeout(() => {
+                      setShowToast(false);
+                      setIsAdding(false);
+                    }, 2000);
                   }}
                   className={`font-body text-[10px] md:text-xs font-bold tracking-widest uppercase px-5 md:px-8 py-3.5 md:py-4 rounded-full flex items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
-                    product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false)
+                    product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false) || isAdding
                       ? 'bg-gray-400 text-white cursor-not-allowed shadow-none'
                       : 'bg-primary hover:bg-primary-container text-on-primary cursor-pointer'
                   }`}
@@ -505,13 +516,30 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                   <span>
                     {product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false)
                       ? 'Out of Stock'
-                      : 'Add to Cart'}
+                      : isAdding ? 'Added ✓' : 'Add to Cart'}
                   </span>
                 </button>
               </div>
             </div>
 
           </motion.div>
+          
+          {/* Toast Notification */}
+          <AnimatePresence>
+            {showToast && (
+              <motion.div
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] bg-[#1B3022] text-[#FAF9F5] px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-[#3E5247] whitespace-nowrap"
+              >
+                <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center">
+                  <span className="text-[#1B3022] font-bold text-xs">✓</span>
+                </div>
+                <span className="font-body text-sm font-semibold tracking-wide">{toastMessage}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
     </AnimatePresence>
