@@ -111,7 +111,6 @@ const productSpecs: Record<string, {
 export default function ProductDetailModal({ product, isOpen, onClose, onAddToCart }: ProductDetailModalProps) {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [activeAccordion, setActiveAccordion] = useState<string | null>('details');
-  const [isSaved, setIsSaved] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
@@ -265,17 +264,6 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                     <span className="font-body text-xs font-bold text-primary uppercase tracking-wider">
                       PACK SIZE
                     </span>
-                    <button
-                      onClick={() => setIsSaved(!isSaved)}
-                      className={`flex items-center gap-1 text-xs font-bold py-1.5 px-3 rounded-full border transition-all duration-300 ${
-                        isSaved 
-                          ? 'bg-secondary text-white border-secondary' 
-                          : 'bg-white text-on-surface-variant border-outline-variant/40 hover:border-secondary'
-                      }`}
-                    >
-                      <Heart className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
-                      <span>{isSaved ? 'Saved' : 'Save'}</span>
-                    </button>
                   </div>
                   
                   <div className="flex flex-wrap gap-3">

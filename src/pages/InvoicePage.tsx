@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchOrderById } from "../utils/db";
 import type { Order } from "../utils/store";
-import { ShoppingBag, MapPin, Phone, Printer, Copy, Check } from "lucide-react";
+import { ShoppingBag, MapPin, Phone, Printer, Copy, Check, Leaf } from "lucide-react";
 
 export default function InvoicePage() {
   const { id } = useParams<{ id: string }>();
@@ -48,7 +48,7 @@ export default function InvoicePage() {
       <div className="min-h-screen bg-[#FAF9F5] flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
           <div className="w-12 h-12 bg-[#2B3E2F] rounded-full flex items-center justify-center shadow-lg">
-            <ShoppingBag className="w-6 h-6 text-[#FAF9F5]" />
+            <Leaf className="w-6 h-6 text-[#FAF9F5]" />
           </div>
           <p className="text-[#2B3E2F] font-bold tracking-widest uppercase text-sm font-display">Generating Digital Bill...</p>
         </div>
@@ -68,7 +68,7 @@ export default function InvoicePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0EBE1] text-[#1B3022] font-sans py-12 px-4 print:p-0 print:bg-white flex flex-col items-center">
+    <div className="min-h-screen bg-[#F0FDF4] text-[#1B3022] font-sans py-12 px-4 print:p-0 print:bg-white flex flex-col items-center">
       <style>{`
         @media print {
           @page { margin: 10mm; }
@@ -108,7 +108,7 @@ export default function InvoicePage() {
         {/* Header Section */}
         <div className="bg-[#FAF9F5] border-b border-[#E5E0D8] p-8 sm:p-12 print:p-6 flex flex-col items-center text-center">
           <div className="w-24 h-24 flex items-center justify-center mb-4">
-            <ShoppingBag className="w-16 h-16 text-[#2B3E2F]" />
+            <Leaf className="w-16 h-16 text-[#2B3E2F]" />
           </div>
           <h1 className="text-3xl font-black text-[#1B3022] tracking-tight font-display">Organic Sisterz</h1>
           <p className="text-xs text-[#8F9974] font-bold tracking-wider mt-1 mb-4 uppercase">INVOICE: {order.id}</p>
@@ -118,11 +118,11 @@ export default function InvoicePage() {
               <span className="inline-block text-[#2B3E2F] mr-1.5 align-middle -mt-0.5">
                 <MapPin className="w-3.5 h-3.5" />
               </span>
-              <span>123 Organic Lane, Green City, Eco State 12345</span>
+              <span>Organic Sisterz, No. 42, Lotus Avenue, Greenways Road, Chennai - 600028</span>
             </div>
-            <div className="flex items-center gap-1.5 justify-center">
+            <div className="flex items-center gap-1.5 justify-center mt-1">
               <Phone className="w-3.5 h-3.5 text-[#2B3E2F] shrink-0" />
-              <span>+91 {import.meta.env.VITE_ADMIN_WHATSAPP_1 || "7904199050"}</span>
+              <span>+91 98765 43210</span>
             </div>
           </div>
         </div>
@@ -240,7 +240,18 @@ export default function InvoicePage() {
         {/* Footer */}
         <div className="border-t border-[#E5E0D8]/60 p-6 print:p-4 text-center bg-[#F8F5F0] flex flex-col items-center justify-center gap-1.5">
           <p className="text-xs font-bold text-[#2B3E2F] tracking-wider uppercase font-display">Thank you for shopping with us!</p>
-          <p className="text-[9px] font-bold text-[#8F9974] uppercase tracking-[0.15em]">Powered by BioVerse</p>
+        <div className="flex justify-center items-center gap-1.5 opacity-90 text-[10px] text-[#8F9974] uppercase tracking-widest mt-1">
+          <span>Powered by</span>
+          <a
+            href="https://cenexasystems.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-display text-xs tracking-wide font-bold hover:text-[#1B3022] transition-colors text-[#2B3E2F]"
+          >
+            Cenexa Systems
+          </a>{" "}
+          © {new Date().getFullYear()}
+        </div>
         </div>
 
       </div>

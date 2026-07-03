@@ -82,18 +82,18 @@ export default function CartPage() {
       whatsappNumber = `91${whatsappNumber}`;
     }
 
-    const emojiSeedling = String.fromCodePoint(0x1F33F);
-    const emojiUser = String.fromCodePoint(0x1F464);
-    const emojiPhone = String.fromCodePoint(0x1F4DE);
-    const emojiPin = String.fromCodePoint(0x1F4CD);
-    const emojiBox = String.fromCodePoint(0x1F4E6);
-    const emojiMoney = String.fromCodePoint(0x1F4B0);
-    const emojiSparkles = String.fromCodePoint(0x2728);
-    const bullet = String.fromCodePoint(0x2022);
-    const rupee = String.fromCodePoint(0x20B9);
+    const eHerb = decodeURIComponent('%F0%9F%8C%BF'); // 🌿
+    const eUser = decodeURIComponent('%F0%9F%91%A4'); // 👤
+    const ePhone = decodeURIComponent('%F0%9F%93%9E'); // 📞
+    const ePin = decodeURIComponent('%F0%9F%93%8D'); // 📍
+    const ePkg = decodeURIComponent('%F0%9F%93%A6'); // 📦
+    const eMoney = decodeURIComponent('%F0%9F%92%B0'); // 💰
+    const eSparkles = decodeURIComponent('%E2%9C%A8'); // ✨
+    const eBullet = decodeURIComponent('%E2%80%A2'); // •
+    const eRupee = decodeURIComponent('%E2%82%B9'); // ₹
 
-    const orderLines = cartItems.map(it => `${bullet} ${it.quantity}x *${it.name}* (${it.size}) - ${rupee}${it.price * it.quantity}`).join("\n");
-    const text = `${emojiSeedling} *ORGANIC SISTERZ - NEW ORDER* ${emojiSeedling}\n----------------------------------\n${emojiUser} *Customer:* ${custName}\n${emojiPhone} *Phone:* ${custPhone}\n${emojiPin} *Delivery Address:* ${custAddress}\n\n${emojiBox} *Products Ordered:*\n${orderLines}\n\n${emojiMoney} *Total Amount:* *${rupee}${totalAmount}*\n----------------------------------\n${emojiSparkles} Thank you for choosing organic, clean, botanical solutions! ${emojiSparkles}`;
+    const orderLines = cartItems.map(it => `${eBullet} ${it.quantity}x *${it.name}* (${it.size}) - ${eRupee}${it.price * it.quantity}`).join("\n");
+    const text = `${eHerb} *ORGANIC SISTERZ - NEW ORDER* ${eHerb}\n----------------------------------\n${eUser} *Customer:* ${custName}\n${ePhone} *Phone:* ${custPhone}\n${ePin} *Delivery Address:* ${custAddress}\n\n${ePkg} *Products Ordered:*\n${orderLines}\n\n${eMoney} *Total Amount:* *${eRupee}${totalAmount}*\n----------------------------------\n${eSparkles} Thank you for choosing organic, clean, botanical solutions! ${eSparkles}`;
     
     // Bulletproof Redirect
     const whatsappLink = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(text)}`;
