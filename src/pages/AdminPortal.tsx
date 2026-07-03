@@ -560,11 +560,19 @@ export default function AdminPortal() {
 
   // WhatsApp message builder and dynamic formatter matching the screenshot
   const formatWhatsAppMessage = (order: Order) => {
+    const ePkg = decodeURIComponent('%F0%9F%93%A6'); // 📦
+    const eBags = decodeURIComponent('%F0%9F%9B%8D%EF%B8%8F'); // 🛍️
+    const eUser = decodeURIComponent('%F0%9F%91%A4'); // 👤
+    const ePhone = decodeURIComponent('%F0%9F%93%9E'); // 📞
+    const ePin = decodeURIComponent('%F0%9F%93%8D'); // 📍
+    const eMemo = decodeURIComponent('%F0%9F%93%9D'); // 📝
+    const eMoney = decodeURIComponent('%F0%9F%92%B0'); // 💰
+    
     const itemsText = order.items.map(it => {
       const sizeStr = it.size && it.size !== '—' ? ` - ${it.size}` : '';
-      return `- ${it.name}${sizeStr} x ${it.quantity} (Rs. ${it.price * it.quantity})`;
+      return `${ePkg} ${it.name}${sizeStr} x ${it.quantity} (Rs. ${it.price * it.quantity})`;
     }).join('\n');
-    return `*Order Request - Organic Sisterz*\nCustomer: ${order.customerName}\nPhone: ${order.customerPhone}\nAddress: ${order.customerAddress}\n*Items:*\n${itemsText}\n*Estimated Total: Rs. ${order.totalPrice}*`;
+    return `${eBags} *Order Request - Organic Sisterz*\n\n${eUser} *Customer:* ${order.customerName}\n${ePhone} *Phone:* ${order.customerPhone}\n${ePin} *Address:* ${order.customerAddress}\n\n${eMemo} *Items:*\n${itemsText}\n\n${eMoney} *Estimated Total: Rs. ${order.totalPrice}*`;
   };
 
 
@@ -634,20 +642,14 @@ export default function AdminPortal() {
     }
   };
 
-  const generateNextInvoiceId = (currentOrders: Order[]) => {
-    let maxNum = 0;
-    currentOrders.forEach(o => {
-      // Match strictly INV-2026-XXXXX to ensure exact sequential ordering
-      const matchInv = o.id.match(/^INV-2026-(\d+)/);
-      if (matchInv) {
-        const num = parseInt(matchInv[1], 10);
-        // Skip legacy test numbers in the 90000s range to start fresh from 1
-        if (!isNaN(num) && num < 90000 && num > maxNum) maxNum = num;
-      }
-    });
-    const nextNum = maxNum + 1;
-    const paddedNum = String(nextNum).padStart(5, '0');
-    return `INV-2026-${paddedNum}`;
+  const generateNextInvoiceId = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 7; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const year = new Date().getFullYear();
+    return `INV-${year}-${code}`;
   };
 
   const handleCheckoutPOS = async () => {
@@ -657,7 +659,7 @@ export default function AdminPortal() {
     const grandTotal = getGrandTotal();
     const balance = billingAmountReceived >= grandTotal ? billingAmountReceived - grandTotal : 0;
 
-    const nextInvoiceId = generateNextInvoiceId(orders);
+    const nextInvoiceId = generateNextInvoiceId();
 
     // Create the order object to append to stored orders database
     const newOrder: Order = {
@@ -699,15 +701,38 @@ export default function AdminPortal() {
 
     // Format WhatsApp invoice
     const invoiceUrl = `${window.location.origin}/invoice/${newOrder.id}`;
-    const invoiceMessage = `🌿 *Organic Sisterz - Purchase Successful!*\n\nHi ${billingCustomerName || 'Customer'},\nThank you for shopping with us! You can view, download, or print your official digital invoice here:\n\n${invoiceUrl}\n\nHave a great day!`;
+    const eHerb = String.fromCodePoint(0x1F33F); // 🌿
+    const eParty = String.fromCodePoint(0x1F389); // 🎉
+    const eInvoice = String.fromCodePoint(0x1F4C4); // 📄
+    const eLink = String.fromCodePoint(0x1F517); // 🔗
+    const eSparkles = String.fromCodePoint(0x2728); // ✨
 
-    // Copy to clipboard
-    navigator.clipboard.writeText(invoiceUrl);
+    const invoiceMessage = [
+      `${eHerb} *Organic Sisterz - Purchase Successful!* ${eParty}`,
+      ``,
+      `Hi ${billingCustomerName || 'Customer'},`,
+      `Thank you for shopping with us! ${eSparkles}`,
+      ``,
+      `${eInvoice} View, download or print your digital invoice here:`,
+      `${eLink} ${invoiceUrl}`,
+      ``,
+      `Have a great day!`
+    ].join('\n');
 
-    // Open WhatsApp Web targeting the input customer number or default to 7904199050
-    const targetPhone = billingCustomerPhone ? billingCustomerPhone : '7904199050';
-    const formattedPhone = targetPhone.startsWith('91') && targetPhone.length > 10 ? targetPhone : `91${targetPhone}`;
-    window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(invoiceMessage)}`, '_blank');
+    // Copy invoice URL to clipboard
+    navigator.clipboard.writeText(invoiceUrl).catch(() => {});
+
+    // Open WhatsApp — use api.whatsapp.com/send for consistent behaviour across devices
+    const targetPhone = billingCustomerPhone ? billingCustomerPhone.replace(/\D/g, '') : '7904199050';
+    const formattedPhone = targetPhone.length === 10 ? `91${targetPhone}` : targetPhone;
+    const waUrl = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(invoiceMessage)}`;
+    const waLink = document.createElement('a');
+    waLink.href = waUrl;
+    waLink.target = '_blank';
+    waLink.rel = 'noopener noreferrer';
+    document.body.appendChild(waLink);
+    waLink.click();
+    document.body.removeChild(waLink);
 
     // Reset POS input fields
     setBillingCustomerName('');
@@ -994,7 +1019,9 @@ export default function AdminPortal() {
                   title="WhatsApp"
                 >
                   <div className={`flex items-center ${isSidebarOpen ? 'gap-3.5' : ''}`}>
-                    <MessageSquare className="w-4.5 h-4.5 text-green-500 shrink-0" />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4.5 h-4.5 text-[#25D366] shrink-0">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
                     {isSidebarOpen && <span>WhatsApp</span>}
                   </div>
                   {pendingOrdersCount > 0 && (
@@ -1129,7 +1156,12 @@ export default function AdminPortal() {
                 {/* Header Title Controls */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                   <div className="flex items-center gap-4">
-                    <h1 className="text-3xl font-bold tracking-tight text-primary">WhatsApp Center</h1>
+                    <h1 className="text-3xl font-bold tracking-tight text-primary flex items-center gap-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-[#25D366]">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
+                      WhatsApp Center
+                    </h1>
                     <span className="bg-[#FEF3C7] text-[#D97706] text-xs font-bold px-3 py-1.5 rounded-full border border-[#FDE68A]">
                       {pendingOrdersCount} pending
                     </span>
@@ -1220,7 +1252,9 @@ export default function AdminPortal() {
                 <div className="bg-white border border-outline-variant/20 rounded-3xl overflow-hidden shadow-md">
                   <div className="p-6 md:p-8 bg-[#FAF9F5]/30 border-b border-outline-variant/20 flex flex-col md:flex-row justify-between md:items-center gap-4">
                     <div className="flex flex-wrap items-center gap-3">
-                      <MessageSquare className="w-5 h-5 text-green-500" />
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-[#25D366]">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
                       <h3 className="text-lg font-bold text-primary">Customer Requests</h3>
                       <span className="text-xs font-bold text-[#4B5563] bg-gray-100 py-1 px-3 rounded-full">
                         {filteredOrdersList.length} requests
@@ -1744,7 +1778,9 @@ export default function AdminPortal() {
                               : 'bg-[#2B3E2F] hover:bg-[#1E2B21] text-white'
                           }`}
                         >
-                          <MessageSquare className="w-4 h-4" />
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`w-4 h-4 ${(billingItems.length === 0 || !billingCustomerName.trim() || billingCustomerPhone.trim().length !== 10) ? 'text-gray-500' : 'text-[#25D366]'}`}>
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                          </svg>
                           <span>SEND BILL VIA WHATSAPP</span>
                         </button>
                       </div>

@@ -30,7 +30,16 @@ export default function GiftCustomization() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetchProducts().then(setProducts).catch(console.error);
+    fetchProducts().then(data => {
+      const sorted = [...data].sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        if (aName.includes('herbal hair oil') || aName.includes('hair oil')) return -1;
+        if (bName.includes('herbal hair oil') || bName.includes('hair oil')) return 1;
+        return 0;
+      });
+      setProducts(sorted);
+    }).catch(console.error);
   }, []);
 
   const addToBasket = (product: Product) => {
@@ -75,6 +84,14 @@ export default function GiftCustomization() {
       alert("Please fill in all required 'From' and 'To' details.");
       return;
     }
+    if (senderMobile.length !== 10) {
+      alert("Your Mobile No. must be exactly 10 digits.");
+      return;
+    }
+    if (recipientPhone && recipientPhone.length !== 10) {
+      alert("Their Phone must be exactly 10 digits.");
+      return;
+    }
 
     const items = Object.values(selectedProducts).map(data => {
       return {
@@ -94,20 +111,20 @@ export default function GiftCustomization() {
       whatsappNumber = `91${whatsappNumber}`;
     }
 
-    const emojiGift = String.fromCodePoint(0x1F381);
-    const emojiHeartRibbon = String.fromCodePoint(0x1F49D);
-    const emojiUser = String.fromCodePoint(0x1F464);
-    const emojiPhone = String.fromCodePoint(0x1F4DE);
-    const emojiPin = String.fromCodePoint(0x1F4CD);
-    const emojiBox = String.fromCodePoint(0x1F4E6);
-    const emojiMoney = String.fromCodePoint(0x1F4B0);
-    const emojiMail = String.fromCodePoint(0x1F4E9);
-    const emojiSparkles = String.fromCodePoint(0x2728);
-    const bullet = String.fromCodePoint(0x2022);
-    const rupee = String.fromCodePoint(0x20B9);
+    const eGift = decodeURIComponent('%F0%9F%8E%81'); // 🎁
+    const eHeart = decodeURIComponent('%F0%9F%92%9D'); // 💝
+    const eUser = decodeURIComponent('%F0%9F%91%A4'); // 👤
+    const ePhone = decodeURIComponent('%F0%9F%93%9E'); // 📞
+    const ePin = decodeURIComponent('%F0%9F%93%8D'); // 📍
+    const ePkg = decodeURIComponent('%F0%9F%93%A6'); // 📦
+    const eMoney = decodeURIComponent('%F0%9F%92%B0'); // 💰
+    const eMail = decodeURIComponent('%F0%9F%92%8C'); // 💌
+    const eSparkles = decodeURIComponent('%E2%9C%A8'); // ✨
+    const eBullet = decodeURIComponent('%E2%80%A2'); // •
+    const eRupee = decodeURIComponent('%E2%82%B9'); // ₹
 
-    const orderLines = items.map(it => `${bullet} ${it.quantity}x *${it.name}* (${it.size}) - ${rupee}${it.price * it.quantity}`).join("\n");
-    const text = `${emojiGift} *ORGANIC SISTERZ - NEW GIFT ORDER* ${emojiGift}\n----------------------------------\n${emojiHeartRibbon} *From (Sender):* ${senderName} (${senderMobile})\n${emojiUser} *To (Recipient):* ${recipientName}\n${emojiPhone} *Phone:* ${recipientPhone || "N/A"}\n${emojiPin} *Delivery Address:* ${recipientAddress}\n\n${emojiBox} *Gift Box Selections:*\n${orderLines}\n\n${emojiMoney} *Total Amount:* *${rupee}${totalPrice}* (+ Premium Packaging Charges)\n----------------------------------\n${emojiMail} *Personal Message:*\n_"${giftMessage || "No message provided"}"_\n----------------------------------\n${emojiSparkles} Delivering organic magic to your loved ones! ${emojiSparkles}`;
+    const orderLines = items.map(it => `${eBullet} ${it.quantity}x *${it.name}* (${it.size}) - ${eRupee}${it.price * it.quantity}`).join("\n");
+    const text = `${eGift} *ORGANIC SISTERZ - NEW GIFT ORDER* ${eGift}\n----------------------------------\n${eHeart} *From (Sender):* ${senderName} (${senderMobile})\n${eUser} *To (Recipient):* ${recipientName}\n${ePhone} *Phone:* ${recipientPhone || "N/A"}\n${ePin} *Delivery Address:* ${recipientAddress}\n\n${ePkg} *Gift Box Selections:*\n${orderLines}\n\n${eMoney} *Total Amount:* *${eRupee}${totalPrice}* (+ Premium Packaging Charges)\n----------------------------------\n${eMail} *Personal Message:*\n_"${giftMessage || "No message provided"}"_\n----------------------------------\n${eSparkles} Delivering organic magic to your loved ones! ${eSparkles}`;
     
     setWhatsappLink(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(text)}`);
 
@@ -194,56 +211,75 @@ export default function GiftCustomization() {
                   <Gift className="w-8 h-8 text-[#D4AF37]/50" />
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   {products.map(product => {
                     const currentSize = productSelections[product.id] || product.sizes[0].size;
+                    const currentPrice = product.sizes.find(s => s.size === currentSize)?.price || product.sizes[0].price;
+                    const key = `${product.id}-${currentSize}`;
+                    const basketItem = selectedProducts[key];
+
                     return (
                       <div 
                         key={product.id}
-                        className="group relative p-6 rounded-[20px] border border-outline-variant/30 hover:border-[#1B3022]/30 bg-white hover:shadow-sm transition-all duration-300 flex flex-col items-center text-center gap-4 overflow-hidden"
+                        className="group relative p-4 sm:p-5 rounded-[20px] border border-outline-variant/30 hover:border-[#1B3022]/30 bg-white hover:shadow-lg transition-all duration-300 flex flex-col gap-3 overflow-hidden"
                       >
-                        <div className="flex flex-col items-center w-full">
-                          <div 
-                            className="w-44 h-44 sm:w-48 sm:h-48 rounded-2xl overflow-hidden border-2 border-outline-variant/20 group-hover:border-outline-variant/40 bg-white p-1 flex items-center justify-center cursor-pointer transition-all duration-300 group-hover:scale-105"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedDetailProduct(product);
-                              setIsDetailModalOpen(true);
-                            }}
-                            title="Click to view details"
-                          >
-                            <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain drop-shadow-sm" />
-                          </div>
-                          <span className="font-display text-sm font-bold tracking-wide mt-4 text-[#1B3022]">
-                            {product.name}
-                          </span>
+                        <div 
+                          className="w-full h-56 md:h-48 pt-2 pb-2 flex items-center justify-center cursor-pointer transition-transform duration-500 group-hover:scale-105"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDetailProduct(product);
+                            setIsDetailModalOpen(true);
+                          }}
+                          title="Click to view details"
+                        >
+                          <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain drop-shadow-xl" />
                         </div>
                         
-                        <div className="flex flex-col gap-3 mt-1 w-full px-2">
-                          {product.sizes.length > 1 && (
-                            <div className="relative w-full">
-                              <select 
-                                value={currentSize}
-                                onChange={(e) => setProductSelections(prev => ({ ...prev, [product.id]: e.target.value }))}
-                                onClick={e => e.stopPropagation()}
-                                className="w-full bg-[#FAF9F5] border border-outline-variant/30 rounded-lg text-xs py-2 pl-3 pr-8 text-[#1B3022] font-body focus:outline-none focus:border-[#D4AF37] appearance-none text-left cursor-pointer transition-colors"
-                              >
-                                {product.sizes.map(s => (
-                                  <option key={s.size} value={s.size}>{s.size} - ₹{s.price}</option>
-                                ))}
-                              </select>
-                              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#1B3022]/50">
-                                <ChevronDown className="w-3.5 h-3.5" />
-                              </div>
+                        <span className="font-display text-base sm:text-lg font-bold tracking-wide mt-2 text-[#1B3022] text-left leading-tight">
+                          {product.name}
+                        </span>
+                        
+                        {product.sizes.length > 1 ? (
+                          <div className="relative w-full mb-1">
+                            <select 
+                              value={currentSize}
+                              onChange={(e) => setProductSelections(prev => ({ ...prev, [product.id]: e.target.value }))}
+                              onClick={e => e.stopPropagation()}
+                              className="w-full bg-[#FAF9F5] border border-outline-variant/30 rounded-md text-[10px] sm:text-xs py-1.5 pl-2 pr-6 text-[#6B7280] font-body focus:outline-none focus:border-[#D4AF37] appearance-none text-left cursor-pointer transition-colors"
+                            >
+                              {product.sizes.map(s => (
+                                <option key={s.size} value={s.size}>{s.size}</option>
+                              ))}
+                            </select>
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#6B7280]">
+                              <ChevronDown className="w-3 h-3" />
                             </div>
-                          )}
+                          </div>
+                        ) : (
+                          <span className="text-[10px] sm:text-xs text-[#6B7280] font-body mb-1 text-left">{currentSize}</span>
+                        )}
+
+                        <div className="flex items-center justify-between mt-auto pt-2 border-t border-outline-variant/20">
+                          <div className="flex flex-col">
+                            <span className="font-display font-extrabold text-[#1B3022] text-sm sm:text-base">₹{currentPrice}</span>
+                          </div>
                           
-                          <button 
-                            onClick={() => addToBasket(product)}
-                            className="w-full text-[10px] uppercase tracking-widest font-extrabold px-5 py-2.5 rounded-full transition-all duration-300 cursor-pointer bg-[#FAF9F5] border border-[#1B3022]/20 text-[#1B3022] hover:bg-[#1B3022] hover:text-[#FAF9F5] hover:border-[#1B3022] shadow-sm hover:shadow-md flex items-center justify-center gap-2"
-                          >
-                            <Plus className="w-3 h-3" /> Add to Basket
-                          </button>
+                          <div className="w-16 sm:w-20">
+                            {basketItem ? (
+                              <div className="flex items-center justify-between w-full bg-[#1B3022] text-white rounded-md h-7 sm:h-8 shadow-sm">
+                                <button onClick={(e) => { e.stopPropagation(); updateBasketQuantity(key, -1); }} className="w-5 sm:w-6 h-full flex items-center justify-center hover:bg-white/20 rounded-l-md transition-colors"><Minus className="w-3 h-3" /></button>
+                                <span className="font-bold text-[10px] sm:text-xs">{basketItem.quantity}</span>
+                                <button onClick={(e) => { e.stopPropagation(); updateBasketQuantity(key, 1); }} className="w-5 sm:w-6 h-full flex items-center justify-center hover:bg-white/20 rounded-r-md transition-colors"><Plus className="w-3 h-3" /></button>
+                              </div>
+                            ) : (
+                              <button 
+                                onClick={() => addToBasket(product)}
+                                className="w-full h-7 sm:h-8 text-[10px] sm:text-xs font-bold rounded-md transition-all duration-300 cursor-pointer bg-white border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-white shadow-sm flex items-center justify-center"
+                              >
+                                ADD
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -335,10 +371,14 @@ export default function GiftCustomization() {
                       <label className="block font-display text-[10px] font-bold text-[#1B3022] uppercase tracking-[0.2em] mb-2">Your Mobile No. *</label>
                       <input 
                         type="tel" 
+                        maxLength={10}
                         value={senderMobile}
-                        onChange={e => setSenderMobile(e.target.value)}
+                        onChange={e => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          if (val.length <= 10) setSenderMobile(val);
+                        }}
                         className="w-full bg-[#FAF9F5] border border-outline-variant/40 rounded-xl px-5 py-4 font-body text-[#1B3022] placeholder-[#6B7280]/50 focus:outline-none focus:border-[#D4AF37] transition-all"
-                        placeholder="For updates & payment"
+                        placeholder="10-digit number"
                       />
                     </div>
                   </div>
@@ -366,11 +406,15 @@ export default function GiftCustomization() {
                     <div>
                       <label className="block font-display text-[10px] font-bold text-[#D4AF37] uppercase tracking-[0.2em] mb-2">Their Phone (Optional)</label>
                       <input 
-                        type="text" 
+                        type="tel" 
+                        maxLength={10}
                         value={recipientPhone}
-                        onChange={e => setRecipientPhone(e.target.value)}
+                        onChange={e => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          if (val.length <= 10) setRecipientPhone(val);
+                        }}
                         className="w-full bg-white/5 border border-white/20 rounded-xl px-5 py-4 font-body text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37] transition-all"
-                        placeholder="+91 9876543210"
+                        placeholder="10-digit number"
                       />
                     </div>
                   </div>
@@ -479,7 +523,7 @@ export default function GiftCustomization() {
                   </motion.div>
 
                   {/* The Products Falling */}
-                  <div className="absolute flex gap-4 top-10">
+                  <div className="absolute flex justify-center w-full px-2 -space-x-12 sm:-space-x-4 md:-space-x-0 md:gap-4 top-10 z-10">
                     {selectedImages.map((src, idx) => (
                       <motion.div
                         key={idx}
@@ -491,9 +535,9 @@ export default function GiftCustomization() {
                           stiffness: 80, 
                           delay: idx * 0.3 
                         }}
-                        className="w-20 h-20 rounded-2xl border-4 border-white shadow-xl bg-white p-1.5 flex items-center justify-center overflow-hidden z-10"
+                        className="w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center z-10 drop-shadow-2xl"
                       >
-                        <img src={src} className="max-w-full max-h-full object-contain" alt="gift product" />
+                        <img src={src} className="w-full h-full object-contain" alt="gift product" />
                       </motion.div>
                     ))}
                   </div>
@@ -699,13 +743,64 @@ export default function GiftCustomization() {
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1B3022] text-[#FAF9F5] px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-[#3E5247]"
+            className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-[#1B3022] text-[#FAF9F5] px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-[#3E5247] whitespace-nowrap"
           >
             <Check className="w-5 h-5 text-[#D4AF37]" />
             <span className="font-body text-sm font-semibold tracking-wide">{toastMessage}</span>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mobile Sticky Checkout Banner (Zepto Style) */}
+      <AnimatePresence>
+        {Object.keys(selectedProducts).length > 0 && animState === 'idle' && (
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            className="lg:hidden fixed bottom-4 left-4 right-4 bg-[#1B3022] text-white rounded-xl shadow-2xl p-3 flex items-center justify-between z-40 border border-[#3E5247]"
+          >
+            <div className="flex flex-col pl-1">
+              <span className="text-[10px] font-bold text-white/70 tracking-widest uppercase">
+                {Object.values(selectedProducts).reduce((sum, p) => sum + p.quantity, 0)} Items
+              </span>
+              <span className="font-display font-extrabold text-base">
+                ₹{Object.values(selectedProducts).reduce((sum, p) => sum + p.price * p.quantity, 0)}
+              </span>
+            </div>
+            <button 
+              onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+              className="bg-white text-[#1B3022] text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-lg flex items-center gap-2"
+            >
+              View Cart <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Simple Footer */}
+      <footer className="w-full bg-primary mt-auto">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left text-white/90 font-body text-xs py-6 px-6 lg:px-8">
+          <div className="flex-1 md:text-left text-center">
+            © {new Date().getFullYear()} Organic Sisterz. All Rights Reserved
+          </div>
+          
+          <div className="flex-1 flex justify-center items-center gap-1.5 text-[10px] tracking-wider uppercase">
+            <span className="opacity-70">Powered by</span>
+            <a
+              href="https://cenexasystems.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-display font-bold hover:text-white transition-colors text-inverse-primary"
+            >
+              Cenexa Systems 
+            </a>  © {new Date().getFullYear()}
+          </div>
+          
+          <div className="flex-1 md:text-right text-center tracking-widest uppercase text-[10px] font-bold text-inverse-primary">
+            Pure • Organic • Proven
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
