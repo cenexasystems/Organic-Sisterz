@@ -581,6 +581,8 @@ export default function AdminPortal() {
       priceSummary += `\n${eMoney} *Discount:* -Rs. ${subtotal - order.totalPrice}`;
     }
     priceSummary += `\n${eMoney} *Final Amount to Pay:* *Rs. ${order.totalPrice}*`;
+    priceSummary += `\n\n*Delivery charges may apply depending upon your location*`;
+    priceSummary += `\n💳 GPay Number : 9500258080`;
 
     return `${eBags} *Order Request - Organic Sisterz*\n\n${eUser} *Customer:* ${order.customerName}\n${ePhone} *Phone:* ${order.customerPhone}\n${ePin} *Address:* ${order.customerAddress}\n\n${eMemo} *Items:*\n${itemsText}\n----------------------------------${priceSummary}`;
   };

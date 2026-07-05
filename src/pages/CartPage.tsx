@@ -135,6 +135,8 @@ export default function CartPage() {
       priceSummary += `\n${eMoney} *Discount Amount:* -${eRupee}${discountAmount.toFixed(2)}`;
     }
     priceSummary += `\n${eMoney} *Final Amount to Pay:* *${eRupee}${totalAmount.toFixed(2)}*`;
+    priceSummary += `\n\n*Delivery charges may apply depending upon your location*`;
+    priceSummary += `\n💳 GPay Number : 9500258080`;
 
     const text = `${eHerb} *ORGANIC SISTERZ - NEW ORDER* ${eHerb}\n----------------------------------\n${eUser} *Customer:* ${custName}\n${ePhone} *Phone:* ${custPhone}\n${ePin} *Delivery Address:* ${custAddress}\n\n${ePkg} *Products Ordered:*\n${orderLines}${couponLine}\n----------------------------------${priceSummary}\n----------------------------------\n${eSparkles} Thank you for choosing organic, clean, botanical solutions! ${eSparkles}`;
     
