@@ -125,27 +125,7 @@ export default function AdminPortal() {
   const [whatsappRequests, setWhatsappRequests] = useState<any[]>([]);
   const [giftRequests, setGiftRequests] = useState<any[]>([]);
 
-  // Helper to generate Invoice ID for WhatsApp requests
-  const getWhatsAppInvoice = (orderId: string) => {
-    const index = whatsappRequests.findIndex(r => r.id === orderId);
-    if (index === -1) return "ORD-2026-0000";
-    const seq = whatsappRequests.length - index;
-    const seqStr = String(seq).padStart(4, '0');
-    const request = whatsappRequests[index];
-    const year = request.createdAt ? new Date(request.createdAt).getFullYear() : 2026;
-    return `ORD-${year}-${seqStr}`;
-  };
-
-  // Helper to generate Invoice ID for Gift requests
-  const getGiftInvoice = (giftId: string) => {
-    const index = giftRequests.findIndex(g => g.id === giftId);
-    if (index === -1) return "GIFT-2026-0000";
-    const seq = giftRequests.length - index;
-    const seqStr = String(seq).padStart(4, '0');
-    const gift = giftRequests[index];
-    const year = gift.createdAt ? new Date(gift.createdAt).getFullYear() : 2026;
-    return `GIFT-${year}-${seqStr}`;
-  };
+  // Removed getWhatsAppInvoice and getGiftInvoice as we now use orderId and giftId from the database
 
   // Filtered Gift requests by period and search
   const getFilteredGiftRequests = (excludeSearch = false) => {
@@ -189,7 +169,7 @@ export default function AdminPortal() {
       list = list.filter(g => {
         const senderMatch = g.senderName?.toLowerCase().includes(term) || g.senderMobile?.toLowerCase().includes(term);
         const recipientMatch = g.recipientName?.toLowerCase().includes(term) || g.recipientPhone?.toLowerCase().includes(term) || g.recipientAddress?.toLowerCase().includes(term);
-        const invoiceId = getGiftInvoice(g.id);
+        const invoiceId = g.giftId || `GIFT-UNKNOWN`;
         const invoiceMatch = invoiceId.toLowerCase().includes(term);
         const productsMatch = g.items?.some((it: any) => it.name?.toLowerCase().includes(term));
         return senderMatch || recipientMatch || invoiceMatch || productsMatch;
@@ -792,7 +772,7 @@ export default function AdminPortal() {
       list = list.filter(o => 
         (o.customerName || '').toLowerCase().includes(s) || 
         (o.customerPhone || '').toLowerCase().includes(s) || 
-        getWhatsAppInvoice(o.id).toLowerCase().includes(s)
+        (o.orderId || '').toLowerCase().includes(s)
       );
     }
     
@@ -1346,7 +1326,7 @@ export default function AdminPortal() {
                           {filteredOrdersList.map(o => (
                             <Fragment key={o.id}>
                               <tr className="hover:bg-[#FAF9F5]/20 transition-colors">
-                                <td className="px-4 py-3 font-bold text-primary">{getWhatsAppInvoice(o.id)}</td>
+                                <td className="px-4 py-3 font-bold text-primary">{o.orderId || 'ORD-UNKNOWN'}</td>
                                 <td className="px-4 py-3 font-semibold text-primary">{o.customerName}</td>
                                 <td className="px-4 py-3 font-medium">{o.customerPhone.split('_')[0]}</td>
                                 <td className="px-4 py-3 max-w-[120px] truncate text-center text-on-surface-variant mx-auto">{o.customerAddress}</td>
@@ -2837,7 +2817,7 @@ export default function AdminPortal() {
                         {filteredGiftRequests.map(o => (
                           <Fragment key={o.id}>
                             <tr className="hover:bg-[#FAF9F5]/40 transition-colors">
-                              <td className="px-4 py-3 font-bold text-primary">{getGiftInvoice(o.id)}</td>
+                              <td className="px-4 py-3 font-bold text-primary">{o.giftId || 'GIFT-UNKNOWN'}</td>
                               <td className="px-4 py-3 text-on-surface-variant font-medium">
                                 {o.createdAt ? (
                                   <>
@@ -2916,7 +2896,7 @@ export default function AdminPortal() {
                       </button>
 
                       <div className="p-8 border-b border-outline-variant/20 bg-white">
-                        <h4 className="text-xl font-display font-bold text-primary">{getGiftInvoice(selectedGiftOrder.id)}</h4>
+                        <h4 className="text-xl font-display font-bold text-primary">{selectedGiftOrder.giftId || 'GIFT-UNKNOWN'}</h4>
                         <span className="text-xs text-on-surface-variant font-medium block mt-1">
                           Placed: {new Date(selectedGiftOrder.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
                         </span>

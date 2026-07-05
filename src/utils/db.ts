@@ -135,7 +135,27 @@ export async function updateUserRole(id: string, role: 'Admin' | 'Customer') {
 // WhatsApp Requests
 export async function insertWhatsappRequest(order: Omit<Order, 'id' | 'createdAt' | 'status' | 'source' | 'couponCode' | 'couponDiscount' | 'manualDiscount' | 'deliveryCharge' | 'cashReceived' | 'changeReturned' | 'subtotal'>) {
   const { data: { session } } = await supabase.auth.getSession();
+  
+  // Generate ORD-YYYY-NNNN
+  const currentYear = new Date().getFullYear();
+  const { data: latest } = await supabase
+    .from('whatsapp_requests')
+    .select('order_id')
+    .ilike('order_id', `ORD-${currentYear}-%`)
+    .order('created_at', { ascending: false })
+    .limit(1);
+    
+  let nextNum = 1;
+  if (latest && latest.length > 0 && latest[0].order_id) {
+    const parts = latest[0].order_id.split('-');
+    if (parts.length === 3) {
+      nextNum = parseInt(parts[2], 10) + 1;
+    }
+  }
+  const orderId = `ORD-${currentYear}-${String(nextNum).padStart(4, '0')}`;
+
   const { error } = await supabase.from('whatsapp_requests').insert({
+    order_id: orderId,
     customer_name: order.customerName,
     customer_phone: order.customerPhone,
     customer_email: order.customerEmail,
@@ -163,6 +183,7 @@ export async function fetchWhatsappRequests() {
     }
     return {
       id: o.id,
+      orderId: o.order_id,
       customerName: o.customer_name,
       customerPhone: o.customer_phone,
       customerEmail: o.customer_email,
@@ -184,7 +205,27 @@ export async function updateWhatsappRequestStatus(id: string, status: string) {
 // Gift Requests
 export async function insertGiftRequest(senderName: string, recipientName: string, phone: string, message: string, items: any[], totalPrice: number) {
   const { data: { session } } = await supabase.auth.getSession();
+
+  // Generate GIFT-YYYY-NNNN
+  const currentYear = new Date().getFullYear();
+  const { data: latest } = await supabase
+    .from('gift_requests')
+    .select('gift_id')
+    .ilike('gift_id', `GIFT-${currentYear}-%`)
+    .order('created_at', { ascending: false })
+    .limit(1);
+    
+  let nextNum = 1;
+  if (latest && latest.length > 0 && latest[0].gift_id) {
+    const parts = latest[0].gift_id.split('-');
+    if (parts.length === 3) {
+      nextNum = parseInt(parts[2], 10) + 1;
+    }
+  }
+  const giftId = `GIFT-${currentYear}-${String(nextNum).padStart(4, '0')}`;
+
   const { error } = await supabase.from('gift_requests').insert({
+    gift_id: giftId,
     sender_name: senderName,
     recipient_name: recipientName,
     customer_phone: phone,
@@ -222,6 +263,7 @@ export async function fetchGiftRequests() {
     }
     return {
       id: o.id,
+      giftId: o.gift_id,
       senderName: o.sender_name,
       recipientName: o.recipient_name,
       recipientPhone: o.customer_phone,
