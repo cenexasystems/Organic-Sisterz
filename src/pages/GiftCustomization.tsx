@@ -524,29 +524,29 @@ export default function GiftCustomization() {
                   {/* The Box Base */}
                   <motion.div 
                     initial={{ y: 200, opacity: 0 }}
-                    animate={{ y: 150, opacity: 1 }}
+                    animate={{ y: 120, opacity: 1 }}
                     transition={{ type: "spring", bounce: 0.4 }}
-                    className="absolute w-64 h-24 bg-[#1B3022] rounded-b-2xl shadow-2xl flex items-center justify-center border-t border-[#3E5247] z-20"
+                    className="absolute w-72 h-32 bg-[#1B3022] rounded-b-2xl shadow-2xl flex items-end justify-center pb-4 border-t border-[#3E5247] z-20"
                   >
                     <span className="font-display text-[#FAF9F5]/40 text-xs tracking-[0.3em] uppercase">Organic Sisterz</span>
                   </motion.div>
 
                   {/* The Products Falling */}
-                  <div className="absolute flex justify-center w-full px-2 -space-x-12 sm:-space-x-4 md:-space-x-0 md:gap-4 z-10">
+                  <div className="absolute flex justify-center items-center w-full max-w-sm px-2 -space-x-12 sm:-space-x-16 z-10">
                     {selectedImages.map((src, idx) => (
                       <motion.div
                         key={idx}
                         initial={{ y: -300, opacity: 0, rotate: -20 + Math.random() * 40 }}
-                        animate={{ y: 10, opacity: 1, rotate: 0 }}
+                        animate={{ y: 10, opacity: 1, rotate: -15 + (idx * 12) }}
                         transition={{ 
                           type: "spring", 
                           damping: 15, 
                           stiffness: 80, 
                           delay: idx * 0.3 
                         }}
-                        className="w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center z-10 bg-white rounded-2xl border-4 border-white shadow-2xl overflow-hidden"
+                        className="w-20 h-20 sm:w-28 sm:h-28 flex items-center justify-center z-10 bg-white rounded-xl border-4 border-white shadow-xl overflow-hidden shrink-0"
                       >
-                        <img src={src} className="w-full h-full object-cover" alt="gift product" />
+                        <img src={src} className="w-full h-full object-contain p-1" alt="gift product" />
                       </motion.div>
                     ))}
                   </div>
