@@ -23,26 +23,26 @@ interface HerbRatio {
 }
 
 const herbData: Record<string, HerbRatio> = {
-  bringaraj: {
-    name: 'Bringaraj (False Daisy)',
-    color: 'bg-[#064e3b]', // Dark Green
+  panneerRose: {
+    name: 'Panneer Rose',
+    color: 'bg-[#db2777]', // Pink
     basePercent: 25,
     boostedPercent: 45,
   },
-  amla: {
-    name: 'Amla (Gooseberry)',
-    color: 'bg-[#d97706]', // Amber/Orange
+  jadamansi: {
+    name: 'Jadamansi Root',
+    color: 'bg-[#92400e]', // Amber/Brown
     basePercent: 25,
     boostedPercent: 45,
   },
-  rosemary: {
-    name: 'Rosemary Active Extract',
-    color: 'bg-[#059669]', // Green
+  mahizhamFlower: {
+    name: 'Mahizham Flowers',
+    color: 'bg-[#ca8a04]', // Golden/Yellow
     basePercent: 25,
     boostedPercent: 40,
   },
   hibiscus: {
-    name: 'Hibiscus Flower Infusion',
+    name: 'Hibiscus Infusion',
     color: 'bg-[#b91c1c]', // Red
     basePercent: 25,
     boostedPercent: 40,
@@ -63,28 +63,28 @@ export default function BlendCustomizer() {
   };
 
   const getRatios = () => {
-    let ratios = { bringaraj: 25, amla: 25, rosemary: 25, hibiscus: 25 };
+    let ratios = { panneerRose: 25, jadamansi: 25, mahizhamFlower: 25, hibiscus: 25 };
 
     if (selectedConcerns.includes('thinning')) {
-      ratios.bringaraj = herbData.bringaraj.boostedPercent;
-      ratios.rosemary = 30;
+      ratios.panneerRose = herbData.panneerRose.boostedPercent;
+      ratios.mahizhamFlower = 30;
     }
     if (selectedConcerns.includes('dandruff')) {
-      ratios.rosemary = herbData.rosemary.boostedPercent;
-      ratios.bringaraj = Math.max(ratios.bringaraj, 25);
+      ratios.mahizhamFlower = herbData.mahizhamFlower.boostedPercent;
+      ratios.panneerRose = Math.max(ratios.panneerRose, 25);
     }
     if (selectedConcerns.includes('damage')) {
       ratios.hibiscus = herbData.hibiscus.boostedPercent;
     }
     if (selectedConcerns.includes('greying')) {
-      ratios.amla = herbData.amla.boostedPercent;
+      ratios.jadamansi = herbData.jadamansi.boostedPercent;
     }
 
-    const sum = ratios.bringaraj + ratios.amla + ratios.rosemary + ratios.hibiscus;
+    const sum = ratios.panneerRose + ratios.jadamansi + ratios.mahizhamFlower + ratios.hibiscus;
     return {
-      bringaraj: Math.round((ratios.bringaraj / sum) * 100),
-      amla: Math.round((ratios.amla / sum) * 100),
-      rosemary: Math.round((ratios.rosemary / sum) * 100),
+      panneerRose: Math.round((ratios.panneerRose / sum) * 100),
+      jadamansi: Math.round((ratios.jadamansi / sum) * 100),
+      mahizhamFlower: Math.round((ratios.mahizhamFlower / sum) * 100),
       hibiscus: Math.round((ratios.hibiscus / sum) * 100)
     };
   };
@@ -93,10 +93,10 @@ export default function BlendCustomizer() {
 
   const getDynamicMessage = () => {
     if (selectedConcerns.includes('thinning') && selectedConcerns.includes('greying')) {
-      return 'Your formulation is heavily concentrated with Bhringraj and Amla to target weak roots while restoring organic dark pigment to premature grey strands.';
+      return 'Your formulation is heavily concentrated with Panneer Rose and Jadamansi to target weak roots while restoring organic dark pigment to premature grey strands.';
     }
     if (selectedConcerns.includes('thinning') && selectedConcerns.includes('dandruff')) {
-      return 'Optimized with therapeutic Rosemary oil and Bhringraj to eradicate dry flakes while boosting root oxygen levels to prevent hair fall.';
+      return 'Optimized with therapeutic Mahizham Flowers and Panneer Rose to eradicate dry flakes while boosting root oxygen levels to prevent hair fall.';
     }
     if (selectedConcerns.includes('damage')) {
       return 'Enriched with Hibiscus natural mucilage to restore structural protein, sealing broken cuticles and reviving dry, chemically-treated fibers.';
@@ -191,31 +191,31 @@ export default function BlendCustomizer() {
                   <span className="text-[11px] font-bold text-white block pl-8">Hibiscus {ratios.hibiscus}%</span>
                 </motion.div>
 
-                {/* Amla Layer */}
+                {/* Jadamansi Layer */}
                 <motion.div 
-                  animate={{ height: `${ratios.amla}%` }}
+                  animate={{ height: `${ratios.jadamansi}%` }}
                   transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className={`${herbData.amla.color} w-full flex flex-col justify-center items-center relative z-10`}
+                  className={`${herbData.jadamansi.color} w-full flex flex-col justify-center items-center relative z-10`}
                 >
-                  <span className="text-[11px] font-bold text-white block pl-8">Amla {ratios.amla}%</span>
+                  <span className="text-[11px] font-bold text-white block pl-8">Jadamansi {ratios.jadamansi}%</span>
                 </motion.div>
 
-                {/* Rosemary Layer */}
+                {/* Mahizham Flower Layer */}
                 <motion.div 
-                  animate={{ height: `${ratios.rosemary}%` }}
+                  animate={{ height: `${ratios.mahizhamFlower}%` }}
                   transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className={`${herbData.rosemary.color} w-full flex flex-col justify-center items-center relative z-10`}
+                  className={`${herbData.mahizhamFlower.color} w-full flex flex-col justify-center items-center relative z-10`}
                 >
-                  <span className="text-[11px] font-bold text-white block pl-8">Rosemary {ratios.rosemary}%</span>
+                  <span className="text-[11px] font-bold text-white block pl-8">Mahizham {ratios.mahizhamFlower}%</span>
                 </motion.div>
 
-                {/* Bringaraj Layer */}
+                {/* Panneer Rose Layer */}
                 <motion.div 
-                  animate={{ height: `${ratios.bringaraj}%` }}
+                  animate={{ height: `${ratios.panneerRose}%` }}
                   transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className={`${herbData.bringaraj.color} w-full flex flex-col justify-center items-center relative z-10`}
+                  className={`${herbData.panneerRose.color} w-full flex flex-col justify-center items-center relative z-10`}
                 >
-                  <span className="text-[11px] font-bold text-white block pl-8">Bhringraj {ratios.bringaraj}%</span>
+                  <span className="text-[11px] font-bold text-white block pl-8">Panneer Rose {ratios.panneerRose}%</span>
                 </motion.div>
               </div>
 
@@ -229,47 +229,47 @@ export default function BlendCustomizer() {
             </h4>
             
             <div className="flex flex-col gap-6">
-              {/* Bringaraj Detail */}
+              {/* Panneer Rose Detail */}
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between font-display text-[14px] font-bold text-[#111827]">
-                  <span>{herbData.bringaraj.name}</span>
-                  <span>{ratios.bringaraj}%</span>
+                  <span>{herbData.panneerRose.name}</span>
+                  <span>{ratios.panneerRose}%</span>
                 </div>
                 <div className="h-2 w-full bg-[#F3F4F6] rounded-full overflow-hidden">
                   <motion.div 
-                    animate={{ width: `${ratios.bringaraj}%` }}
+                    animate={{ width: `${ratios.panneerRose}%` }}
                     transition={{ duration: 0.8 }}
-                    className={`h-full ${herbData.bringaraj.color}`} 
+                    className={`h-full ${herbData.panneerRose.color}`} 
                   />
                 </div>
               </div>
 
-              {/* Rosemary Detail */}
+              {/* Mahizham Flower Detail */}
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between font-display text-[14px] font-bold text-[#111827]">
-                  <span>{herbData.rosemary.name}</span>
-                  <span>{ratios.rosemary}%</span>
+                  <span>{herbData.mahizhamFlower.name}</span>
+                  <span>{ratios.mahizhamFlower}%</span>
                 </div>
                 <div className="h-2 w-full bg-[#F3F4F6] rounded-full overflow-hidden">
                   <motion.div 
-                    animate={{ width: `${ratios.rosemary}%` }}
+                    animate={{ width: `${ratios.mahizhamFlower}%` }}
                     transition={{ duration: 0.8 }}
-                    className={`h-full ${herbData.rosemary.color}`} 
+                    className={`h-full ${herbData.mahizhamFlower.color}`} 
                   />
                 </div>
               </div>
 
-              {/* Amla Detail */}
+              {/* Jadamansi Detail */}
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between font-display text-[14px] font-bold text-[#111827]">
-                  <span>{herbData.amla.name}</span>
-                  <span>{ratios.amla}%</span>
+                  <span>{herbData.jadamansi.name}</span>
+                  <span>{ratios.jadamansi}%</span>
                 </div>
                 <div className="h-2 w-full bg-[#F3F4F6] rounded-full overflow-hidden">
                   <motion.div 
-                    animate={{ width: `${ratios.amla}%` }}
+                    animate={{ width: `${ratios.jadamansi}%` }}
                     transition={{ duration: 0.8 }}
-                    className={`h-full ${herbData.amla.color}`} 
+                    className={`h-full ${herbData.jadamansi.color}`} 
                   />
                 </div>
               </div>

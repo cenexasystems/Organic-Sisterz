@@ -140,12 +140,17 @@ export default function GiftCustomization() {
         setAnimState('ready');
         
         // Finalize Order
+        const itemsWithMeta = [
+          ...items,
+          { __metadata: true, senderMobile, recipientAddress }
+        ];
+
         insertGiftRequest(
           senderName,
           recipientName,
           recipientPhone || "N/A",
           giftMessage,
-          items,
+          itemsWithMeta,
           totalPrice
         ).catch(console.error);
       }, 4500);
@@ -527,12 +532,12 @@ export default function GiftCustomization() {
                   </motion.div>
 
                   {/* The Products Falling */}
-                  <div className="absolute flex justify-center w-full px-2 -space-x-12 sm:-space-x-4 md:-space-x-0 md:gap-4 top-10 z-10">
+                  <div className="absolute flex justify-center w-full px-2 -space-x-12 sm:-space-x-4 md:-space-x-0 md:gap-4 z-10">
                     {selectedImages.map((src, idx) => (
                       <motion.div
                         key={idx}
                         initial={{ y: -300, opacity: 0, rotate: -20 + Math.random() * 40 }}
-                        animate={{ y: 200, opacity: 1, rotate: 0 }}
+                        animate={{ y: 10, opacity: 1, rotate: 0 }}
                         transition={{ 
                           type: "spring", 
                           damping: 15, 
