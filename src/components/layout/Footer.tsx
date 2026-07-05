@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -41,9 +40,6 @@ export default function Footer() {
             <li className="flex flex-col">
               <span className="font-bold mb-1">Hours:</span>
               <span>Mon - Sat: 9:00 AM - 8:00 PM</span>
-            </li>
-            <li className="pt-2">
-              <Link to="/admin" className="hover:text-inverse-primary transition-colors">Admin Console</Link>
             </li>
           </ul>
         </div>
