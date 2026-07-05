@@ -186,24 +186,24 @@ export default function Navbar({
       <nav
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
           isScrolled 
-            ? "bg-[#FAF9F5]/95 backdrop-blur-md border-b border-[#2B3E2F]/10 shadow-[0_2px_15px_rgba(0,0,0,0.02)] py-4 px-6 md:px-12" 
-            : "bg-transparent py-6 px-6 md:px-12"
+            ? "bg-[#FAF9F5]/95 backdrop-blur-md border-b border-[#2B3E2F]/10 shadow-[0_2px_15px_rgba(0,0,0,0.02)] py-4 px-6 lg:px-12" 
+            : "bg-transparent py-6 px-6 lg:px-12"
         }`}
       >
-        <div className="w-full max-w-[1600px] mx-auto grid grid-cols-2 md:grid-cols-3 items-center">
+        <div className="w-full max-w-[1600px] mx-auto grid grid-cols-2 lg:grid-cols-3 items-center">
           
           {/* Left Side: Logo */}
           <div className="flex justify-start">
             <a
               href="/"
-              className="font-display text-2xl md:text-3xl font-extrabold tracking-tight select-none text-primary flex items-center"
+              className="font-display text-2xl lg:text-3xl font-extrabold tracking-tight select-none text-primary flex items-center"
             >
               Organic Sisterz
             </a>
           </div>
 
           {/* Center: Navigation Links */}
-          <div className="hidden md:flex justify-center items-center space-x-9">
+          <div className="hidden lg:flex justify-center items-center space-x-9">
             {navLinks.map((link) => (
               <a
                 key={link.name}
@@ -232,10 +232,10 @@ export default function Navbar({
           </div>
 
           {/* Right Side: Actions */}
-          <div className="flex items-center justify-end space-x-3 md:space-x-4">
+          <div className="flex items-center justify-end space-x-3 lg:space-x-4">
             <button
               onClick={onGiftClick}
-              className="hidden md:flex items-center gap-2 border border-[#2B3E2F]/20 hover:bg-[#2B3E2F]/5 text-[#2B3E2F] font-body text-[10px] font-bold tracking-[0.15em] uppercase px-5 py-2.5 rounded-full transition-all duration-300 cursor-pointer"
+              className="hidden lg:flex items-center gap-2 border border-[#2B3E2F]/20 hover:bg-[#2B3E2F]/5 text-[#2B3E2F] font-body text-[10px] font-bold tracking-[0.15em] uppercase px-5 py-2.5 rounded-full transition-all duration-300 cursor-pointer"
             >
               <Gift className="w-3.5 h-3.5" /> Gift a Friend
             </button>
@@ -253,12 +253,12 @@ export default function Navbar({
             </button>
             <button
               onClick={() => navigate(user ? '/profile' : '/login')}
-              className="hidden md:flex items-center gap-2 bg-[#2B3E2F] hover:bg-[#1b3022] text-[#FAF9F5] font-body text-[10px] font-bold tracking-[0.15em] uppercase px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+              className="hidden lg:flex items-center gap-2 bg-[#2B3E2F] hover:bg-[#1b3022] text-[#FAF9F5] font-body text-[10px] font-bold tracking-[0.15em] uppercase px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
             >
               <User className="w-3.5 h-3.5" /> {user ? "Profile" : "Login"}
             </button>
             <button
-              className="md:hidden text-primary p-2 -mr-2 cursor-pointer"
+              className="lg:hidden text-primary p-2 -mr-2 cursor-pointer"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? (
@@ -280,7 +280,7 @@ export default function Navbar({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-0 z-[60] bg-[#FAF9F5] md:hidden flex flex-col pt-8 px-8 pb-8 h-[100dvh] overflow-y-auto"
+              className="fixed inset-0 z-[60] bg-[#FAF9F5] lg:hidden flex flex-col pt-8 px-8 pb-8 h-[100dvh] overflow-y-auto"
             >
               {/* Drawer Header with Close Button */}
               <div className="flex justify-end mb-10">

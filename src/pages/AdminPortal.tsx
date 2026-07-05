@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Lock, Plus, Trash2, Edit3, Settings, Eye, Search, Shield, BarChart3, ShoppingCart, Receipt, 
   Package, FolderTree, Ticket, Users, RefreshCw, Award, CheckCircle2, TrendingUp,
-  Globe, ShoppingBag, Gift, ChevronLeft, ChevronRight, Download
+  Globe, ShoppingBag, Gift, ChevronLeft, ChevronRight, Download, User, Phone, Heart, MapPin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -32,6 +32,7 @@ export default function AdminPortal() {
   
   // Sidebar State
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // POS Billing states
   const [billingCustomerName, setBillingCustomerName] = useState('');
@@ -69,6 +70,7 @@ export default function AdminPortal() {
   // Orders state
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedGiftOrder, setSelectedGiftOrder] = useState<any | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   // Filter state for dashboard/whatsapp center
@@ -920,7 +922,7 @@ export default function AdminPortal() {
   const completedOrdersCount = ordersFilteredByPeriod.filter(o => o.status === 'Completed').length;
 
   return (
-    <div className="min-h-screen md:h-screen bg-[#FAF9F5] flex flex-col md:flex-row font-poppins text-primary antialiased md:overflow-hidden">
+    <div className="min-h-screen lg:h-screen bg-[#FAF9F5] flex flex-col lg:flex-row font-poppins text-primary antialiased lg:overflow-hidden">
       
       {/* AUTHENTICATION VIEW */}
       {checkingAuth ? (
@@ -962,192 +964,228 @@ export default function AdminPortal() {
         </div>
       ) : (
         <>
+          {/* MOBILE BURGER MENU TOGGLE */}
+          <div className="lg:hidden flex items-center justify-between bg-white border-b border-outline-variant/20 p-4 shrink-0 shadow-sm w-full z-40">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center border border-primary/10">
+                <Settings className="w-4 h-4 text-primary animate-spin-slow" />
+              </div>
+              <div className="whitespace-nowrap">
+                <h2 className="text-sm font-bold text-primary tracking-wide leading-none">Business ERP</h2>
+                <span className="text-[9px] text-on-surface-variant uppercase tracking-widest font-semibold block mt-0.5">Organic Sisterz</span>
+              </div>
+            </div>
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-primary hover:bg-[#FAF9F5] rounded-lg cursor-pointer"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>}
+            </button>
+          </div>
+
           {/* LEFT SIDEBAR NAVIGATION */}
-          <div className={`relative bg-white border-b md:border-b-0 md:border-r border-outline-variant/25 flex flex-col shrink-0 shadow-sm justify-between md:h-full transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-full md:w-72 p-8' : 'w-full md:w-[90px] p-4 items-center'}`}>
+          {isMobileMenuOpen && (
+            <div 
+              className="lg:hidden fixed inset-0 bg-black/20 z-[45]" 
+              onClick={() => setIsMobileMenuOpen(false)} 
+            />
+          )}
+          <div className={`fixed lg:relative inset-y-0 left-0 z-[50] bg-white border-r border-outline-variant/25 flex flex-col shrink-0 shadow-2xl lg:shadow-sm justify-between h-full transition-transform duration-300 ease-in-out ${
+            isMobileMenuOpen ? 'translate-x-0 w-[280px]' : '-translate-x-full lg:translate-x-0'
+          } ${isSidebarOpen ? 'lg:w-72 p-6 lg:p-8' : 'lg:w-[90px] p-6 lg:p-4 lg:items-center'}`}>
             
             {/* Toggle Button */}
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="absolute -right-3.5 top-12 bg-white border border-outline-variant/30 shadow-sm rounded-full p-1.5 text-primary hover:bg-[#FAF9F5] z-50 hidden md:block cursor-pointer"
+              className="absolute -right-3.5 top-12 bg-white border border-outline-variant/30 shadow-sm rounded-full p-1.5 text-primary hover:bg-[#FAF9F5] z-50 hidden lg:block cursor-pointer"
             >
               {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
 
-            <div className="w-full">
-              {/* Branding Section */}
-              <div className={`flex flex-col gap-6 mb-10 pb-6 border-b border-outline-variant/10 ${!isSidebarOpen && 'items-center'}`}>
-                <div className={`flex items-center gap-3.5 ${!isSidebarOpen && 'justify-center'}`}>
-                  <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10 shrink-0">
-                    <Settings className="w-6 h-6 text-primary animate-spin-slow" />
-                  </div>
-                  {isSidebarOpen && (
-                    <div className="whitespace-nowrap transition-opacity duration-300">
-                      <h2 className="text-base font-bold text-primary tracking-wide">Business ERP</h2>
-                      <span className="text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold block">Organic Sisterz</span>
+            <div className="w-full h-full overflow-y-auto scrollbar-hide flex flex-col justify-between">
+              <div>
+                {/* Branding Section */}
+                <div className={`flex flex-col gap-6 mb-10 pb-6 border-b border-outline-variant/10 ${!isSidebarOpen && 'lg:items-center'}`}>
+                  <div className={`flex items-center justify-between gap-3.5 ${!isSidebarOpen && 'lg:justify-center'}`}>
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10 shrink-0">
+                        <Settings className="w-6 h-6 text-primary animate-spin-slow" />
+                      </div>
+                      <div className={`whitespace-nowrap transition-opacity duration-300 ${!isSidebarOpen ? 'lg:hidden' : ''}`}>
+                        <h2 className="text-base font-bold text-primary tracking-wide">Business ERP</h2>
+                        <span className="text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold block">Organic Sisterz</span>
+                      </div>
                     </div>
-                  )}
+                    <button 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="lg:hidden p-2 text-primary hover:bg-outline-variant/10 rounded-xl cursor-pointer transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  {/* Top Actions */}
+                  <div className={`flex gap-2.5 w-full ${!isSidebarOpen ? 'lg:flex-col lg:items-center' : ''}`}>
+                    <button
+                      onClick={() => navigate('/')}
+                      className={`flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-[#FAF9F5] text-primary hover:bg-outline-variant/20 transition-all cursor-pointer border border-outline-variant/20 text-xs font-bold ${!isSidebarOpen ? 'lg:w-10 lg:flex-none' : ''}`}
+                      title="Exit Console"
+                    >
+                      <X className="w-3.5 h-3.5 shrink-0" />
+                      <span className={`${!isSidebarOpen ? 'lg:hidden' : ''}`}>Exit</span>
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className={`flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-red-50 text-error hover:bg-red-100 transition-all cursor-pointer border border-red-200/50 text-xs font-bold ${!isSidebarOpen ? 'lg:w-10 lg:flex-none' : ''}`}
+                      title="Log Out"
+                    >
+                      <Lock className="w-3.5 h-3.5 shrink-0" />
+                      <span className={`${!isSidebarOpen ? 'lg:hidden' : ''}`}>Logout</span>
+                    </button>
+                  </div>
                 </div>
-                {/* Top Actions */}
-                <div className={`flex gap-2.5 w-full ${!isSidebarOpen && 'flex-col items-center'}`}>
+
+                <div className="space-y-1.5 w-full pb-8">
                   <button
-                    onClick={() => navigate('/')}
-                    className={`flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-[#FAF9F5] text-primary hover:bg-outline-variant/20 transition-all cursor-pointer border border-outline-variant/20 text-xs font-bold ${!isSidebarOpen && 'w-10 flex-none'}`}
-                    title="Exit Console"
+                    onClick={() => { setActiveTab('whatsapp'); setIsMobileMenuOpen(false); }}
+                    className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'justify-between px-4.5' : 'px-4.5 lg:px-0 lg:justify-center justify-between relative'} ${
+                      activeTab === 'whatsapp'
+                        ? 'bg-[#2B3E2F] text-white shadow-md'
+                        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                    }`}
+                    title="WhatsApp"
                   >
-                    <X className="w-3.5 h-3.5 shrink-0" />
-                    {isSidebarOpen && <span>Exit</span>}
+                    <div className={`flex items-center gap-3.5`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`w-4.5 h-4.5 text-[#25D366] shrink-0`}>
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
+                      <span className={`${!isSidebarOpen ? 'lg:hidden' : ''}`}>WhatsApp</span>
+                    </div>
+                    {pendingOrdersCount > 0 && (
+                      <span className={`${isSidebarOpen ? 'bg-secondary text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full' : 'absolute top-2 right-2 w-2.5 h-2.5 bg-secondary rounded-full lg:block hidden'}`}>
+                        {isSidebarOpen ? pendingOrdersCount : ''}
+                      </span>
+                    )}
                   </button>
+
                   <button
-                    onClick={handleLogout}
-                    className={`flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-red-50 text-error hover:bg-red-100 transition-all cursor-pointer border border-red-200/50 text-xs font-bold ${!isSidebarOpen && 'w-10 flex-none'}`}
-                    title="Log Out"
+                    onClick={() => { setActiveTab('pos_billing'); setIsMobileMenuOpen(false); }}
+                    className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'px-4.5 lg:px-0 lg:justify-center gap-3.5'} ${
+                      activeTab === 'pos_billing'
+                        ? 'bg-[#2B3E2F] text-white shadow-md'
+                        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                    }`}
+                    title="POS Billing"
                   >
-                    <Lock className="w-3.5 h-3.5 shrink-0" />
-                    {isSidebarOpen && <span>Logout</span>}
+                    <Receipt className="w-4.5 h-4.5 text-orange-500 shrink-0" />
+                    <span className={`whitespace-nowrap truncate ${!isSidebarOpen ? 'lg:hidden' : ''}`}>POS Billing</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('analytics'); setIsMobileMenuOpen(false); }}
+                    className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'px-4.5 lg:px-0 lg:justify-center gap-3.5'} ${
+                      activeTab === 'analytics'
+                        ? 'bg-[#2B3E2F] text-white shadow-md'
+                        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                    }`}
+                    title="POS Analytics"
+                  >
+                    <BarChart3 className="w-4.5 h-4.5 shrink-0" />
+                    <span className={`whitespace-nowrap truncate ${!isSidebarOpen ? 'lg:hidden' : ''}`}>POS Analytics</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('orders'); setSelectedOrder(null); setSelectedGiftOrder(null); setIsMobileMenuOpen(false); }}
+                    className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'justify-between px-4.5' : 'px-4.5 lg:px-0 lg:justify-center justify-between'} ${
+                      activeTab === 'orders'
+                        ? 'bg-[#2B3E2F] text-white shadow-md'
+                        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                    }`}
+                    title="Orders"
+                  >
+                    <div className={`flex items-center gap-3.5`}>
+                      <ShoppingCart className={`w-4.5 h-4.5 shrink-0`} />
+                      <span className={`${!isSidebarOpen ? 'lg:hidden' : ''}`}>Orders</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('gifts'); setSelectedOrder(null); setSelectedGiftOrder(null); setIsMobileMenuOpen(false); }}
+                    className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'justify-between px-4.5' : 'px-4.5 lg:px-0 lg:justify-center justify-between relative'} ${
+                      activeTab === 'gifts'
+                        ? 'bg-[#2B3E2F] text-white shadow-md'
+                        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                    }`}
+                    title="Gifts Received"
+                  >
+                    <div className={`flex items-center gap-3.5`}>
+                      <Gift className={`w-4.5 h-4.5 text-[#D4AF37] shrink-0`} />
+                      <span className={`${!isSidebarOpen ? 'lg:hidden' : ''}`}>Gifts Received</span>
+                    </div>
+                    {orders.filter(o => o.isGift).length > 0 && (
+                      <span className={`${isSidebarOpen ? 'bg-[#D4AF37] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm' : 'absolute top-2 right-2 w-2.5 h-2.5 bg-[#D4AF37] rounded-full lg:block hidden'}`}>
+                        {isSidebarOpen ? orders.filter(o => o.isGift).length : ''}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('products'); setEditingProduct(null); setIsAddingProduct(false); setIsMobileMenuOpen(false); }}
+                    className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'px-4.5 lg:px-0 lg:justify-center gap-3.5'} ${
+                      activeTab === 'products'
+                        ? 'bg-[#2B3E2F] text-white shadow-md'
+                        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                    }`}
+                    title="Inventory"
+                  >
+                    <Package className="w-4.5 h-4.5 shrink-0" />
+                    <span className={`whitespace-nowrap truncate ${!isSidebarOpen ? 'lg:hidden' : ''}`}>Inventory</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('categories'); setIsMobileMenuOpen(false); }}
+                    className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'px-4.5 lg:px-0 lg:justify-center gap-3.5'} ${
+                      activeTab === 'categories'
+                        ? 'bg-[#2B3E2F] text-white shadow-md'
+                        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                    }`}
+                    title="Categories"
+                  >
+                    <FolderTree className="w-4.5 h-4.5 shrink-0" />
+                    <span className={`whitespace-nowrap truncate ${!isSidebarOpen ? 'lg:hidden' : ''}`}>Categories</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('coupons'); setIsMobileMenuOpen(false); }}
+                    className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'px-4.5 lg:px-0 lg:justify-center gap-3.5'} ${
+                      activeTab === 'coupons'
+                        ? 'bg-[#2B3E2F] text-white shadow-md'
+                        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                    }`}
+                    title="Coupons"
+                  >
+                    <Ticket className="w-4.5 h-4.5 shrink-0" />
+                    <span className={`whitespace-nowrap truncate ${!isSidebarOpen ? 'lg:hidden' : ''}`}>Coupons</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }}
+                    className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'px-4.5 lg:px-0 lg:justify-center gap-3.5'} ${
+                      activeTab === 'users'
+                        ? 'bg-[#2B3E2F] text-white shadow-md'
+                        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                    }`}
+                    title="Users"
+                  >
+                    <Users className="w-4.5 h-4.5 shrink-0" />
+                    <span className={`whitespace-nowrap truncate ${!isSidebarOpen ? 'lg:hidden' : ''}`}>Users</span>
                   </button>
                 </div>
-              </div>
-
-              <div className="space-y-1.5 w-full">                <button
-                  onClick={() => { setActiveTab('whatsapp'); }}
-                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'justify-between px-4.5' : 'justify-center px-0 relative'} ${
-                    activeTab === 'whatsapp'
-                      ? 'bg-[#2B3E2F] text-white shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
-                  }`}
-                  title="WhatsApp"
-                >
-                  <div className={`flex items-center ${isSidebarOpen ? 'gap-3.5' : ''}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4.5 h-4.5 text-[#25D366] shrink-0">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                    </svg>
-                    {isSidebarOpen && <span>WhatsApp</span>}
-                  </div>
-                  {pendingOrdersCount > 0 && (
-                    <span className={`${isSidebarOpen ? 'bg-secondary text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full' : 'absolute top-2 right-2 w-2.5 h-2.5 bg-secondary rounded-full'}`}>
-                      {isSidebarOpen ? pendingOrdersCount : ''}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => { setActiveTab('pos_billing'); }}
-                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
-                    activeTab === 'pos_billing'
-                      ? 'bg-[#2B3E2F] text-white shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
-                  }`}
-                  title="POS Billing"
-                >
-                  <Receipt className="w-4.5 h-4.5 text-orange-500 shrink-0" />
-                  {isSidebarOpen && <span className="whitespace-nowrap truncate">POS Billing</span>}
-                </button>
-
-                <button
-                  onClick={() => { setActiveTab('analytics'); }}
-                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
-                    activeTab === 'analytics'
-                      ? 'bg-[#2B3E2F] text-white shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
-                  }`}
-                  title="POS Analytics"
-                >
-                  <BarChart3 className="w-4.5 h-4.5 shrink-0" />
-                  {isSidebarOpen && <span className="whitespace-nowrap truncate">POS Analytics</span>}
-                </button>
-
-                <button
-                  onClick={() => { setActiveTab('orders'); setSelectedOrder(null); }}
-                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'justify-between px-4.5' : 'justify-center px-0'} ${
-                    activeTab === 'orders'
-                      ? 'bg-[#2B3E2F] text-white shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
-                  }`}
-                  title="Orders"
-                >
-                  <div className={`flex items-center ${isSidebarOpen ? 'gap-3.5' : ''}`}>
-                    <ShoppingCart className="w-4.5 h-4.5 shrink-0" />
-                    {isSidebarOpen && <span>Orders</span>}
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => { setActiveTab('gifts'); setSelectedOrder(null); }}
-                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'justify-between px-4.5' : 'justify-center px-0 relative'} ${
-                    activeTab === 'gifts'
-                      ? 'bg-[#2B3E2F] text-white shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
-                  }`}
-                  title="Gifts Received"
-                >
-                  <div className={`flex items-center ${isSidebarOpen ? 'gap-3.5' : ''}`}>
-                    <Gift className="w-4.5 h-4.5 text-[#D4AF37] shrink-0" />
-                    {isSidebarOpen && <span>Gifts Received</span>}
-                  </div>
-                  {orders.filter(o => o.isGift).length > 0 && (
-                    <span className={`${isSidebarOpen ? 'bg-[#D4AF37] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm' : 'absolute top-2 right-2 w-2.5 h-2.5 bg-[#D4AF37] rounded-full'}`}>
-                      {isSidebarOpen ? orders.filter(o => o.isGift).length : ''}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => { setActiveTab('products'); setEditingProduct(null); setIsAddingProduct(false); }}
-                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
-                    activeTab === 'products'
-                      ? 'bg-[#2B3E2F] text-white shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
-                  }`}
-                  title="Inventory"
-                >
-                  <Package className="w-4.5 h-4.5 shrink-0" />
-                  {isSidebarOpen && <span className="whitespace-nowrap truncate">Inventory</span>}
-                </button>
-
-                <button
-                  onClick={() => { setActiveTab('categories'); }}
-                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
-                    activeTab === 'categories'
-                      ? 'bg-[#2B3E2F] text-white shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
-                  }`}
-                  title="Categories"
-                >
-                  <FolderTree className="w-4.5 h-4.5 shrink-0" />
-                  {isSidebarOpen && <span className="whitespace-nowrap truncate">Categories</span>}
-                </button>
-
-                <button
-                  onClick={() => { setActiveTab('coupons'); }}
-                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
-                    activeTab === 'coupons'
-                      ? 'bg-[#2B3E2F] text-white shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
-                  }`}
-                  title="Coupons"
-                >
-                  <Ticket className="w-4.5 h-4.5 shrink-0" />
-                  {isSidebarOpen && <span className="whitespace-nowrap truncate">Coupons</span>}
-                </button>
-
-                <button
-                  onClick={() => { setActiveTab('users'); }}
-                  className={`w-full flex items-center text-xs font-bold tracking-wider uppercase py-4 rounded-xl transition-all cursor-pointer ${isSidebarOpen ? 'px-4.5 gap-3.5' : 'justify-center px-0'} ${
-                    activeTab === 'users'
-                      ? 'bg-[#2B3E2F] text-white shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
-                  }`}
-                  title="Users"
-                >
-                  <Users className="w-4.5 h-4.5 shrink-0" />
-                  {isSidebarOpen && <span className="whitespace-nowrap truncate">Users</span>}
-                </button>
               </div>
             </div>
           </div>
 
           {/* MAIN DASHBOARD CONTENT AREA */}
-          <div className="flex-grow flex flex-col pt-5 px-6 pb-6 md:pt-6 md:px-10 md:pb-8 overflow-y-auto w-full">
+          <div className="flex-grow flex flex-col pt-5 px-6 pb-6 lg:pt-6 lg:px-10 lg:pb-8 overflow-y-auto w-full">
             
             {/* TAB 1: WHATSAPP CENTER (Matches Vercel Screenshot layout) */}
             {activeTab === 'whatsapp' && (
@@ -1170,7 +1208,7 @@ export default function AdminPortal() {
                   <div className="flex flex-col xl:flex-row items-end xl:items-center gap-4 self-start sm:self-auto w-full xl:w-auto">
 
                     {/* Period selection filters and Refresh button */}
-                    <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto pb-1 xl:pb-0">
+                    <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto scrollbar-hide pb-1 xl:pb-0">
                       <div className="bg-[#ECEEEB] p-1.5 rounded-full flex gap-1 shrink-0">
                         {(['all', 'today', 'week', 'month', 'year', 'custom'] as const).map(f => (
                           <button
@@ -2685,7 +2723,7 @@ export default function AdminPortal() {
                   {/* Filters Container */}
                   <div className="flex flex-col xl:flex-row items-end xl:items-center gap-4 self-start sm:self-auto w-full xl:w-auto">
                     {/* Period selection filters and Refresh button */}
-                    <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto pb-1 xl:pb-0">
+                    <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto scrollbar-hide pb-1 xl:pb-0">
                       <div className="bg-[#ECEEEB] p-1.5 rounded-full flex gap-1 shrink-0">
                         {(['all', 'today', 'week', 'month', 'year', 'custom'] as const).map(f => (
                           <button
@@ -2764,18 +2802,18 @@ export default function AdminPortal() {
                       <table className="w-full text-left text-xs min-w-[900px]">
                         <thead>
                           <tr className="bg-[#FAF9F5] text-primary font-bold border-b border-outline-variant/25 uppercase text-[10px] tracking-wider">
-                            <th className="px-4 py-3">Invoice ID</th>
+                            <th className="px-4 py-3">Gift ID</th>
                             <th className="px-4 py-3">Date & Time</th>
                             <th className="px-4 py-3">Sender / Recipient</th>
-                            <th className="px-4 py-3">Personal Message</th>
-                            <th className="px-4 py-3">Products</th>
                             <th className="px-4 py-3">Status</th>
                             <th className="px-4 py-3 text-right">Total</th>
+                            <th className="px-4 py-3 text-right">Details</th>
                           </tr>
                         </thead>
                       <tbody className="divide-y divide-outline-variant/10">
                         {filteredGiftRequests.map(o => (
-                          <tr key={o.id} className="hover:bg-[#FAF9F5]/40 transition-colors">
+                          <Fragment key={o.id}>
+                            <tr className="hover:bg-[#FAF9F5]/40 transition-colors">
                               <td className="px-4 py-3 font-bold text-primary">{getGiftInvoice(o.id)}</td>
                               <td className="px-4 py-3 text-on-surface-variant font-medium">
                                 {o.createdAt ? (
@@ -2794,18 +2832,6 @@ export default function AdminPortal() {
                               <td className="px-4 py-3">
                                 <div className="font-semibold text-primary">{o.recipientName}</div>
                                 <div className="text-[10px] text-on-surface-variant mt-0.5">{o.recipientPhone} | Gift from: {o.senderName}</div>
-                              </td>
-                              <td className="px-4 py-3">
-                                <div className="bg-[#FAF9F5] p-2 rounded-lg border border-[#D4AF37]/30 text-[10px] italic text-[#1B3022] max-w-[150px] truncate hover:whitespace-normal hover:max-w-xs transition-all">
-                                  "{o.giftMessage || 'No message provided'}"
-                                </div>
-                              </td>
-                              <td className="px-4 py-3">
-                                <ul className="text-[10px] space-y-1 text-on-surface-variant">
-                                  {o.items.map((it: any, idx: number) => (
-                                    <li key={idx}>• {it.name} ({it.size}) x{it.quantity}</li>
-                                  ))}
-                                </ul>
                               </td>
                               <td className="px-4 py-3">
                                 <select
@@ -2828,21 +2854,139 @@ export default function AdminPortal() {
                                 </select>
                               </td>
                               <td className="px-4 py-3 font-bold text-primary text-right">₹{o.totalPrice}</td>
+                              <td className="px-4 py-3 text-right">
+                                <button
+                                  onClick={() => setSelectedGiftOrder(o)}
+                                  className={`font-bold text-xs px-5 py-2.5 rounded-xl transition-all inline-block cursor-pointer ${
+                                    selectedGiftOrder && selectedGiftOrder.id === o.id
+                                      ? 'bg-[#1F2937] text-white hover:bg-black'
+                                      : 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
+                                  }`}
+                                >
+                                  View
+                                </button>
+                              </td>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
+                          </Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Gift Request Details Modal */}
+              <AnimatePresence>
+                {selectedGiftOrder && (
+                  <div className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-4 sm:p-6" onClick={() => setSelectedGiftOrder(null)}>
+                    <motion.div
+                      key={selectedGiftOrder.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="bg-[#FAF9F5] rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <button onClick={() => setSelectedGiftOrder(null)} className="absolute top-6 right-6 p-2 bg-white hover:bg-outline-variant/20 rounded-full z-10 transition-colors cursor-pointer shadow-sm">
+                        <X className="w-5 h-5 text-primary" />
+                      </button>
+
+                      <div className="p-8 border-b border-outline-variant/20 bg-white">
+                        <h4 className="text-xl font-display font-bold text-primary">{getGiftInvoice(selectedGiftOrder.id)}</h4>
+                        <span className="text-xs text-on-surface-variant font-medium block mt-1">
+                          Placed: {new Date(selectedGiftOrder.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                        </span>
+                      </div>
+
+                      <div className="p-8 overflow-y-auto custom-scrollbar flex-1 space-y-8">
+                        {/* Contact & Address Details Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-1 bg-white p-5 rounded-2xl border border-outline-variant/20 shadow-sm">
+                            <span className="block text-[10px] font-bold text-primary uppercase tracking-wider mb-3 flex items-center gap-2"><User className="w-3.5 h-3.5" /> From (Sender)</span>
+                            <div className="text-base font-display font-bold text-primary">{selectedGiftOrder.senderName || 'N/A'}</div>
+                            <div className="text-sm text-on-surface-variant font-medium mt-1"><Phone className="w-3 h-3 inline mr-1 text-primary/60" /> {selectedGiftOrder.senderMobile || 'N/A'}</div>
+                          </div>
+                          <div className="space-y-1 bg-white p-5 rounded-2xl border border-outline-variant/20 shadow-sm">
+                            <span className="block text-[10px] font-bold text-[#D4AF37] uppercase tracking-wider mb-3 flex items-center gap-2"><Heart className="w-3.5 h-3.5" /> To (Recipient)</span>
+                            <div className="text-base font-display font-bold text-primary">{selectedGiftOrder.recipientName || 'N/A'}</div>
+                            <div className="text-sm text-on-surface-variant font-medium mt-1"><Phone className="w-3 h-3 inline mr-1 text-primary/60" /> {selectedGiftOrder.recipientPhone || 'N/A'}</div>
+                            <div className="text-sm text-on-surface-variant font-medium mt-2 pt-2 border-t border-outline-variant/10">
+                              <MapPin className="w-3 h-3 inline mr-1 text-primary/60" /> {selectedGiftOrder.recipientAddress || 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Personal Message */}
+                        <div className="space-y-3">
+                          <span className="block text-[10px] font-bold text-primary uppercase tracking-wider">Personal Message</span>
+                          <div className="w-full bg-white border border-[#D4AF37]/30 rounded-2xl p-5 text-sm font-medium text-primary shadow-inner italic">
+                            "{selectedGiftOrder.giftMessage || 'No message provided'}"
+                          </div>
+                        </div>
+
+                        {/* Order Items Table */}
+                        <div className="space-y-3">
+                          <span className="block text-[10px] font-bold text-primary uppercase tracking-wider">Gift Box Contents</span>
+                          <div className="bg-white rounded-2xl border border-outline-variant/20 overflow-hidden shadow-sm">
+                            <table className="w-full text-left text-xs">
+                              <thead>
+                                <tr className="bg-[#FAF9F5] text-primary font-bold border-b border-outline-variant/20 uppercase tracking-wider text-[10px]">
+                                  <th className="px-5 py-3">Product</th>
+                                  <th className="px-5 py-3">Variant</th>
+                                  <th className="px-5 py-3 text-center">Qty</th>
+                                  <th className="px-5 py-3 text-right">Line Total</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-outline-variant/10">
+                                {selectedGiftOrder.items.map((it: any, idx: number) => (
+                                  <tr key={idx} className="hover:bg-[#FAF9F5]/40 transition-colors">
+                                    <td className="px-5 py-3 font-semibold text-primary">{it.name}</td>
+                                    <td className="px-5 py-3 text-on-surface-variant">{it.size}</td>
+                                    <td className="px-5 py-3 text-center font-medium">{it.quantity}</td>
+                                    <td className="px-5 py-3 font-bold text-primary text-right">₹{it.price * it.quantity}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Modal Footer with Actions */}
+                      <div className="p-6 border-t border-outline-variant/20 bg-white flex items-center justify-between">
+                        <div className="flex gap-3">
+                          <button 
+                            onClick={() => {
+                              const eBullet = decodeURIComponent('%E2%80%A2');
+                              const text = `*GIFT ORDER DETAILS*\n\n*From:* ${selectedGiftOrder.senderName} (${selectedGiftOrder.senderMobile || 'N/A'})\n*To:* ${selectedGiftOrder.recipientName} (${selectedGiftOrder.recipientPhone || 'N/A'})\n*Address:* ${selectedGiftOrder.recipientAddress || 'N/A'}\n\n*Message:* "${selectedGiftOrder.giftMessage || 'N/A'}"\n\n*Items:*\n${selectedGiftOrder.items.map((it: any) => `${eBullet} ${it.quantity}x ${it.name} (${it.size})`).join('\n')}\n\n*Total:* ₹${selectedGiftOrder.totalPrice}`;
+                              navigator.clipboard.writeText(text);
+                              alert("Gift order details copied to clipboard!");
+                            }}
+                            className="bg-blue-50 text-blue-700 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-blue-100 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                            Copy Details
+                          </button>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block mb-0.5">Grand Total</span>
+                          <span className="font-display font-extrabold text-2xl text-primary">₹{selectedGiftOrder.totalPrice}</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
+
               </div>
             )}
 
             {/* TAB 4: ORDERS HUB */}
             {activeTab === 'orders' && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="w-full">
                 {/* Orders List */}
-                <div className="lg:col-span-7 space-y-5">
+                <div className="w-full space-y-5">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                       <h1 className="text-3xl font-bold tracking-tight text-primary font-poppins">Billing & Invoice Hub</h1>
@@ -2983,7 +3127,7 @@ export default function AdminPortal() {
                         <table className="w-full text-left text-sm min-w-[800px]">
                           <thead>
                           <tr className="bg-surface-container-low text-primary font-bold border-b border-outline-variant/25">
-                            <th className="px-6 py-4">Bill ID</th>
+                            <th className="px-6 py-4">Invoice ID</th>
                             <th className="px-6 py-4">Customer</th>
                             <th className="px-6 py-4">Source</th>
                             <th className="px-6 py-4">Total</th>
@@ -3045,115 +3189,117 @@ export default function AdminPortal() {
                   </div>
                 </div>
 
-                {/* Order Details Panel */}
-                <div className="lg:col-span-5">
-                  <AnimatePresence mode="wait">
-                    {selectedOrder ? (
+                {/* Order Details Modal */}
+                <AnimatePresence mode="wait">
+                  {selectedOrder && (
+                    <div className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-4 sm:p-6" onClick={() => setSelectedOrder(null)}>
                       <motion.div
                         key={selectedOrder.id}
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        className="bg-white border border-outline-variant/20 rounded-2xl p-8 shadow-md space-y-6 sticky top-4"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl relative"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="flex justify-between items-center border-b border-outline-variant/20 pb-4">
-                          <div>
-                            <h4 className="text-lg font-bold text-primary">{selectedOrder.id}</h4>
-                            <span className="text-xs text-on-surface-variant">
-                              Placed: {new Date(selectedOrder.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-                            </span>
+                        <button onClick={() => setSelectedOrder(null)} className="absolute top-6 right-6 p-2 bg-[#FAF9F5] hover:bg-outline-variant/20 rounded-full z-10 transition-colors cursor-pointer">
+                          <X className="w-5 h-5 text-primary" />
+                        </button>
+                        <div className="p-8 space-y-6">
+                          <div className="flex justify-between items-center border-b border-outline-variant/20 pb-4 pr-8">
+                            <div>
+                              <h4 className="text-lg font-bold text-primary">{selectedOrder.id}</h4>
+                              <span className="text-xs text-on-surface-variant">
+                                Placed: {new Date(selectedOrder.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                              </span>
+                            </div>
                           </div>
-                        </div>
 
-                        {/* Customer Details */}
-                        <div className="space-y-3 bg-[#FAF9F5] p-5 rounded-xl border border-outline-variant/20">
-                          <span className="block text-xs font-bold text-primary uppercase tracking-wider">Shipping details</span>
-                          <div className="space-y-2 text-sm text-primary">
-                            <div className="font-bold">{selectedOrder.customerName}</div>
-                            <div>Phone: {selectedOrder.customerPhone.split('_')[0]}</div>
-                            <div>Email: {selectedOrder.customerEmail}</div>
-                            <div className="text-on-surface-variant italic leading-relaxed pt-2 border-t border-outline-variant/10 mt-2">
-                              {selectedOrder.customerAddress}
+                          {/* Customer Details */}
+                          <div className="space-y-3 bg-[#FAF9F5] p-5 rounded-xl border border-outline-variant/20">
+                            <span className="block text-xs font-bold text-primary uppercase tracking-wider">Shipping details</span>
+                            <div className="space-y-2 text-sm text-primary">
+                              <div className="font-bold">{selectedOrder.customerName}</div>
+                              <div>Phone: {selectedOrder.customerPhone.split('_')[0]}</div>
+                              <div>Email: {selectedOrder.customerEmail}</div>
+                              <div className="text-on-surface-variant italic leading-relaxed pt-2 border-t border-outline-variant/10 mt-2">
+                                {selectedOrder.customerAddress}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Items Purchased */}
+                          <div className="space-y-4">
+                            <span className="block text-xs font-bold text-primary uppercase tracking-wider">Items Summary</span>
+                            <div className="space-y-3.5">
+                              {selectedOrder.items.map((it, idx) => (
+                                <div key={idx} className="flex justify-between items-center text-sm text-primary">
+                                  <div>
+                                    <span className="font-bold">{it.name}</span>
+                                    <div className="text-xs text-on-surface-variant mt-0.5">{it.size} × {it.quantity}</div>
+                                  </div>
+                                  <span className="font-semibold">₹{it.price * it.quantity}</span>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="border-t border-outline-variant/20 pt-5 space-y-2.5">
+                              {(() => {
+                                const subtotal = selectedOrder.items.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+                                const couponDisc = selectedOrder.couponDiscount || 0;
+                                const manualDisc = selectedOrder.manualDiscount || 0;
+                                const delivFee = selectedOrder.deliveryCharge || 0;
+                                const cashRec = selectedOrder.cashReceived || 0;
+                                const changeRet = selectedOrder.changeReturned || 0;
+
+                                return (
+                                  <>
+                                    <div className="flex justify-between text-xs text-on-surface-variant font-semibold">
+                                      <span>Subtotal:</span>
+                                      <span>₹{subtotal.toFixed(2)}</span>
+                                    </div>
+                                    {(couponDisc > 0 || selectedOrder.couponCode) && (
+                                      <div className="flex justify-between text-xs text-green-700 font-bold">
+                                        <span>Coupon Discount ({selectedOrder.couponCode || 'Promo'}):</span>
+                                        <span>-₹{couponDisc.toFixed(2)}</span>
+                                      </div>
+                                    )}
+                                    {manualDisc > 0 && (
+                                      <div className="flex justify-between text-xs text-green-700 font-bold">
+                                        <span>Manual Discount:</span>
+                                        <span>-₹{manualDisc.toFixed(2)}</span>
+                                      </div>
+                                    )}
+                                    {delivFee > 0 && (
+                                      <div className="flex justify-between text-xs text-on-surface-variant font-semibold">
+                                        <span>Delivery Fee:</span>
+                                        <span>₹{delivFee.toFixed(2)}</span>
+                                      </div>
+                                    )}
+                                    <div className="border-t border-dashed border-outline-variant/20 pt-3.5 flex justify-between items-center text-base font-extrabold text-primary">
+                                      <span>Grand Total:</span>
+                                      <span>₹{selectedOrder.totalPrice.toFixed(2)}</span>
+                                    </div>
+                                    {cashRec > 0 && (
+                                      <div className="border-t border-outline-variant/10 pt-2.5 space-y-1.5 bg-[#FAF9F5] p-3 rounded-lg border border-outline-variant/10">
+                                        <div className="flex justify-between text-xs text-on-surface-variant font-semibold">
+                                          <span>Cash Paid:</span>
+                                          <span>₹{cashRec.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs text-green-700 font-extrabold">
+                                          <span>Change Return:</span>
+                                          <span>₹{changeRet.toFixed(2)}</span>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
-
-                        {/* Items Purchased */}
-                        <div className="space-y-4">
-                          <span className="block text-xs font-bold text-primary uppercase tracking-wider">Items Summary</span>
-                          <div className="space-y-3.5">
-                            {selectedOrder.items.map((it, idx) => (
-                              <div key={idx} className="flex justify-between items-center text-sm text-primary">
-                                <div>
-                                  <span className="font-bold">{it.name}</span>
-                                  <div className="text-xs text-on-surface-variant mt-0.5">{it.size} × {it.quantity}</div>
-                                </div>
-                                <span className="font-semibold">₹{it.price * it.quantity}</span>
-                              </div>
-                            ))}
-                          </div>
-                          <div className="border-t border-outline-variant/20 pt-5 space-y-2.5">
-                            {(() => {
-                              const subtotal = selectedOrder.items.reduce((sum, it) => sum + (it.price * it.quantity), 0);
-                              const couponDisc = selectedOrder.couponDiscount || 0;
-                              const manualDisc = selectedOrder.manualDiscount || 0;
-                              const delivFee = selectedOrder.deliveryCharge || 0;
-                              const cashRec = selectedOrder.cashReceived || 0;
-                              const changeRet = selectedOrder.changeReturned || 0;
-
-                              return (
-                                <>
-                                  <div className="flex justify-between text-xs text-on-surface-variant font-semibold">
-                                    <span>Subtotal:</span>
-                                    <span>₹{subtotal.toFixed(2)}</span>
-                                  </div>
-                                  {(couponDisc > 0 || selectedOrder.couponCode) && (
-                                    <div className="flex justify-between text-xs text-green-700 font-bold">
-                                      <span>Coupon Discount ({selectedOrder.couponCode || 'Promo'}):</span>
-                                      <span>-₹{couponDisc.toFixed(2)}</span>
-                                    </div>
-                                  )}
-                                  {manualDisc > 0 && (
-                                    <div className="flex justify-between text-xs text-green-700 font-bold">
-                                      <span>Manual Discount:</span>
-                                      <span>-₹{manualDisc.toFixed(2)}</span>
-                                    </div>
-                                  )}
-                                  {delivFee > 0 && (
-                                    <div className="flex justify-between text-xs text-on-surface-variant font-semibold">
-                                      <span>Delivery Fee:</span>
-                                      <span>₹{delivFee.toFixed(2)}</span>
-                                    </div>
-                                  )}
-                                  <div className="border-t border-dashed border-outline-variant/20 pt-3.5 flex justify-between items-center text-base font-extrabold text-primary">
-                                    <span>Grand Total:</span>
-                                    <span>₹{selectedOrder.totalPrice.toFixed(2)}</span>
-                                  </div>
-                                  {cashRec > 0 && (
-                                    <div className="border-t border-outline-variant/10 pt-2.5 space-y-1.5 bg-[#FAF9F5] p-3 rounded-lg border border-outline-variant/10">
-                                      <div className="flex justify-between text-xs text-on-surface-variant font-semibold">
-                                        <span>Cash Paid:</span>
-                                        <span>₹{cashRec.toFixed(2)}</span>
-                                      </div>
-                                      <div className="flex justify-between text-xs text-green-700 font-extrabold">
-                                        <span>Change Return:</span>
-                                        <span>₹{changeRet.toFixed(2)}</span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </>
-                              );
-                            })()}
-                          </div>
-                        </div>
                       </motion.div>
-                    ) : (
-                      <div className="bg-white border border-outline-variant/20 rounded-2xl p-12 text-center text-on-surface-variant text-sm italic">
-                        Select an order from the list to manage customer details, address logs, and delivery status.
-                      </div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                    </div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 

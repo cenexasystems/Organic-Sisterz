@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { getStoredCart, saveStoredCart } from '../utils/store';
-import { fetchProducts, insertWhatsappRequest } from '../utils/db';
+import { fetchProducts, insertWhatsappRequest, fetchCoupons } from '../utils/db';
 import type { Product } from '../utils/store';
 import Navbar from '../components/layout/Navbar';
 import type { OrderItem } from '../utils/store';
@@ -17,12 +17,46 @@ export default function CartPage() {
   const [custPhone, setCustPhone] = useState("");
   const [custAddress, setCustAddress] = useState("");
   const [productsList, setProductsList] = useState<Product[]>([]);
+  const [couponsList, setCouponsList] = useState<any[]>([]);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{code: string, discount: number} | null>(null);
+  const [couponError, setCouponError] = useState("");
 
   useEffect(() => {
     window.scrollTo(0, 0);
     setCartItems(getStoredCart());
     fetchProducts().then(setProductsList).catch(console.error);
+    fetchCoupons().then(setCouponsList).catch(console.error);
   }, [user]);
+
+  const handleVerifyCoupon = () => {
+    setCouponError("");
+    if (!couponCode.trim()) return;
+    
+    const found = couponsList.find(c => c.code.toUpperCase() === couponCode.toUpperCase().trim());
+    if (!found) {
+      setCouponError("Invalid coupon code");
+      return;
+    }
+    if (found.status !== 'ACTIVE') {
+      setCouponError("Coupon is no longer active");
+      return;
+    }
+    if (found.usageLimit > 0 && found.usedCount >= found.usageLimit) {
+      setCouponError("Coupon usage limit reached");
+      return;
+    }
+    if (found.expiryDate && new Date(found.expiryDate) < new Date()) {
+      setCouponError("Coupon has expired");
+      return;
+    }
+    if (subtotal < found.minOrder) {
+      setCouponError(`Minimum order amount for this coupon is ₹${found.minOrder}`);
+      return;
+    }
+    
+    setAppliedCoupon({ code: found.code, discount: found.discount });
+  };
 
   const updateQuantity = (idx: number, delta: number) => {
     const updated = [...cartItems];
@@ -47,7 +81,8 @@ export default function CartPage() {
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
-  const totalAmount = subtotal;
+  const discountAmount = appliedCoupon ? (subtotal * (appliedCoupon.discount / 100)) : 0;
+  const totalAmount = subtotal - discountAmount;
 
   const handlePlaceOrderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +128,8 @@ export default function CartPage() {
     const eRupee = decodeURIComponent('%E2%82%B9'); // ₹
 
     const orderLines = cartItems.map(it => `${eBullet} ${it.quantity}x *${it.name}* (${it.size}) - ${eRupee}${it.price * it.quantity}`).join("\n");
-    const text = `${eHerb} *ORGANIC SISTERZ - NEW ORDER* ${eHerb}\n----------------------------------\n${eUser} *Customer:* ${custName}\n${ePhone} *Phone:* ${custPhone}\n${ePin} *Delivery Address:* ${custAddress}\n\n${ePkg} *Products Ordered:*\n${orderLines}\n\n${eMoney} *Total Amount:* *${eRupee}${totalAmount}*\n----------------------------------\n${eSparkles} Thank you for choosing organic, clean, botanical solutions! ${eSparkles}`;
+    const couponLine = appliedCoupon ? `\n${eMoney} *Coupon Applied:* ${appliedCoupon.code} (-${appliedCoupon.discount}%)` : "";
+    const text = `${eHerb} *ORGANIC SISTERZ - NEW ORDER* ${eHerb}\n----------------------------------\n${eUser} *Customer:* ${custName}\n${ePhone} *Phone:* ${custPhone}\n${ePin} *Delivery Address:* ${custAddress}\n\n${ePkg} *Products Ordered:*\n${orderLines}${couponLine}\n\n${eMoney} *Total Amount:* *${eRupee}${totalAmount.toFixed(2)}*\n----------------------------------\n${eSparkles} Thank you for choosing organic, clean, botanical solutions! ${eSparkles}`;
     
     // Bulletproof Redirect
     const whatsappLink = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(text)}`;
@@ -327,18 +363,69 @@ export default function CartPage() {
                 </div>
 
                 <hr className="border-outline-variant/20" />
+                
+                {/* Coupon Code Section */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold text-[#1B3022]/80 uppercase tracking-widest">
+                    Have a coupon code?
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      disabled={!!appliedCoupon}
+                      className="flex-1 border border-outline-variant/40 focus:border-[#1B3022] rounded-xl px-4 py-3 text-sm bg-[#FAF9F5] text-[#1B3022] outline-none transition-all shadow-inner disabled:opacity-60 uppercase"
+                      placeholder="Enter code"
+                    />
+                    {appliedCoupon ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAppliedCoupon(null);
+                          setCouponCode("");
+                        }}
+                        className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-red-100 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleVerifyCoupon}
+                        className="bg-[#1B3022] text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#2C4835] transition-colors"
+                      >
+                        Verify
+                      </button>
+                    )}
+                  </div>
+                  {couponError && <p className="text-red-500 text-xs font-semibold mt-1">{couponError}</p>}
+                  {appliedCoupon && <p className="text-green-600 text-xs font-semibold mt-1">Coupon '{appliedCoupon.code}' applied successfully! (-{appliedCoupon.discount}%)</p>}
+                </div>
+
+                <hr className="border-outline-variant/20" />
 
                 {/* Totals */}
                 <div className="space-y-3.5">
-                  <div className="text-right text-xs text-on-surface-variant italic mb-2">
-                    *Delivery charges may apply depending upon your location
+                  <div className="text-right text-xs font-bold text-red-600 mb-2">
+                    Delivery charges may apply depending upon your location
                   </div>
-                  <div className="flex justify-between items-end pt-2">
+                  <div className="flex justify-between items-center text-sm text-on-surface-variant font-medium">
+                    <span>Subtotal</span>
+                    <span>₹{subtotal.toFixed(2)}</span>
+                  </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between items-center text-sm text-green-600 font-bold">
+                      <span>Discount ({appliedCoupon.discount}%)</span>
+                      <span>-₹{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-end pt-2 border-t border-dashed border-outline-variant/20">
                     <span className="font-display font-bold text-xs text-[#1B3022] uppercase tracking-widest">
                       Total Amount
                     </span>
                     <span className="font-display font-extrabold text-2xl text-[#1B3022]">
-                      ₹{totalAmount}
+                      ₹{totalAmount.toFixed(2)}
                     </span>
                   </div>
                 </div>

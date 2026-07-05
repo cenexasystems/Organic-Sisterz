@@ -201,11 +201,21 @@ export async function fetchGiftRequests() {
   if (error) throw error;
   return (data || []).map(o => {
     let parsedItems: any[] = [];
+    let senderMobile = '';
+    let recipientAddress = '';
+    
     try {
       if (Array.isArray(o.items)) {
         parsedItems = o.items;
       } else if (typeof o.items === 'string') {
         parsedItems = JSON.parse(o.items);
+      }
+      
+      const metaItem = parsedItems.find((it: any) => it.__metadata);
+      if (metaItem) {
+        senderMobile = metaItem.senderMobile || '';
+        recipientAddress = metaItem.recipientAddress || '';
+        parsedItems = parsedItems.filter((it: any) => !it.__metadata);
       }
     } catch (e) {
       console.error("Failed to parse gift request items:", e);
@@ -215,6 +225,8 @@ export async function fetchGiftRequests() {
       senderName: o.sender_name,
       recipientName: o.recipient_name,
       recipientPhone: o.customer_phone,
+      senderMobile,
+      recipientAddress,
       giftMessage: o.message,
       items: parsedItems,
       totalPrice: typeof o.total_price === 'number' ? o.total_price : parseFloat(o.total_price || '0'),
