@@ -573,7 +573,16 @@ export default function AdminPortal() {
       const sizeStr = it.size && it.size !== '—' ? ` - ${it.size}` : '';
       return `${ePkg} ${it.name}${sizeStr} x ${it.quantity} (Rs. ${it.price * it.quantity})`;
     }).join('\n');
-    return `${eBags} *Order Request - Organic Sisterz*\n\n${eUser} *Customer:* ${order.customerName}\n${ePhone} *Phone:* ${order.customerPhone}\n${ePin} *Address:* ${order.customerAddress}\n\n${eMemo} *Items:*\n${itemsText}\n\n${eMoney} *Estimated Total: Rs. ${order.totalPrice}*`;
+    
+    const subtotal = order.items.reduce((sum: number, it: any) => sum + (it.price * it.quantity), 0);
+    let priceSummary = `\n${eMoney} *Subtotal:* Rs. ${subtotal}`;
+    
+    if (order.totalPrice < subtotal) {
+      priceSummary += `\n${eMoney} *Discount:* -Rs. ${subtotal - order.totalPrice}`;
+    }
+    priceSummary += `\n${eMoney} *Final Amount to Pay:* *Rs. ${order.totalPrice}*`;
+
+    return `${eBags} *Order Request - Organic Sisterz*\n\n${eUser} *Customer:* ${order.customerName}\n${ePhone} *Phone:* ${order.customerPhone}\n${ePin} *Address:* ${order.customerAddress}\n\n${eMemo} *Items:*\n${itemsText}\n----------------------------------${priceSummary}`;
   };
 
 
@@ -666,7 +675,7 @@ export default function AdminPortal() {
     const newOrder: Order = {
       id: nextInvoiceId,
       customerName: billingCustomerName || 'Walk-in Customer',
-      customerPhone: billingCustomerPhone || '7904199050',
+      customerPhone: billingCustomerPhone || '9500258080',
       customerEmail: '', // Not required for offline POS checkout
       customerAddress: billingSource === 'OFFLINE' ? 'Offline POS Shop' : 'Online Shipping Address',
       source: billingSource,
@@ -724,7 +733,7 @@ export default function AdminPortal() {
     navigator.clipboard.writeText(invoiceUrl).catch(() => {});
 
     // Open WhatsApp — use api.whatsapp.com/send for consistent behaviour across devices
-    const targetPhone = billingCustomerPhone ? billingCustomerPhone.replace(/\D/g, '') : '7904199050';
+    const targetPhone = billingCustomerPhone ? billingCustomerPhone.replace(/\D/g, '') : '9500258080';
     const formattedPhone = targetPhone.length === 10 ? `91${targetPhone}` : targetPhone;
     const waUrl = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(invoiceMessage)}`;
     const waLink = document.createElement('a');
@@ -1429,10 +1438,22 @@ export default function AdminPortal() {
                                         </table>
                                       </div>
 
-                                      {/* Grand Total */}
-                                      <div className="flex justify-between items-center bg-[#FAF9F6]/50 p-4 rounded-xl border border-outline-variant/15">
-                                        <span className="text-xs font-bold text-primary uppercase tracking-wider">Grand Total</span>
-                                        <span className="text-xl font-bold text-primary">₹{o.totalPrice}</span>
+                                      {/* Totals Breakdown */}
+                                      <div className="space-y-2 border border-outline-variant/15 rounded-xl p-4 bg-[#FAF9F6]/50">
+                                        <div className="flex justify-between items-center text-sm font-semibold text-primary/80">
+                                          <span>Subtotal</span>
+                                          <span>₹{o.items.reduce((sum: number, it: any) => sum + (it.price * it.quantity), 0)}</span>
+                                        </div>
+                                        {o.totalPrice < o.items.reduce((sum: number, it: any) => sum + (it.price * it.quantity), 0) && (
+                                          <div className="flex justify-between items-center text-sm font-bold text-green-600">
+                                            <span>Discount</span>
+                                            <span>-₹{o.items.reduce((sum: number, it: any) => sum + (it.price * it.quantity), 0) - o.totalPrice}</span>
+                                          </div>
+                                        )}
+                                        <div className="flex justify-between items-center pt-2 border-t border-outline-variant/20">
+                                          <span className="text-xs font-bold text-primary uppercase tracking-wider">Final Amount</span>
+                                          <span className="text-xl font-bold text-primary">₹{o.totalPrice}</span>
+                                        </div>
                                       </div>
 
                                       {/* WhatsApp message block */}
@@ -1444,8 +1465,8 @@ export default function AdminPortal() {
                                               const msg = formatWhatsAppMessage(o);
                                               navigator.clipboard.writeText(msg);
                                               alert('Message copied to clipboard!');
-                                              // Open WhatsApp Web using the override phone number "7904199050"
-                                              const adminNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "917904199050";
+                                              // Open WhatsApp Web using the override phone number "9500258080"
+                                              const adminNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "919500258080";
                                               window.open(`https://wa.me/${adminNumber}?text=${encodeURIComponent(msg)}`, '_blank');
                                             }}
                                             className="bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
