@@ -111,7 +111,7 @@ export default function CartPage() {
 
     insertWhatsappRequest(orderData).catch(console.error);
     
-    let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "917904199050";
+    let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "919500258080";
     whatsappNumber = whatsappNumber.replace(/\D/g, '');
     if (whatsappNumber.length === 10) {
       whatsappNumber = `91${whatsappNumber}`;
@@ -129,7 +129,14 @@ export default function CartPage() {
 
     const orderLines = cartItems.map(it => `${eBullet} ${it.quantity}x *${it.name}* (${it.size}) - ${eRupee}${it.price * it.quantity}`).join("\n");
     const couponLine = appliedCoupon ? `\n${eMoney} *Coupon Applied:* ${appliedCoupon.code} (-${appliedCoupon.discount}%)` : "";
-    const text = `${eHerb} *ORGANIC SISTERZ - NEW ORDER* ${eHerb}\n----------------------------------\n${eUser} *Customer:* ${custName}\n${ePhone} *Phone:* ${custPhone}\n${ePin} *Delivery Address:* ${custAddress}\n\n${ePkg} *Products Ordered:*\n${orderLines}${couponLine}\n\n${eMoney} *Total Amount:* *${eRupee}${totalAmount.toFixed(2)}*\n----------------------------------\n${eSparkles} Thank you for choosing organic, clean, botanical solutions! ${eSparkles}`;
+    
+    let priceSummary = `\n${eMoney} *Subtotal:* ${eRupee}${subtotal.toFixed(2)}`;
+    if (appliedCoupon) {
+      priceSummary += `\n${eMoney} *Discount Amount:* -${eRupee}${discountAmount.toFixed(2)}`;
+    }
+    priceSummary += `\n${eMoney} *Final Amount to Pay:* *${eRupee}${totalAmount.toFixed(2)}*`;
+
+    const text = `${eHerb} *ORGANIC SISTERZ - NEW ORDER* ${eHerb}\n----------------------------------\n${eUser} *Customer:* ${custName}\n${ePhone} *Phone:* ${custPhone}\n${ePin} *Delivery Address:* ${custAddress}\n\n${ePkg} *Products Ordered:*\n${orderLines}${couponLine}\n----------------------------------${priceSummary}\n----------------------------------\n${eSparkles} Thank you for choosing organic, clean, botanical solutions! ${eSparkles}`;
     
     // Bulletproof Redirect
     const whatsappLink = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(text)}`;

@@ -105,7 +105,7 @@ export default function GiftCustomization() {
 
     const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "917904199050";
+    let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "919500258080";
     whatsappNumber = whatsappNumber.replace(/\D/g, '');
     if (whatsappNumber.length === 10) {
       whatsappNumber = `91${whatsappNumber}`;
@@ -682,7 +682,7 @@ export default function GiftCustomization() {
                           };
                         });
                         const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                        let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "917904199050";
+                        let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "919500258080";
                         whatsappNumber = whatsappNumber.replace(/\D/g, '');
                         if (whatsappNumber.length === 10) {
                           whatsappNumber = `91${whatsappNumber}`;
