@@ -5,7 +5,11 @@ const DOMAIN = 'https://organicsisterz.com';
 
 const pages = [
   { url: '/', priority: '1.0', changefreq: 'weekly' },
-  { url: '/gift', priority: '0.8', changefreq: 'monthly' }
+  { url: '/gift', priority: '0.8', changefreq: 'monthly' },
+  { url: '/admin', priority: '0.5', changefreq: 'monthly' },
+  { url: '/login', priority: '0.5', changefreq: 'monthly' },
+  { url: '/profile', priority: '0.5', changefreq: 'monthly' },
+  { url: '/cart', priority: '0.5', changefreq: 'always' }
 ];
 
 const generateSitemap = () => {
