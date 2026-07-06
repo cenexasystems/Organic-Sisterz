@@ -21,13 +21,10 @@ export default function CustomerProfile() {
         ]);
 
         // Normalize gift requests to fit Order structure for rendering
-        const normalizedGifts = storedGifts.map((g, idx) => {
-          const seq = storedGifts.length - idx;
-          const seqStr = String(seq).padStart(4, '0');
-          const year = g.createdAt ? new Date(g.createdAt).getFullYear() : 2026;
+        const normalizedGifts = storedGifts.map((g) => {
           return {
             id: g.id,
-            invoiceId: `GIFT-${year}-${seqStr}`,
+            invoiceId: g.giftId,
             customerName: `${g.senderName} (Gift to ${g.recipientName})`,
             customerPhone: g.recipientPhone,
             customerEmail: '',
@@ -41,13 +38,10 @@ export default function CustomerProfile() {
           };
         });
 
-        const normalizedWhatsapps = storedOrders.map((o, idx) => {
-          const seq = storedOrders.length - idx;
-          const seqStr = String(seq).padStart(4, '0');
-          const year = o.createdAt ? new Date(o.createdAt).getFullYear() : 2026;
+        const normalizedWhatsapps = storedOrders.map((o) => {
           return {
             ...o,
-            invoiceId: `ORD-${year}-${seqStr}`
+            invoiceId: (o as any).orderId
           };
         });
 
