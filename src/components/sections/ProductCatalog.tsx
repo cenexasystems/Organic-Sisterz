@@ -94,15 +94,14 @@ export default function ProductCatalog() {
                 }}
                 className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-outline-variant/20 hover:border-secondary/40 hover:shadow-lg transition-all duration-500"
               >
-                {/* Image Section */}
                 <div
                   onClick={() => handleOpenModal(product)}
-                  className="relative aspect-square overflow-hidden bg-white cursor-pointer flex items-center justify-center p-6 border-b border-outline-variant/10"
+                  className="relative h-[280px] w-full overflow-hidden bg-white cursor-pointer flex items-center justify-center p-8 border-b border-outline-variant/10"
                 >
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="max-h-full max-w-full object-contain transition-transform duration-[2s] group-hover:scale-103"
+                    className="w-full h-full object-contain transition-transform duration-[2s] group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
