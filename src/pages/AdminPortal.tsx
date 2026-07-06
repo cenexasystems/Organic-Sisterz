@@ -1,4 +1,5 @@
 import { useState, useEffect, Fragment } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Lock, Plus, Trash2, Edit3, Settings, Eye, Search, Shield, BarChart3, ShoppingCart, Receipt, 
@@ -914,6 +915,9 @@ export default function AdminPortal() {
 
   return (
     <div className="min-h-screen lg:h-screen bg-[#FAF9F5] flex flex-col lg:flex-row font-poppins text-primary antialiased lg:overflow-hidden">
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       
       {/* AUTHENTICATION VIEW */}
       {checkingAuth ? (

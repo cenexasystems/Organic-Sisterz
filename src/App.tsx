@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { HelmetProvider, Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "motion/react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Lenis from "lenis";
@@ -54,6 +55,43 @@ function Storefront() {
       transition={{ duration: 1, ease: "easeOut" }}
       className="min-h-screen bg-background text-on-background selection:bg-secondary-container selection:text-on-secondary-container font-body antialiased"
     >
+      <Helmet>
+        <title>Organic Sisterz | Premium Organic Herbal Care</title>
+        <meta name="description" content="Discover Organic Sisterz premium, natural hair and skin care products. Crafted with pure Indian herbs for holistic wellness and radiant beauty." />
+        <link rel="canonical" href="https://organicsisterz.com/" />
+        <script type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Organic Sisterz",
+              "url": "https://organicsisterz.com",
+              "logo": "https://organicsisterz.com/favicon.svg",
+              "sameAs": [
+                "https://www.instagram.com/organic.sisterz/"
+              ]
+            }
+          `}
+        </script>
+        <script type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "LocalBusiness",
+              "name": "Organic Sisterz",
+              "image": "https://organicsisterz.com/mahizham_hair_oil.png",
+              "url": "https://organicsisterz.com",
+              "telephone": "",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Organic Sisterz HQ",
+                "addressLocality": "India",
+                "addressCountry": "IN"
+              }
+            }
+          `}
+        </script>
+      </Helmet>
       <Navbar
         onConsultationClick={() => setIsQuizOpen(true)}
         onAdminClick={() => navigate("/admin")}
@@ -82,7 +120,7 @@ export default function App() {
   const [isPreloaderActive, setIsPreloaderActive] = useState(true);
 
   return (
-    <>
+    <HelmetProvider>
       {/* Cinematic preloader on first entrance */}
       <Preloader onComplete={() => setIsPreloaderActive(false)} />
 
@@ -101,6 +139,6 @@ export default function App() {
           </BrowserRouter>
         )}
       </AnimatePresence>
-    </>
+    </HelmetProvider>
   );
 }

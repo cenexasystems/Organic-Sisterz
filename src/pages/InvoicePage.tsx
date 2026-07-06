@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from "react-router-dom";
 import { fetchOrderById } from "../utils/db";
 import type { Order } from "../utils/store";
@@ -69,6 +70,9 @@ export default function InvoicePage() {
 
   return (
     <div className="min-h-screen bg-[#F0FDF4] text-[#1B3022] font-sans py-12 px-4 print:p-0 print:bg-white flex flex-col items-center">
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <style>{`
         @media print {
           @page { margin: 10mm; }

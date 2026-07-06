@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, User, LogOut, Leaf, ShoppingBag, Settings } from 'lucide-react';
@@ -90,6 +91,9 @@ export default function CustomerProfile() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F5] text-[#1B3022] font-body flex flex-col md:flex-row">
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       
       {/* Sidebar Navigation */}
       <div className="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-outline-variant/25 flex flex-col p-8 shrink-0 shadow-sm md:min-h-screen">

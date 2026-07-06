@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Gift, Sparkles, Check, Heart, Plus, Minus, MessageSquare, ChevronDown, Trash2 } from 'lucide-react';
@@ -164,6 +165,11 @@ export default function GiftCustomization() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F5] text-[#1B3022] font-body relative overflow-hidden selection:bg-[#1B3022]/20">
+      <Helmet>
+        <title>Gift Customization | Organic Sisterz</title>
+        <meta name="description" content="Create a personalized organic herbal gift box. Customize ingredients, add a special message, and send wellness to your loved ones with Organic Sisterz." />
+        <link rel="canonical" href="https://organicsisterz.com/gift" />
+      </Helmet>
       
       {/* Decorative Gift Bow Backgrounds */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] opacity-[0.03] pointer-events-none transform -rotate-12">

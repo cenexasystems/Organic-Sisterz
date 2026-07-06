@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
@@ -163,6 +164,9 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F5] text-[#1B3022] font-body flex flex-col items-center selection:bg-primary/10">
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <Navbar
         onConsultationClick={() => navigate("/")}
         onAdminClick={() => navigate("/admin")}
