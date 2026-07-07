@@ -96,12 +96,14 @@ export default function BotanicalHealing() {
               {/* Concentric subtle rings like in the design */}
               <div className="absolute inset-2 border border-outline-variant/10 rounded-t-[130px] pointer-events-none" />
               
-              {/* Product Image */}
-              <motion.img 
-                src="/oil_splash.png" 
-                alt="Mahizham Hair Oil"
-                className="w-52 absolute bottom-6 z-10 object-contain drop-shadow-2xl"
-              />
+              {/* Product Image (Masked to Arch) */}
+              <div className="absolute inset-0 rounded-t-[140px] rounded-b-2xl overflow-hidden pointer-events-none">
+                <motion.img 
+                  src="/oil_splash.png" 
+                  alt="Mahizham Hair Oil"
+                  className="w-full h-full object-cover z-10"
+                />
+              </div>
               
               {/* Floating Badge */}
               <motion.div 
