@@ -98,7 +98,7 @@ export default function BotanicalHealing() {
               
               {/* Product Image */}
               <motion.img 
-                src="/mahizham_hair_oil.png" 
+                src="/oil_splash.png" 
                 alt="Mahizham Hair Oil"
                 className="w-52 absolute bottom-6 z-10 object-contain drop-shadow-2xl"
               />
