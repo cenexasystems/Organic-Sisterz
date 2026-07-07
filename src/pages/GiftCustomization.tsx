@@ -224,10 +224,7 @@ export default function GiftCustomization() {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                  {products.map(productRaw => {
-                    const product = productRaw.id === 'multi-millet-mix' 
-                      ? { ...productRaw, image: '/gift_wellness_mix.png' } 
-                      : productRaw;
+                  {products.map(product => {
                     const currentSize = productSelections[product.id] || product.sizes[0].size;
                     const currentPrice = product.sizes.find(s => s.size === currentSize)?.price || product.sizes[0].price;
                     const key = `${product.id}-${currentSize}`;
