@@ -387,8 +387,16 @@ export default function CartPage() {
                       type="text"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (!appliedCoupon) {
+                            handleVerifyCoupon();
+                          }
+                        }
+                      }}
                       disabled={!!appliedCoupon}
-                      className="flex-1 border border-outline-variant/40 focus:border-[#1B3022] rounded-xl px-4 py-3 text-sm bg-[#FAF9F5] text-[#1B3022] outline-none transition-all shadow-inner disabled:opacity-60 uppercase"
+                      className="flex-1 min-w-0 border border-outline-variant/40 focus:border-[#1B3022] rounded-xl px-4 py-3 text-sm bg-[#FAF9F5] text-[#1B3022] outline-none transition-all shadow-inner disabled:opacity-60 uppercase"
                       placeholder="Enter code"
                     />
                     {appliedCoupon ? (
@@ -398,7 +406,7 @@ export default function CartPage() {
                           setAppliedCoupon(null);
                           setCouponCode("");
                         }}
-                        className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-red-100 transition-colors"
+                        className="shrink-0 bg-red-50 text-red-600 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-red-100 transition-colors"
                       >
                         Remove
                       </button>
@@ -406,7 +414,7 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={handleVerifyCoupon}
-                        className="bg-[#1B3022] text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#2C4835] transition-colors"
+                        className="shrink-0 bg-[#1B3022] text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#2C4835] transition-colors"
                       >
                         Verify
                       </button>
