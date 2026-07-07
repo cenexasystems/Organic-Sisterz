@@ -79,7 +79,7 @@ export default function Hero() {
           <img
             src="/oil_splash.png"
             alt="Hair Oil"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-top"
             style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.05) brightness(1.02)' }}
           />
         </motion.div>
@@ -94,7 +94,7 @@ export default function Hero() {
           <img
             src="/oil_splash.png"
             alt="Herbal Hair Oil"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-top"
             style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.05) brightness(1.02)' }}
           />
         </motion.div>
@@ -109,7 +109,7 @@ export default function Hero() {
           <img
             src="/face_hero.png"
             alt="Face Pack"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-[center_15%]"
             style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.05) brightness(1.02)' }}
           />
         </motion.div>
@@ -124,7 +124,7 @@ export default function Hero() {
           <img
             src="/millet_hero.png"
             alt="Millet Health Mix"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-[center_15%]"
             style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.05) brightness(1.02)' }}
           />
         </motion.div>
@@ -139,7 +139,7 @@ export default function Hero() {
           <img
             src="/shikakai_hero.png"
             alt="Shikakai Powder"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-[center_10%]"
             style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.05) brightness(1.02)' }}
           />
         </motion.div>
@@ -154,7 +154,7 @@ export default function Hero() {
           <img
             src="/shikakai_hero.png"
             alt="Shikakai Powder"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-[center_10%]"
             style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.05) brightness(1.02)' }}
           />
         </motion.div>
