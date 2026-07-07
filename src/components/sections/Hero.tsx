@@ -79,7 +79,8 @@ export default function Hero() {
           <img
             src="/oil_splash.png"
             alt="Hair Oil"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover will-change-transform backface-visibility-hidden"
+            style={{ transform: 'translateZ(0)', imageRendering: 'auto' }}
           />
         </motion.div>
 
@@ -93,7 +94,8 @@ export default function Hero() {
           <img
             src="/oil_splash.png"
             alt="Herbal Hair Oil"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover will-change-transform backface-visibility-hidden"
+            style={{ transform: 'translateZ(0)', imageRendering: 'auto' }}
           />
         </motion.div>
 
@@ -107,7 +109,8 @@ export default function Hero() {
           <img
             src="/face_hero.png"
             alt="Face Pack"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover will-change-transform backface-visibility-hidden"
+            style={{ transform: 'translateZ(0)', imageRendering: 'auto' }}
           />
         </motion.div>
 
@@ -121,7 +124,8 @@ export default function Hero() {
           <img
             src="/millet_hero.png"
             alt="Millet Health Mix"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover will-change-transform backface-visibility-hidden"
+            style={{ transform: 'translateZ(0)', imageRendering: 'auto' }}
           />
         </motion.div>
 
@@ -135,7 +139,8 @@ export default function Hero() {
           <img
             src="/shikakai_hero.png"
             alt="Shikakai Powder"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover will-change-transform backface-visibility-hidden"
+            style={{ transform: 'translateZ(0)', imageRendering: 'auto' }}
           />
         </motion.div>
 
@@ -149,7 +154,8 @@ export default function Hero() {
           <img
             src="/shikakai_hero.png"
             alt="Shikakai Powder"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover will-change-transform backface-visibility-hidden"
+            style={{ transform: 'translateZ(0)', imageRendering: 'auto' }}
           />
         </motion.div>
       </div>
