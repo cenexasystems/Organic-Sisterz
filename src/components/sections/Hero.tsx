@@ -79,7 +79,7 @@ export default function Hero() {
           <img
             src="/oil_splash.png"
             alt="Hair Oil"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover object-top"
           />
         </motion.div>
 
@@ -93,7 +93,7 @@ export default function Hero() {
           <img
             src="/oil_splash.png"
             alt="Herbal Hair Oil"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover object-top"
           />
         </motion.div>
 
