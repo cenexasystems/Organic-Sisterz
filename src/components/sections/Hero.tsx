@@ -74,12 +74,12 @@ export default function Hero() {
           style={{ y: y1 }}
           whileHover={{ scale: 1.05, rotate: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="absolute top-[15%] sm:top-[10%] left-[2%] sm:left-[4%] w-20 h-28 sm:w-48 sm:h-56 rounded-[1rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border-[4px] sm:border-[6px] border-white/90 rotate-[-8deg] pointer-events-auto cursor-pointer"
+          className="absolute top-[15%] sm:top-[10%] left-[2%] sm:left-[4%] w-20 h-28 sm:w-48 sm:h-56 rounded-[1rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border-[4px] sm:border-[6px] border-white/90 rotate-[-8deg] pointer-events-auto cursor-pointer will-change-transform"
         >
           <img
             src="/oil_splash.png"
             alt="Hair Oil"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         </motion.div>
 
@@ -88,12 +88,12 @@ export default function Hero() {
           style={{ y: y2 }}
           whileHover={{ scale: 1.05, rotate: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="hidden md:block absolute top-[15%] right-[2%] lg:right-[3%] w-48 h-56 lg:w-56 lg:h-64 rounded-full overflow-hidden shadow-2xl border-[6px] border-white/90 rotate-[10deg] pointer-events-auto cursor-pointer"
+          className="hidden md:block absolute top-[15%] right-[2%] lg:right-[3%] w-48 h-56 lg:w-56 lg:h-64 rounded-full overflow-hidden shadow-2xl border-[6px] border-white/90 rotate-[10deg] pointer-events-auto cursor-pointer will-change-transform"
         >
           <img
             src="/oil_splash.png"
             alt="Herbal Hair Oil"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         </motion.div>
 
@@ -102,12 +102,12 @@ export default function Hero() {
           style={{ y: y3 }}
           whileHover={{ scale: 1.05, rotate: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="hidden md:block absolute top-[40%] left-[ -3%] lg:left-[2%] w-48 h-56 lg:w-56 lg:h-64 rounded-[2rem] overflow-hidden shadow-2xl border-[6px] border-white/90 rotate-[5deg] bg-white pointer-events-auto cursor-pointer"
+          className="hidden md:block absolute top-[40%] left-[ -3%] lg:left-[2%] w-48 h-56 lg:w-56 lg:h-64 rounded-[2rem] overflow-hidden shadow-2xl border-[6px] border-white/90 rotate-[5deg] bg-white pointer-events-auto cursor-pointer will-change-transform"
         >
           <img
             src="/face_hero.png"
             alt="Face Pack"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         </motion.div>
 
@@ -116,12 +116,12 @@ export default function Hero() {
           style={{ y: y6 }}
           whileHover={{ scale: 1.05, rotate: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="absolute top-[48%] sm:top-[42%] right-[-5%] sm:right-[2%] w-28 h-28 sm:w-48 sm:h-48 lg:w-56 lg:h-56 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border-[4px] sm:border-[6px] border-white/90 rotate-[-12deg] pointer-events-auto cursor-pointer"
+          className="absolute top-[48%] sm:top-[42%] right-[-5%] sm:right-[2%] w-28 h-28 sm:w-48 sm:h-48 lg:w-56 lg:h-56 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl border-[4px] sm:border-[6px] border-white/90 rotate-[-12deg] pointer-events-auto cursor-pointer will-change-transform"
         >
           <img
             src="/millet_hero.png"
             alt="Millet Health Mix"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         </motion.div>
 
@@ -130,12 +130,12 @@ export default function Hero() {
           style={{ y: y5 }}
           whileHover={{ scale: 1.05, rotate: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="absolute bottom-[10%] sm:bottom-[12%] left-[-2%] sm:left-[8%] w-24 h-24 sm:w-48 sm:h-48 lg:w-52 lg:h-52 rounded-full overflow-hidden shadow-2xl border-[4px] sm:border-[6px] border-white/90 rotate-[15deg] pointer-events-auto cursor-pointer"
+          className="absolute bottom-[10%] sm:bottom-[12%] left-[-2%] sm:left-[8%] w-24 h-24 sm:w-48 sm:h-48 lg:w-52 lg:h-52 rounded-full overflow-hidden shadow-2xl border-[4px] sm:border-[6px] border-white/90 rotate-[15deg] pointer-events-auto cursor-pointer will-change-transform"
         >
           <img
             src="/shikakai_hero.png"
             alt="Shikakai Powder"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         </motion.div>
 
@@ -144,12 +144,12 @@ export default function Hero() {
           style={{ y: y4 }}
           whileHover={{ scale: 1.05, rotate: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="hidden md:block absolute bottom-[5%] right-[4%] lg:right-[7%] w-48 h-64 lg:w-56 lg:h-72 rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-white/90 rotate-[-8deg] pointer-events-auto cursor-pointer"
+          className="hidden md:block absolute bottom-[5%] right-[4%] lg:right-[7%] w-48 h-64 lg:w-56 lg:h-72 rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-white/90 rotate-[-8deg] pointer-events-auto cursor-pointer will-change-transform"
         >
           <img
             src="/shikakai_hero.png"
             alt="Shikakai Powder"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         </motion.div>
       </div>
