@@ -42,29 +42,29 @@ export default function FloatingCartButton() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 120, opacity: 0 }}
           transition={{ type: "spring", stiffness: 260, damping: 22 }}
-          className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-[100] cursor-pointer w-[calc(100%-2rem)] max-w-sm sm:w-auto sm:max-w-none"
+          className="fixed bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-[100] cursor-pointer w-auto"
           onClick={() => navigate(user ? "/cart" : "/login?redirect=/cart")}
         >
-          <div className="bg-[#1B3022] hover:bg-[#0c1510] active:scale-95 transition-all text-white rounded-full px-4 py-2 sm:px-5 sm:py-2.5 flex items-center gap-3 sm:gap-4 shadow-2xl border border-white/10 w-full sm:w-auto justify-between sm:justify-start">
+          <div className="bg-[#1B3022] hover:bg-[#0c1510] active:scale-95 transition-all text-white rounded-full px-5 py-3 md:px-6 md:py-3.5 flex items-center gap-4 md:gap-5 shadow-2xl border border-white/10 w-auto justify-center">
             {/* Cart Icon + Badge */}
-            <div className="relative shrink-0">
-              <ShoppingCart className="w-4 h-4 text-white" strokeWidth={2.5} />
-              <span className="absolute -top-2 -right-2 bg-[#81B29A] text-[#1B3022] w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-extrabold shadow-sm">
+            <div className="relative shrink-0 flex items-center">
+              <ShoppingCart className="w-5 h-5 text-white" strokeWidth={2.5} />
+              <span className="absolute -top-2 -right-2.5 bg-[#81B29A] text-[#1B3022] w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold shadow-sm">
                 {totalQuantity}
               </span>
             </div>
 
             {/* Price */}
-            <div className="font-display font-extrabold text-base tracking-tight">
+            <div className="font-display font-extrabold text-base md:text-lg tracking-tight">
               ₹{totalPrice.toFixed(0)}
             </div>
 
-            <div className="w-[1px] h-5 bg-white/30 hidden sm:block"></div>
+            <div className="w-[1px] h-5 bg-white/30 hidden md:block"></div>
 
             {/* CTA */}
-            <div className="flex items-center gap-1.5 font-body text-[10px] md:text-[11px] font-bold tracking-widest uppercase text-white/90">
+            <div className="flex items-center gap-1.5 font-body text-[11px] md:text-xs font-bold tracking-widest uppercase text-white/90">
               {user ? "Checkout" : "Sign In & Checkout"}
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
             </div>
           </div>
         </motion.div>
