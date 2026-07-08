@@ -3,7 +3,7 @@ import {
   X,
   User,
   Gift,
-  ShoppingBag,
+  ShoppingCart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -244,7 +244,7 @@ export default function Navbar({
               className="text-primary hover:text-secondary hover:bg-[#2B3E2F]/5 transition-all p-2 rounded-full cursor-pointer relative"
               title="View Cart"
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingCart className="w-5 h-5" strokeWidth={2.5} />
               {totalQuantity > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-secondary text-white rounded-full flex items-center justify-center font-body text-[8px] font-bold shadow-sm animate-pulse-slow">
                   {totalQuantity}
