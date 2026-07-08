@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import ProductDetailModal from "../ui/ProductDetailModal";
 import { fetchProducts } from "../../utils/db";
