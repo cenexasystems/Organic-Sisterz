@@ -207,7 +207,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
               onClick={onClose}
               className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-white/95 border border-outline-variant/30 hover:border-secondary flex items-center justify-center text-primary hover:text-secondary shadow-md transition-all duration-300 z-30 cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" strokeWidth={2.5} />
             </button>
 
             {/* Left Column: Image Area */}
