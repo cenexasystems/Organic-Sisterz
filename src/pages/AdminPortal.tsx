@@ -717,6 +717,16 @@ export default function AdminPortal() {
       await insertOrder(newOrder);
       const updatedOrders = [newOrder, ...orders];
       setOrders(updatedOrders);
+
+      // Increment coupon usage if a valid coupon was used
+      if (billingCoupon) {
+        const dbCoupon = coupons.find(c => c.code === billingCoupon);
+        if (dbCoupon) {
+          const updatedCoupon = { ...dbCoupon, usedCount: (dbCoupon.usedCount || 0) + 1 };
+          await upsertCoupon(updatedCoupon);
+          setCoupons(prev => prev.map(c => c.code === updatedCoupon.code ? updatedCoupon : c));
+        }
+      }
     } catch (err) {
       console.error(err);
       alert('Failed to save POS bill');

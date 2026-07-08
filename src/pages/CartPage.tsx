@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { getStoredCart, saveStoredCart } from '../utils/store';
-import { fetchProducts, insertWhatsappRequest, fetchCoupons } from '../utils/db';
+import { fetchProducts, insertWhatsappRequest, fetchCoupons, upsertCoupon } from '../utils/db';
 import type { Product } from '../utils/store';
 import Navbar from '../components/layout/Navbar';
 import type { OrderItem } from '../utils/store';
@@ -117,6 +117,13 @@ export default function CartPage() {
     };
 
     insertWhatsappRequest(orderData).catch(console.error);
+
+    if (appliedCoupon) {
+      const dbCoupon = couponsList.find(c => c.code === appliedCoupon.code);
+      if (dbCoupon) {
+        upsertCoupon({ ...dbCoupon, usedCount: (dbCoupon.usedCount || 0) + 1 }).catch(console.error);
+      }
+    }
     
     let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "919500258080";
     whatsappNumber = whatsappNumber.replace(/\D/g, '');
