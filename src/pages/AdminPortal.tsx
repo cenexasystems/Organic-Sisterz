@@ -2840,7 +2840,7 @@ export default function AdminPortal() {
                   )}
                 </AnimatePresence>
                 
-                <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-x-auto shadow-sm">
                   {filteredGiftRequests.length === 0 ? (
                     <div className="p-12 text-center text-on-surface-variant text-sm italic">
                       No gift orders found.
@@ -2976,7 +2976,7 @@ export default function AdminPortal() {
                         {/* Order Items Table */}
                         <div className="space-y-3">
                           <span className="block text-[10px] font-bold text-primary uppercase tracking-wider">Gift Box Contents</span>
-                          <div className="bg-white rounded-2xl border border-outline-variant/20 overflow-hidden shadow-sm">
+                          <div className="bg-white rounded-2xl border border-outline-variant/20 overflow-x-auto shadow-sm">
                             <table className="w-full text-left text-xs">
                               <thead>
                                 <tr className="bg-[#FAF9F5] text-primary font-bold border-b border-outline-variant/20 uppercase tracking-wider text-[10px]">
@@ -3165,7 +3165,7 @@ export default function AdminPortal() {
                   )}
                   
                   {/* Bills List Table */}
-                  <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-x-auto shadow-sm">
                     {filteredBills.length === 0 ? (
                       <div className="p-12 text-center text-on-surface-variant text-sm italic">
                         No billing records found matching the active filters.
@@ -3371,7 +3371,7 @@ export default function AdminPortal() {
                       </button>
                     </div>
 
-                    <div className="bg-white border border-outline-variant/20 rounded-3xl overflow-hidden shadow-md">
+                    <div className="bg-white border border-outline-variant/20 rounded-3xl overflow-x-auto shadow-md">
                       <table className="w-full text-left text-sm min-w-[700px]">
                         <thead>
                           <tr className="bg-surface-container-low text-primary font-bold border-b border-outline-variant/25">
@@ -3985,7 +3985,7 @@ export default function AdminPortal() {
                 </div>
 
                 {/* Users Table */}
-                <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-x-auto shadow-sm">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-[#FAF9F6]/80 text-[#374151] font-bold border-b border-outline-variant/25">
