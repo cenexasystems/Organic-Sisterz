@@ -18,7 +18,7 @@ import {
   fetchOrders, insertOrder, updateOrderStatus as updateOrderStatusDb
 } from '../utils/db';
 import type { Product, Order, Coupon, UserProfile } from '../utils/store';
-
+import ConfirmModal from '../components/ui/ConfirmModal';
 
 export default function AdminPortal() {
   const navigate = useNavigate();
@@ -83,6 +83,23 @@ export default function AdminPortal() {
 
   // Filter state for Gifts Received tab
   const [giftPeriodFilter, setGiftPeriodFilter] = useState<'all' | 'today' | 'week' | 'month' | 'year' | 'custom'>('all');
+
+  // Confirm Modal state
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const requestDelete = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm
+    });
+  };
   const [giftCustomStart, setGiftCustomStart] = useState('');
   const [giftCustomEnd, setGiftCustomEnd] = useState('');
 
@@ -364,15 +381,19 @@ export default function AdminPortal() {
   };
 
   const deleteProduct = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await dbDeleteProduct(id);
-        setProducts(prev => prev.filter(p => p.id !== id));
-      } catch (err) {
-        console.error(err);
-        alert('Failed to delete product');
+    requestDelete(
+      'Delete Product',
+      'Are you sure you want to delete this product? This action cannot be undone.',
+      async () => {
+        try {
+          await dbDeleteProduct(id);
+          setProducts(prev => prev.filter(p => p.id !== id));
+        } catch (err) {
+          console.error(err);
+          alert('Failed to delete product');
+        }
       }
-    }
+    );
   };
 
   // Order status updates
@@ -419,15 +440,19 @@ export default function AdminPortal() {
   };
 
   const deleteCategory = async (cat: string) => {
-    if (window.confirm(`Are you sure you want to delete category "${cat}"?`)) {
-      try {
-        await dbDeleteCategory(cat);
-        setCategories(categories.filter(c => c !== cat));
-      } catch (err) {
-        console.error(err);
-        alert('Failed to delete category');
+    requestDelete(
+      'Delete Category',
+      `Are you sure you want to delete category "${cat}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await dbDeleteCategory(cat);
+          setCategories(categories.filter(c => c !== cat));
+        } catch (err) {
+          console.error(err);
+          alert('Failed to delete category');
+        }
       }
-    }
+    );
   };
 
   // Coupon additions
@@ -493,13 +518,19 @@ export default function AdminPortal() {
   };
 
   const deleteCoupon = async (code: string) => {
-    try {
-      await dbDeleteCoupon(code);
-      setCoupons(coupons.filter(c => c.code !== code));
-    } catch (err) {
-      console.error(err);
-      alert('Failed to delete coupon');
-    }
+    requestDelete(
+      'Delete Coupon',
+      `Are you sure you want to delete coupon "${code}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await dbDeleteCoupon(code);
+          setCoupons(coupons.filter(c => c.code !== code));
+        } catch (err) {
+          console.error(err);
+          alert('Failed to delete coupon');
+        }
+      }
+    );
   };
 
   const toggleCouponStatus = async (code: string) => {
@@ -4061,6 +4092,11 @@ export default function AdminPortal() {
           </div>
         </>
       )}
+
+      <ConfirmModal 
+        {...confirmModal} 
+        onClose={() => setConfirmModal(prev => ({...prev, isOpen: false}))} 
+      />
     </div>
   );
 }
