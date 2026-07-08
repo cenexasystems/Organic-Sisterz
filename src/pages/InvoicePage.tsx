@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from "react-router-dom";
 import { fetchOrderById } from "../utils/db";
 import type { Order } from "../utils/store";
-import {  MapPin, Phone, Printer, Copy, Check, Leaf } from "lucide-react";
+import {  MapPin, Phone, Printer, Copy, Check } from "lucide-react";
 
 export default function InvoicePage() {
   const { id } = useParams<{ id: string }>();
@@ -48,8 +48,8 @@ export default function InvoicePage() {
     return (
       <div className="min-h-screen bg-[#FAF9F5] flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-[#2B3E2F] rounded-full flex items-center justify-center shadow-lg">
-            <Leaf className="w-6 h-6 text-[#FAF9F5]" />
+          <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg bg-white border border-[#2B3E2F]/20 overflow-hidden">
+            <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
           </div>
           <p className="text-[#2B3E2F] font-bold tracking-widest uppercase text-sm font-display">Generating Digital Bill...</p>
         </div>
@@ -111,8 +111,8 @@ export default function InvoicePage() {
         
         {/* Header Section */}
         <div className="bg-[#FAF9F5] border-b border-[#E5E0D8] p-8 sm:p-12 print:p-6 flex flex-col items-center text-center">
-          <div className="w-24 h-24 flex items-center justify-center mb-4">
-            <Leaf className="w-16 h-16 text-[#2B3E2F]" />
+          <div className="w-24 h-24 flex items-center justify-center mb-4 rounded-full overflow-hidden border border-[#E5E0D8] shadow-sm">
+            <img src="/logo.jpg" alt="Organic Sisterz Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-3xl font-black text-[#1B3022] tracking-tight font-display">Organic Sisterz</h1>
           <p className="text-xs text-[#8F9974] font-bold tracking-wider mt-1 mb-4 uppercase">INVOICE: {order.id}</p>

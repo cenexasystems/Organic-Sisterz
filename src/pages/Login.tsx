@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Leaf, Loader2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
@@ -67,8 +67,12 @@ export default function Login() {
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        <div className="w-16 h-16 rounded-full bg-[#FAF9F5] border border-outline-variant/50 flex items-center justify-center mb-6 shadow-sm">
-          <Leaf className="w-8 h-8 text-[#1B3022]" />
+        <div className="mb-6">
+          <img
+            src="/logo.jpg"
+            alt="Organic Sisterz"
+            className="w-24 h-24 rounded-full object-cover border-2 border-[#2B3022]/20 shadow-md mx-auto"
+          />
         </div>
         
         <h1 className="font-display text-4xl font-bold tracking-tight text-[#1B3022] mb-3">

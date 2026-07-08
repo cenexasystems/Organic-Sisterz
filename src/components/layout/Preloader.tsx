@@ -82,10 +82,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                     />
                   </svg>
                   
-                  {/* Leaf Icon inside */}
-                  <svg className="w-8 h-8 text-[#061b0e] opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18M12 3c-4.5 0-8 3.5-8 8s3.5 8 8 10M12 3c4.5 0 8 3.5 8 8s-3.5 8-8 10M4 11c3 0 6 2 8 5M20 11c-3 0-6 2-8 5" />
-                  </svg>
+                  {/* Logo inside */}
+                  <img src="/logo.jpg" alt="Organic Sisterz" className="w-14 h-14 rounded-full object-cover" />
                 </div>
               </motion.div>
 

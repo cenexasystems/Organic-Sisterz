@@ -196,8 +196,13 @@ export default function Navbar({
           <div className="flex justify-start">
             <a
               href="/"
-              className="font-display text-2xl xl:text-3xl font-extrabold tracking-tight select-none text-primary flex items-center"
+              className="font-display text-xl xl:text-2xl font-extrabold tracking-tight select-none text-primary flex items-center gap-2.5"
             >
+              <img
+                src="/logo.jpg"
+                alt="Organic Sisterz Logo"
+                className="w-10 h-10 xl:w-12 xl:h-12 rounded-full object-cover border border-[#2B3E2F]/20 shadow-sm shrink-0"
+              />
               Organic Sisterz
             </a>
           </div>
