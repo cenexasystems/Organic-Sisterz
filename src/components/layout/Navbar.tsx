@@ -246,12 +246,12 @@ export default function Navbar({
             </button>
             <button
               onClick={() => navigate(user ? '/cart' : '/login?redirect=/cart')}
-              className="text-primary hover:text-secondary hover:bg-[#2B3E2F]/5 transition-all p-2 rounded-full cursor-pointer relative"
+              className="text-primary hover:text-secondary transition-colors cursor-pointer relative flex items-center gap-1.5 font-display font-black text-sm md:text-base tracking-widest uppercase ml-1 mr-2"
               title="View Cart"
             >
-              <ShoppingCart className="w-5 h-5" strokeWidth={2.5} />
+              CART
               {totalQuantity > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-secondary text-white rounded-full flex items-center justify-center font-body text-[8px] font-bold shadow-sm animate-pulse-slow">
+                <span className="bg-secondary text-white rounded-full flex items-center justify-center font-body text-[10px] font-bold shadow-sm animate-pulse-slow px-1.5 py-0.5">
                   {totalQuantity}
                 </span>
               )}
