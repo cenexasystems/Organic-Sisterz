@@ -281,7 +281,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                         <button
                           key={idx}
                           disabled={!isSizeAvailable}
-                          onClick={() => setSelectedSize(sObj.size)}
+                          onClick={() => { setSelectedSize(sObj.size); setQuantity(1); }}
                           className={`px-5 py-3.5 rounded-xl font-body text-sm font-bold border transition-all duration-300 relative ${
                             !isSizeAvailable
                               ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60'
