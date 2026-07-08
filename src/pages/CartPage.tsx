@@ -12,7 +12,7 @@ import { useAuth } from '../hooks/useAuth';
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [cartItems, setCartItems] = useState<OrderItem[]>([]);
   const [custName, setCustName] = useState("");
   const [custPhone, setCustPhone] = useState("");
@@ -29,6 +29,12 @@ export default function CartPage() {
     fetchProducts().then(setProductsList).catch(console.error);
     fetchCoupons().then(setCouponsList).catch(console.error);
   }, [user]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login?redirect=/cart');
+    }
+  }, [user, loading, navigate]);
 
   const handleVerifyCoupon = () => {
     setCouponError("");

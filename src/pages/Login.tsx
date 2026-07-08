@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Leaf, Loader2, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/';
+  
   const [email, setEmail] = useState('');
   const { signInWithGoogle, signInWithMagicLink, signOut, loading, error, message, user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate(redirect);
+    }
+  }, [user, navigate, redirect]);
 
   if (user) {
     return (
@@ -83,7 +92,7 @@ export default function Login() {
 
         {/* Google Login Button */}
         <button 
-          onClick={signInWithGoogle}
+          onClick={() => signInWithGoogle(redirect)}
           disabled={loading}
           className="w-full bg-white border border-outline-variant hover:border-[#1B3022] text-[#1B3022] font-body text-sm font-bold tracking-wide py-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
@@ -114,7 +123,7 @@ export default function Login() {
             className="w-full bg-white border border-outline-variant text-[#1B3022] placeholder:text-[#6B7280] font-body text-sm py-4 px-5 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1B3022]/20 focus:border-[#1B3022] transition-all duration-300 disabled:opacity-70 disabled:bg-gray-50"
           />
           <button 
-            onClick={() => signInWithMagicLink(email)}
+            onClick={() => signInWithMagicLink(email, redirect)}
             disabled={loading || !email}
             className="w-full bg-[#1B3022] text-[#FAF9F5] font-body text-sm font-bold tracking-widest uppercase py-4 rounded-xl shadow-lg hover:bg-[#0C1510] hover:shadow-xl transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >

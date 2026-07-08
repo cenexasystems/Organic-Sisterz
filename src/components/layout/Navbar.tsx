@@ -240,7 +240,7 @@ export default function Navbar({
               <Gift className="w-3.5 h-3.5" /> Gift a Friend
             </button>
             <button
-              onClick={() => navigate('/cart')}
+              onClick={() => navigate(user ? '/cart' : '/login?redirect=/cart')}
               className="text-primary hover:text-secondary hover:bg-[#2B3E2F]/5 transition-all p-2 rounded-full cursor-pointer relative"
               title="View Cart"
             >

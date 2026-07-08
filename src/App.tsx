@@ -21,6 +21,7 @@ import Login from "./pages/Login";
 import CustomerProfile from "./pages/CustomerProfile";
 import CartPage from "./pages/CartPage";
 import InvoicePage from "./pages/InvoicePage";
+import FloatingCartButton from "./components/ui/FloatingCartButton";
 
 function Storefront() {
   const navigate = useNavigate();
@@ -136,6 +137,7 @@ export default function App() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/invoice/:id" element={<InvoicePage />} />
             </Routes>
+            <FloatingCartButton />
           </BrowserRouter>
         )}
       </AnimatePresence>
