@@ -10,13 +10,13 @@ export default function Login() {
   const redirect = searchParams.get('redirect') || '/';
   
   const [email, setEmail] = useState('');
-  const { signInWithGoogle, signInWithMagicLink, signOut, loading, error, message, user } = useAuth();
+  const { signInWithGoogle, signInWithMagicLink, signOut, loading, error, message, user, isInitialized } = useAuth();
 
   useEffect(() => {
-    if (user) {
+    if (isInitialized && user) {
       navigate(redirect);
     }
-  }, [user, navigate, redirect]);
+  }, [user, isInitialized, navigate, redirect]);
 
   if (user) {
     return (

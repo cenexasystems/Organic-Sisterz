@@ -3,6 +3,7 @@ import { supabase } from '../utils/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 
 export function useAuth() {
+  const [isInitialized, setIsInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -14,6 +15,7 @@ export function useAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setIsInitialized(true);
     });
 
     // Listen for auth changes (like clicking the magic link)
@@ -71,6 +73,7 @@ export function useAuth() {
   };
 
   return {
+    isInitialized,
     loading,
     error,
     message,

@@ -12,7 +12,7 @@ import { useAuth } from '../hooks/useAuth';
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, isInitialized } = useAuth();
   const [cartItems, setCartItems] = useState<OrderItem[]>([]);
   const [custName, setCustName] = useState("");
   const [custPhone, setCustPhone] = useState("");
@@ -31,10 +31,10 @@ export default function CartPage() {
   }, [user]);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (isInitialized && !user) {
       navigate('/login?redirect=/cart');
     }
-  }, [user, loading, navigate]);
+  }, [user, isInitialized, navigate]);
 
   const handleVerifyCoupon = () => {
     setCouponError("");
