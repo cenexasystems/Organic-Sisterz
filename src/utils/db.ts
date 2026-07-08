@@ -136,21 +136,22 @@ export async function updateUserRole(id: string, role: 'Admin' | 'Customer') {
 export async function insertWhatsappRequest(order: Omit<Order, 'id' | 'createdAt' | 'status' | 'source' | 'couponCode' | 'couponDiscount' | 'manualDiscount' | 'deliveryCharge' | 'cashReceived' | 'changeReturned' | 'subtotal'>) {
   const { data: { session } } = await supabase.auth.getSession();
   
-  // Generate ORD-YYYY-NNNN
+  // Generate ORD-YYYY-NNNN — sort by order_id descending to always get the highest number
   const currentYear = new Date().getFullYear();
-  const { data: latest } = await supabase
+  const { data: allOrders } = await supabase
     .from('whatsapp_requests')
     .select('order_id')
-    .ilike('order_id', `ORD-${currentYear}-%`)
-    .order('created_at', { ascending: false })
-    .limit(1);
-    
+    .ilike('order_id', `ORD-${currentYear}-%`);
+
   let nextNum = 1;
-  if (latest && latest.length > 0 && latest[0].order_id) {
-    const parts = latest[0].order_id.split('-');
-    if (parts.length === 3) {
-      nextNum = parseInt(parts[2], 10) + 1;
-    }
+  if (allOrders && allOrders.length > 0) {
+    const nums = allOrders
+      .map(o => {
+        const parts = o.order_id?.split('-');
+        return parts?.length === 3 ? parseInt(parts[2], 10) : 0;
+      })
+      .filter(n => !isNaN(n));
+    if (nums.length > 0) nextNum = Math.max(...nums) + 1;
   }
   const orderId = `ORD-${currentYear}-${String(nextNum).padStart(4, '0')}`;
 
