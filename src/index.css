@@ -87,6 +87,12 @@
 /* Global enhancements */
 html {
   scroll-behavior: auto;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Custom premium scrollbar */

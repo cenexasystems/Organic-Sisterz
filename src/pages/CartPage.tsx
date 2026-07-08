@@ -187,7 +187,7 @@ export default function CartPage() {
       />
 
       {/* Main Content */}
-      <main className="w-full max-w-6xl px-6 py-8 md:py-16 mt-20 flex-grow flex flex-col">
+      <main className="w-full max-w-6xl px-4 sm:px-6 py-6 md:py-16 mt-20 flex-grow flex flex-col pb-32">
         {/* Header Navigation */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12 border-b border-outline-variant/20 pb-8">
           <div className="flex items-center gap-4">
@@ -329,7 +329,7 @@ export default function CartPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="lg:col-span-5 bg-white rounded-3xl border border-outline-variant/20 shadow-lg overflow-hidden sticky top-28"
+              className="lg:col-span-5 bg-white rounded-3xl border border-outline-variant/20 shadow-lg overflow-hidden lg:sticky lg:top-28"
             >
               <div className="px-8 py-6 border-b border-outline-variant/15 text-center">
                 <h3 className="font-display font-bold text-sm tracking-[0.15em] uppercase text-[#1B3022]">

@@ -476,7 +476,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                 </div>
               </div>
               {/* Bottom Sticky Action Bar */}
-              <div className="p-4 md:px-10 md:py-6 border-t border-outline-variant/20 flex flex-row gap-3 items-center justify-between bg-[#FAF9F5] md:bg-[#FAF9F5]/40 backdrop-blur-sm shrink-0 sticky bottom-0 z-20">
+              <div className="p-4 md:px-10 md:py-6 border-t border-outline-variant/20 flex flex-row gap-3 items-center justify-between bg-[#FAF9F5] md:bg-[#FAF9F5]/40 backdrop-blur-sm shrink-0 sticky bottom-0 z-20 pb-6 md:pb-6">
                 <div className="flex flex-col min-w-[70px]">
                   <span className="text-[10px] font-bold text-on-surface-variant/70 uppercase block">Total</span>
                   <span className="font-display text-lg md:text-2xl font-extrabold text-primary">₹{currentPrice * quantity}</span>
