@@ -136,24 +136,15 @@ export async function updateUserRole(id: string, role: 'Admin' | 'Customer') {
 export async function insertWhatsappRequest(order: Omit<Order, 'id' | 'createdAt' | 'status' | 'source' | 'couponCode' | 'couponDiscount' | 'manualDiscount' | 'deliveryCharge' | 'cashReceived' | 'changeReturned' | 'subtotal'>) {
   const { data: { session } } = await supabase.auth.getSession();
   
-  // Generate ORD-YYYY-NNNN — sort by order_id descending to always get the highest number
-  const currentYear = new Date().getFullYear();
-  const { data: allOrders } = await supabase
-    .from('whatsapp_requests')
-    .select('order_id')
-    .ilike('order_id', `ORD-${currentYear}-%`);
-
-  let nextNum = 1;
-  if (allOrders && allOrders.length > 0) {
-    const nums = allOrders
-      .map(o => {
-        const parts = o.order_id?.split('-');
-        return parts?.length === 3 ? parseInt(parts[2], 10) : 0;
-      })
-      .filter(n => !isNaN(n));
-    if (nums.length > 0) nextNum = Math.max(...nums) + 1;
+  // Securely generate sequential ORD-YYYY-NNNN via a Postgres function
+  // This bypasses RLS restrictions so guests can get the correct next ID.
+  let { data: orderId, error: rpcError } = await supabase.rpc('generate_whatsapp_order_id');
+  
+  if (rpcError || !orderId) {
+    console.error("RPC failed, falling back to random ID", rpcError);
+    // Fallback just in case the SQL script hasn't been run yet
+    orderId = `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
   }
-  const orderId = `ORD-${currentYear}-${String(nextNum).padStart(4, '0')}`;
 
   const { error } = await supabase.from('whatsapp_requests').insert({
     order_id: orderId,
