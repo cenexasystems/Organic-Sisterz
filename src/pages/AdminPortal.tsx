@@ -3645,7 +3645,13 @@ export default function AdminPortal() {
                               </div>
                               <button
                                 type="button"
-                                onClick={() => removeSizeField(idx)}
+                                onClick={() => {
+                                  requestDelete(
+                                    'Delete Pack Size',
+                                    'Are you sure you want to remove this size option?',
+                                    () => removeSizeField(idx)
+                                  );
+                                }}
                                 disabled={prodSizes.length === 1}
                                 className="w-10 h-10 rounded-full border border-outline-variant/30 hover:border-error flex items-center justify-center text-on-surface-variant hover:text-error disabled:opacity-40 disabled:hover:border-outline-variant/30 cursor-pointer"
                               >
