@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Shield, Leaf, Sparkles, ChevronDown, ShoppingBag, ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getStoredCart } from '../../utils/store';
 import type { Product } from '../../utils/store';
 
 interface ProductDetailModalProps {
@@ -115,6 +116,22 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
   const [activeAccordion, setActiveAccordion] = useState<string | null>('details');
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
+  const [cartItems, setCartItems] = useState(getStoredCart());
+
+  useEffect(() => {
+    const handleCartUpdate = () => setCartItems(getStoredCart());
+    const handleAddEvent = () => setTimeout(() => setCartItems(getStoredCart()), 50);
+
+    window.addEventListener("cart_updated", handleCartUpdate);
+    window.addEventListener("mahizham_add_to_cart_triggered", handleAddEvent);
+    
+    return () => {
+      window.removeEventListener("cart_updated", handleCartUpdate);
+      window.removeEventListener("mahizham_add_to_cart_triggered", handleAddEvent);
+    };
+  }, []);
+
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => {
     if (product && product.sizes.length > 0) {
@@ -206,8 +223,13 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             <div className="md:hidden sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md px-4 py-3 border-b border-outline-variant/20 flex justify-between items-center shrink-0 shadow-sm">
                <span className="font-display font-bold text-sm text-primary truncate mr-2">{product.name}</span>
                <div className="flex items-center gap-2 shrink-0">
-                 <button onClick={() => { onClose(); navigate('/cart'); }} className="w-9 h-9 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                 <button onClick={() => { onClose(); navigate('/cart'); }} className="relative w-9 h-9 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
                    <ShoppingCart className="w-4 h-4" />
+                   {totalQuantity > 0 && (
+                     <span className="absolute -top-1 -right-1 bg-error text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
+                       {totalQuantity}
+                     </span>
+                   )}
                  </button>
                  <button onClick={onClose} className="px-5 py-2 bg-red-100 text-red-800 hover:bg-red-200 font-bold text-xs tracking-widest rounded-full transition-colors">CLOSE</button>
                </div>
@@ -218,7 +240,14 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
               onClick={() => { onClose(); navigate('/cart'); }}
               className="hidden md:flex absolute top-6 right-20 gap-2 px-5 h-10 rounded-full bg-white/95 border border-outline-variant/30 hover:border-primary items-center justify-center text-primary shadow-md transition-all duration-300 z-30 cursor-pointer font-bold text-xs tracking-widest"
             >
-              <ShoppingCart className="w-4 h-4" />
+              <div className="relative">
+                <ShoppingCart className="w-4 h-4" />
+                {totalQuantity > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-error text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
+                    {totalQuantity}
+                  </span>
+                )}
+              </div>
               CART
             </button>
 
