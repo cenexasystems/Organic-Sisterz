@@ -126,7 +126,7 @@ export default function InvoicePage() {
             </div>
             <div className="flex items-center gap-1.5 justify-center mt-1">
               <Phone className="w-3.5 h-3.5 text-[#2B3E2F] shrink-0" />
-              <span>+91 98765 43210</span>
+              <span>+91 95002 58080</span>
             </div>
           </div>
         </div>
