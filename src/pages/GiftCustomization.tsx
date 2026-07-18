@@ -745,6 +745,7 @@ export default function GiftCustomization() {
               }
               return next;
             });
+            setIsDetailModalOpen(false);
           }
         }}
       />

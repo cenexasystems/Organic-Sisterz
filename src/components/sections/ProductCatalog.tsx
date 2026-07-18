@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { motion } from "motion/react";
+import { ArrowRight } from "lucide-react";
 import ProductDetailModal from "../ui/ProductDetailModal";
 import { fetchProducts } from "../../utils/db";
 import type { Product } from "../../utils/store";
@@ -9,7 +9,6 @@ export default function ProductCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const updateProducts = async () => {
@@ -47,7 +46,7 @@ export default function ProductCatalog() {
       detail: { productId: id, size: size || "" },
     });
     window.dispatchEvent(event);
-    setToastMessage("Added to cart successfully!");
+    setIsModalOpen(false);
   };
 
   return (
@@ -181,20 +180,6 @@ export default function ProductCatalog() {
           handleAddToCart(id, size);
         }}
       />
-      
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1B3022] text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-white/10"
-          >
-            <CheckCircle className="w-5 h-5 text-secondary" />
-            <span className="font-body text-sm font-semibold tracking-wide">{toastMessage}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   );
 }

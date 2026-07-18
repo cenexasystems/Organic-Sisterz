@@ -183,7 +183,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-6 overflow-y-auto">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -200,18 +200,18 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 250 }}
             data-lenis-prevent
-            className="relative bg-white w-full h-[100dvh] md:h-auto md:max-h-[90vh] md:max-w-6xl md:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-y-auto z-10 md:border md:border-outline-variant/20"
+            className="relative bg-white w-full h-[100dvh] md:h-auto md:max-h-[90vh] md:max-w-6xl rounded-none md:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-y-auto z-10 md:border md:border-outline-variant/20"
           >
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-white/95 border border-outline-variant/30 hover:border-secondary flex items-center justify-center text-primary hover:text-secondary shadow-md transition-all duration-300 z-30 cursor-pointer"
+              className="absolute top-2 right-2 md:top-6 md:right-6 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/95 border border-outline-variant/30 hover:border-secondary flex items-center justify-center text-primary hover:text-secondary shadow-md transition-all duration-300 z-30 cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 md:w-5 md:h-5" />
             </button>
 
             {/* Left Column: Image Area */}
-            <div className="w-full md:w-1/2 bg-[#F9F7F0] pt-16 pb-6 px-4 md:p-10 flex flex-col relative shrink-0 border-b md:border-b-0 md:border-r border-outline-variant/20 md:h-full">
+            <div className="w-full md:w-1/2 bg-[#F9F7F0] pt-6 pb-2 px-4 md:p-10 flex flex-col relative shrink-0 border-b md:border-b-0 md:border-r border-outline-variant/20 md:h-full">
               {/* Badges */}
               <div className="flex flex-wrap gap-2 justify-start mb-2 md:mb-6">
                 <span className="font-body text-[10px] font-bold tracking-widest uppercase bg-primary/10 text-primary px-3 py-1.5 rounded-full border border-primary/20">
@@ -227,7 +227,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-full max-h-[250px] md:max-h-[450px] object-contain group-hover:scale-105 transition-transform duration-700 drop-shadow-2xl mix-blend-multiply"
+                  className="w-full h-full max-h-[160px] md:max-h-[450px] object-contain group-hover:scale-105 transition-transform duration-700 drop-shadow-2xl mix-blend-multiply"
                 />
               </div>
             </div>
@@ -235,28 +235,28 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             {/* Right Column: details and specifications */}
             <div className="w-full md:w-1/2 flex flex-col bg-white shrink-0 md:h-full md:max-h-[90vh]">
               {/* Scrolling details content */}
-              <div className="flex-1 md:overflow-y-auto p-5 md:p-10 space-y-6">
+              <div className="flex-1 md:overflow-y-auto p-4 md:p-10 space-y-4 md:space-y-6">
                 {/* Green Subtitle & Title */}
-                <div className="space-y-2">
-                  <span className="font-body text-xs font-bold text-secondary tracking-widest uppercase block">
+                <div className="space-y-1 md:space-y-2">
+                  <span className="font-body text-[10px] md:text-xs font-bold text-secondary tracking-widest uppercase block">
                     Mahizham Organic
                   </span>
-                  <h2 className="font-display text-3xl md:text-4xl text-primary font-bold tracking-tight">
+                  <h2 className="font-display text-2xl md:text-4xl text-primary font-bold tracking-tight leading-none">
                     {product.name}
                   </h2>
                 </div>
 
                 {/* Price Display Moved Up */}
-                <div className="bg-[#FAF9F5] p-5 rounded-2xl border border-outline-variant/30 flex justify-between items-center">
+                <div className="bg-[#FAF9F5] p-3 md:p-5 rounded-2xl border border-outline-variant/30 flex flex-row gap-2 justify-between items-center">
                   <div>
-                    <span className="font-body text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-wider block mb-1">
+                    <span className="font-body text-[8px] md:text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-wider block mb-0.5 md:mb-1">
                       MRP (INCLUSIVE OF TAXES)
                     </span>
-                    <span className="font-display text-3xl font-extrabold text-primary">
+                    <span className="font-display text-2xl md:text-3xl font-extrabold text-primary">
                       ₹{currentPrice}
                     </span>
                   </div>
-                  <span className="font-body text-xs text-secondary font-semibold">
+                  <span className="font-body text-[10px] md:text-xs text-secondary font-semibold max-w-[80px] text-right md:max-w-none md:text-left">
                     100% Premium Quality
                   </span>
                 </div>
@@ -278,7 +278,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                           key={idx}
                           disabled={!isSizeAvailable}
                           onClick={() => setSelectedSize(sObj.size)}
-                          className={`px-5 py-3.5 rounded-xl font-body text-sm font-bold border transition-all duration-300 relative ${
+                          className={`px-3 py-2 md:px-5 md:py-3.5 rounded-xl font-body text-xs md:text-sm font-bold border transition-all duration-300 relative ${
                             !isSizeAvailable
                               ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60'
                               : isSelected
@@ -478,16 +478,16 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                 </div>
               </div>
               {/* Bottom Sticky Action Bar */}
-              <div className="p-4 md:px-10 md:py-6 border-t border-outline-variant/20 flex flex-row gap-3 items-center justify-between bg-[#FAF9F5] md:bg-[#FAF9F5]/40 backdrop-blur-sm shrink-0 sticky bottom-0 z-20">
-                <div className="flex flex-col min-w-[70px]">
-                  <span className="text-[10px] font-bold text-on-surface-variant/70 uppercase block">Total</span>
-                  <span className="font-display text-lg md:text-2xl font-extrabold text-primary">₹{currentPrice * quantity}</span>
+              <div className="p-3 md:px-10 md:py-6 border-t border-outline-variant/20 flex flex-row gap-2 md:gap-3 items-center justify-between bg-[#FAF9F5] md:bg-[#FAF9F5]/40 backdrop-blur-sm shrink-0 sticky bottom-0 z-20">
+                <div className="flex flex-col min-w-[50px] md:min-w-[70px]">
+                  <span className="text-[9px] md:text-[10px] font-bold text-on-surface-variant/70 uppercase block">Total</span>
+                  <span className="font-display text-base md:text-2xl font-extrabold text-primary">₹{currentPrice * quantity}</span>
                 </div>
                 
                 {/* Quantity Controls */}
                 <div className="flex items-center bg-white rounded-full border border-outline-variant/30 h-10 md:h-12 px-1">
                   <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-primary font-bold hover:bg-surface-container-low rounded-full cursor-pointer">-</button>
-                  <span className="w-5 md:w-6 text-center font-bold text-sm">{quantity}</span>
+                  <span className="w-4 md:w-6 text-center font-bold text-xs md:text-sm">{quantity}</span>
                   <button onClick={() => setQuantity(quantity + 1)} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-primary font-bold hover:bg-surface-container-low rounded-full cursor-pointer">+</button>
                 </div>
 
@@ -506,14 +506,14 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                       setIsAdding(false);
                     }, 2000);
                   }}
-                  className={`font-body text-[10px] md:text-xs font-bold tracking-widest uppercase px-5 md:px-8 py-3.5 md:py-4 rounded-full flex items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
+                  className={`font-body text-[10px] md:text-xs font-bold tracking-widest uppercase px-4 sm:px-5 md:px-8 py-3.5 md:py-4 rounded-full flex items-center justify-center gap-1.5 md:gap-2 shadow-lg transition-all duration-300 ${
                     product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false) || isAdding
                       ? 'bg-gray-400 text-white cursor-not-allowed shadow-none'
                       : 'bg-primary hover:bg-primary-container text-on-primary cursor-pointer'
                   }`}
                 >
-                  <ShoppingBag className="w-4 h-4 hidden sm:block" />
-                  <span>
+                  <ShoppingBag className="w-3 h-3 md:w-4 md:h-4 hidden sm:block" />
+                  <span className="whitespace-nowrap">
                     {product.isAvailable === false || (sizeObj && sizeObj.isAvailable === false)
                       ? 'Out of Stock'
                       : isAdding ? 'Added ✓' : 'Add to Cart'}

@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { getStoredProducts, getStoredCart, saveStoredCart } from "../../utils/store";
 import { useAuth } from "../../hooks/useAuth";
+import AddedToCartModal from "../ui/AddedToCartModal";
 
 interface NavbarProps {
   onConsultationClick: () => void;
@@ -31,6 +32,13 @@ export default function Navbar({
 
 
   const [cartItems, setCartItems] = useState(getStoredCart());
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+  const [lastAddedItem, setLastAddedItem] = useState<{
+    name: string;
+    size: string;
+    price: number;
+    quantity: number;
+  } | null>(null);
 
   // Sync products and cart from local storage
   const [activeSection, setActiveSection] = useState("hero");
@@ -118,7 +126,14 @@ export default function Navbar({
       
       saveStoredCart(updatedCart);
       setCartItems(updatedCart);
-      // Removed navigate('/cart') to allow user to continue shopping
+      // Trigger Added to Cart Modal
+      const addedItem = updatedCart.find(
+        (item) => item.productId === productId && item.size === size
+      );
+      if (addedItem) {
+        setLastAddedItem(addedItem);
+        setIsCartModalOpen(true);
+      }
     };
 
     window.addEventListener("mahizham_add_to_cart_triggered", handleAddEvent);
@@ -342,7 +357,11 @@ export default function Navbar({
         </AnimatePresence>
       </nav>
 
-      
+      <AddedToCartModal
+        isOpen={isCartModalOpen}
+        onClose={() => setIsCartModalOpen(false)}
+        item={lastAddedItem}
+      />
     </>
   );
 }

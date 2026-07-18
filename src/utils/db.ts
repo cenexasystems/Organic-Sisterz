@@ -2,24 +2,39 @@ import { supabase } from './supabase';
 import type { Product, Order, Coupon, UserProfile } from './store';
 
 // Products
+import { getStoredProducts } from './store';
+
 export async function fetchProducts() {
-  const { data, error } = await supabase.from('products').select('*');
-  if (error) throw error;
-  return data.map(p => ({
-    id: p.id,
-    name: p.name,
-    category: p.category,
-    description: p.description,
-    image: p.image_url,
-    herbs: p.herbs,
-    benefits: p.benefits,
-    sizes: p.sizes,
-    isAvailable: p.is_available,
-    howToUse: p.how_to_use,
-    tamilName: p.tamil_name,
-    details: p.details,
-    nutritionalInfo: p.nutritional_info,
-  })) as Product[];
+  try {
+    // Check if we are using the placeholder URL, if so bypass fetch to avoid long retries
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder-project.supabase.co';
+    if (supabaseUrl === 'https://placeholder-project.supabase.co') {
+      return getStoredProducts();
+    }
+
+    const { data, error } = await supabase.from('products').select('*');
+    if (error) throw error;
+    if (!data || data.length === 0) return getStoredProducts();
+    
+    return data.map(p => ({
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      description: p.description,
+      image: p.image_url,
+      herbs: p.herbs,
+      benefits: p.benefits,
+      sizes: p.sizes,
+      isAvailable: p.is_available,
+      howToUse: p.how_to_use,
+      tamilName: p.tamil_name,
+      details: p.details,
+      nutritionalInfo: p.nutritional_info,
+    })) as Product[];
+  } catch (err) {
+    console.warn("Supabase fetch failed, falling back to local products data", err);
+    return getStoredProducts();
+  }
 }
 
 export async function upsertProduct(product: Product, imageFile?: File) {

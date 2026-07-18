@@ -210,7 +210,12 @@ export function getStoredProducts(): Product[] {
     localStorage.setItem('mahizham_products', JSON.stringify(initialProducts));
     return initialProducts;
   }
-  return JSON.parse(data);
+  const parsed = JSON.parse(data);
+  if (!parsed || parsed.length === 0) {
+    localStorage.setItem('mahizham_products', JSON.stringify(initialProducts));
+    return initialProducts;
+  }
+  return parsed;
 }
 
 export function saveStoredProducts(products: Product[]): void {
