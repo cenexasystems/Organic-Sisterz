@@ -23,7 +23,6 @@ import CartPage from "./pages/CartPage";
 import InvoicePage from "./pages/InvoicePage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
-import FloatingCartButton from "./components/ui/FloatingCartButton";
 
 function Storefront() {
   const navigate = useNavigate();
@@ -141,7 +140,6 @@ export default function App() {
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             </Routes>
-            <FloatingCartButton />
           </BrowserRouter>
         )}
       </AnimatePresence>
