@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Shield, Leaf, Sparkles, ChevronDown, ShoppingBag } from 'lucide-react';
+import { X, Shield, Leaf, Sparkles, ChevronDown, ShoppingBag, ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getStoredCart } from '../../utils/store';
 import type { Product } from '../../utils/store';
 
 interface ProductDetailModalProps {
@@ -109,12 +111,27 @@ const productSpecs: Record<string, {
 };
 
 export default function ProductDetailModal({ product, isOpen, onClose, onAddToCart }: ProductDetailModalProps) {
+  const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [activeAccordion, setActiveAccordion] = useState<string | null>('details');
   const [quantity, setQuantity] = useState(1);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [cartItems, setCartItems] = useState(getStoredCart());
+
+  useEffect(() => {
+    const handleCartUpdate = () => setCartItems(getStoredCart());
+    const handleAddEvent = () => setTimeout(() => setCartItems(getStoredCart()), 50);
+
+    window.addEventListener("cart_updated", handleCartUpdate);
+    window.addEventListener("mahizham_add_to_cart_triggered", handleAddEvent);
+    
+    return () => {
+      window.removeEventListener("cart_updated", handleCartUpdate);
+      window.removeEventListener("mahizham_add_to_cart_triggered", handleAddEvent);
+    };
+  }, []);
+
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => {
     if (product && product.sizes.length > 0) {
@@ -202,7 +219,39 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             data-lenis-prevent
             className="relative bg-white w-full h-[100dvh] md:h-auto md:max-h-[90vh] md:max-w-6xl rounded-none md:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-y-auto z-10 md:border md:border-outline-variant/20"
           >
-            {/* Close Button */}
+            {/* Mobile Sticky Header */}
+            <div className="md:hidden sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md px-4 py-3 border-b border-outline-variant/20 flex justify-between items-center shrink-0 shadow-sm">
+               <span className="font-display font-bold text-sm text-primary truncate mr-2">{product.name}</span>
+               <div className="flex items-center gap-2 shrink-0">
+                 <button onClick={() => { onClose(); navigate('/cart'); }} className="relative w-9 h-9 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                   <ShoppingCart className="w-4 h-4" />
+                   {totalQuantity > 0 && (
+                     <span className="absolute -top-1 -right-1 bg-error text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
+                       {totalQuantity}
+                     </span>
+                   )}
+                 </button>
+                 <button onClick={onClose} className="px-5 py-2 bg-red-100 text-red-800 hover:bg-red-200 font-bold text-xs tracking-widest rounded-full transition-colors">CLOSE</button>
+               </div>
+            </div>
+
+            {/* Desktop View Cart Button */}
+            <button
+              onClick={() => { onClose(); navigate('/cart'); }}
+              className="hidden md:flex absolute top-6 right-20 gap-2 px-5 h-10 rounded-full bg-white/95 border border-outline-variant/30 hover:border-primary items-center justify-center text-primary shadow-md transition-all duration-300 z-30 cursor-pointer font-bold text-xs tracking-widest"
+            >
+              <div className="relative">
+                <ShoppingCart className="w-4 h-4" />
+                {totalQuantity > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-error text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
+                    {totalQuantity}
+                  </span>
+                )}
+              </div>
+              CART
+            </button>
+
+            {/* Desktop Close Button */}
             <button
               onClick={onClose}
               className="absolute top-2 right-2 md:top-6 md:right-6 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/95 border border-outline-variant/30 hover:border-secondary flex items-center justify-center text-primary hover:text-secondary shadow-md transition-all duration-300 z-30 cursor-pointer"
@@ -499,10 +548,7 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
                     for(let i=0; i<quantity; i++) {
                        onAddToCart(product.id, activeSizeStr);
                     }
-                    setToastMessage(`Added ${quantity} ${product.name} to box`);
-                    setShowToast(true);
                     setTimeout(() => {
-                      setShowToast(false);
                       setIsAdding(false);
                     }, 2000);
                   }}
@@ -523,23 +569,6 @@ export default function ProductDetailModal({ product, isOpen, onClose, onAddToCa
             </div>
 
           </motion.div>
-          
-          {/* Toast Notification */}
-          <AnimatePresence>
-            {showToast && (
-              <motion.div
-                initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] bg-[#1B3022] text-[#FAF9F5] px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-[#3E5247] whitespace-nowrap"
-              >
-                <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center">
-                  <span className="text-[#1B3022] font-bold text-xs">✓</span>
-                </div>
-                <span className="font-body text-sm font-semibold tracking-wide">{toastMessage}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       )}
     </AnimatePresence>

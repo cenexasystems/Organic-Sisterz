@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { getStoredCart, saveStoredCart } from '../utils/store';
-import { fetchProducts, insertWhatsappRequest, fetchCoupons } from '../utils/db';
+import { fetchProducts, insertWhatsappRequest, fetchCoupons, upsertCoupon } from '../utils/db';
 import type { Product } from '../utils/store';
 import Navbar from '../components/layout/Navbar';
 import type { OrderItem } from '../utils/store';
@@ -12,7 +12,7 @@ import { useAuth } from '../hooks/useAuth';
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isInitialized } = useAuth();
   const [cartItems, setCartItems] = useState<OrderItem[]>([]);
   const [custName, setCustName] = useState("");
   const [custPhone, setCustPhone] = useState("");
@@ -29,6 +29,12 @@ export default function CartPage() {
     fetchProducts().then(setProductsList).catch(console.error);
     fetchCoupons().then(setCouponsList).catch(console.error);
   }, [user]);
+
+  useEffect(() => {
+    if (isInitialized && !user) {
+      navigate('/login?redirect=/cart');
+    }
+  }, [user, isInitialized, navigate]);
 
   const handleVerifyCoupon = () => {
     setCouponError("");
@@ -111,6 +117,13 @@ export default function CartPage() {
     };
 
     insertWhatsappRequest(orderData).catch(console.error);
+
+    if (appliedCoupon) {
+      const dbCoupon = couponsList.find(c => c.code === appliedCoupon.code);
+      if (dbCoupon) {
+        upsertCoupon({ ...dbCoupon, usedCount: (dbCoupon.usedCount || 0) + 1 }).catch(console.error);
+      }
+    }
     
     let whatsappNumber = import.meta.env.VITE_ADMIN_WHATSAPP_1 || "919500258080";
     whatsappNumber = whatsappNumber.replace(/\D/g, '');
@@ -174,7 +187,7 @@ export default function CartPage() {
       />
 
       {/* Main Content */}
-      <main className="w-full max-w-6xl px-6 py-8 md:py-16 mt-20 flex-grow flex flex-col">
+      <main className="w-full max-w-6xl px-4 sm:px-6 py-6 md:py-16 mt-20 flex-grow flex flex-col pb-32">
         {/* Header Navigation */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12 border-b border-outline-variant/20 pb-8">
           <div className="flex items-center gap-4">
@@ -316,7 +329,7 @@ export default function CartPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="lg:col-span-5 bg-white rounded-3xl border border-outline-variant/20 shadow-lg overflow-hidden sticky top-28"
+              className="lg:col-span-5 bg-white rounded-3xl border border-outline-variant/20 shadow-lg overflow-hidden lg:sticky lg:top-28"
             >
               <div className="px-8 py-6 border-b border-outline-variant/15 text-center">
                 <h3 className="font-display font-bold text-sm tracking-[0.15em] uppercase text-[#1B3022]">
@@ -387,8 +400,16 @@ export default function CartPage() {
                       type="text"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (!appliedCoupon) {
+                            handleVerifyCoupon();
+                          }
+                        }
+                      }}
                       disabled={!!appliedCoupon}
-                      className="flex-1 border border-outline-variant/40 focus:border-[#1B3022] rounded-xl px-4 py-3 text-sm bg-[#FAF9F5] text-[#1B3022] outline-none transition-all shadow-inner disabled:opacity-60 uppercase"
+                      className="flex-1 min-w-0 border border-outline-variant/40 focus:border-[#1B3022] rounded-xl px-4 py-3 text-sm bg-[#FAF9F5] text-[#1B3022] outline-none transition-all shadow-inner disabled:opacity-60 uppercase"
                       placeholder="Enter code"
                     />
                     {appliedCoupon ? (
@@ -398,7 +419,7 @@ export default function CartPage() {
                           setAppliedCoupon(null);
                           setCouponCode("");
                         }}
-                        className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-red-100 transition-colors"
+                        className="shrink-0 bg-red-50 text-red-600 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-red-100 transition-colors"
                       >
                         Remove
                       </button>
@@ -406,7 +427,7 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={handleVerifyCoupon}
-                        className="bg-[#1B3022] text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#2C4835] transition-colors"
+                        className="shrink-0 bg-[#1B3022] text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#2C4835] transition-colors"
                       >
                         Verify
                       </button>

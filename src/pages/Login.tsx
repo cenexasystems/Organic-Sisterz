@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Leaf, Loader2, CheckCircle2 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/';
+  
   const [email, setEmail] = useState('');
-  const { signInWithGoogle, signInWithMagicLink, signOut, loading, error, message, user } = useAuth();
+  const { signInWithGoogle, signInWithMagicLink, signOut, loading, error, message, user, isInitialized } = useAuth();
+
+  useEffect(() => {
+    if (isInitialized && user) {
+      navigate(redirect);
+    }
+  }, [user, isInitialized, navigate, redirect]);
 
   if (user) {
     return (
@@ -58,8 +67,12 @@ export default function Login() {
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        <div className="w-16 h-16 rounded-full bg-[#FAF9F5] border border-outline-variant/50 flex items-center justify-center mb-6 shadow-sm">
-          <Leaf className="w-8 h-8 text-[#1B3022]" />
+        <div className="mb-6">
+          <img
+            src="/logo.jpg"
+            alt="Organic Sisterz"
+            className="w-24 h-24 rounded-full object-cover border-2 border-[#2B3022]/20 shadow-md mx-auto"
+          />
         </div>
         
         <h1 className="font-display text-4xl font-bold tracking-tight text-[#1B3022] mb-3">
@@ -83,7 +96,7 @@ export default function Login() {
 
         {/* Google Login Button */}
         <button 
-          onClick={signInWithGoogle}
+          onClick={() => signInWithGoogle(redirect)}
           disabled={loading}
           className="w-full bg-white border border-outline-variant hover:border-[#1B3022] text-[#1B3022] font-body text-sm font-bold tracking-wide py-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
@@ -114,7 +127,7 @@ export default function Login() {
             className="w-full bg-white border border-outline-variant text-[#1B3022] placeholder:text-[#6B7280] font-body text-sm py-4 px-5 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1B3022]/20 focus:border-[#1B3022] transition-all duration-300 disabled:opacity-70 disabled:bg-gray-50"
           />
           <button 
-            onClick={() => signInWithMagicLink(email)}
+            onClick={() => signInWithMagicLink(email, redirect)}
             disabled={loading || !email}
             className="w-full bg-[#1B3022] text-[#FAF9F5] font-body text-sm font-bold tracking-widest uppercase py-4 rounded-xl shadow-lg hover:bg-[#0C1510] hover:shadow-xl transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >

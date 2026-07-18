@@ -107,7 +107,7 @@ export default function Hero() {
           className="hidden md:block absolute top-[40%] left-[ -3%] lg:left-[2%] w-48 h-56 lg:w-56 lg:h-64 rounded-[2rem] overflow-hidden shadow-2xl border-[6px] border-white/90 rotate-[5deg] bg-white pointer-events-auto cursor-pointer"
         >
           <img
-            src="/face_hero.png"
+            src="/face_hero.jpg"
             alt="Face Pack"
             className="w-full h-full object-cover object-[center_15%]"
             style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.05) brightness(1.02)' }}

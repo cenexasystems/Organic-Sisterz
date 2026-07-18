@@ -21,6 +21,9 @@ import Login from "./pages/Login";
 import CustomerProfile from "./pages/CustomerProfile";
 import CartPage from "./pages/CartPage";
 import InvoicePage from "./pages/InvoicePage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import FloatingCartButton from "./components/ui/FloatingCartButton";
 
 function Storefront() {
   const navigate = useNavigate();
@@ -135,7 +138,10 @@ export default function App() {
               <Route path="/profile" element={<CustomerProfile />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/invoice/:id" element={<InvoicePage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             </Routes>
+            <FloatingCartButton />
           </BrowserRouter>
         )}
       </AnimatePresence>

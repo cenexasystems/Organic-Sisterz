@@ -13,11 +13,13 @@ export default function Footer() {
         <div className="flex flex-col md:items-center">
           <h3 className="tracking-widest uppercase text-xs font-bold mb-6 text-inverse-primary">Navigation</h3>
           <ul className="space-y-4 opacity-90 font-medium">
-            <li><a href="#" className="hover:text-inverse-primary transition-colors">Home</a></li>
-            <li><a href="#products" className="hover:text-inverse-primary transition-colors">Products</a></li>
-            <li><a href="#results" className="hover:text-inverse-primary transition-colors">Results</a></li>
-            <li><a href="#story" className="hover:text-inverse-primary transition-colors">Story</a></li>
-            <li><a href="#reviews" className="hover:text-inverse-primary transition-colors">Reviews</a></li>
+            <li><a href="/" className="hover:text-inverse-primary transition-colors">Home</a></li>
+            <li><a href="/#products" className="hover:text-inverse-primary transition-colors">Products</a></li>
+            <li><a href="/#results" className="hover:text-inverse-primary transition-colors">Results</a></li>
+            <li><a href="/#story" className="hover:text-inverse-primary transition-colors">Story</a></li>
+            <li><a href="/#reviews" className="hover:text-inverse-primary transition-colors">Reviews</a></li>
+            <li><a href="/privacy-policy" className="hover:text-inverse-primary transition-colors">Privacy Policy</a></li>
+            <li><a href="/terms-and-conditions" className="hover:text-inverse-primary transition-colors">Terms & Conditions</a></li>
           </ul>
         </div>
 
@@ -35,7 +37,7 @@ export default function Footer() {
             </li>
             <li className="flex flex-col">
               <span className="font-bold mb-1">Phone:</span>
-              <a href="tel:+919876543210" className="hover:text-inverse-primary transition-colors">+91 9500258080</a>
+              <a href="tel:+919500258080" className="hover:text-inverse-primary transition-colors">+91 9500258080</a>
             </li>
             <li className="flex flex-col">
               <span className="font-bold mb-1">Hours:</span>

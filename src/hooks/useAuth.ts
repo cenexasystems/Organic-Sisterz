@@ -3,6 +3,7 @@ import { supabase } from '../utils/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 
 export function useAuth() {
+  const [isInitialized, setIsInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -14,6 +15,7 @@ export function useAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setIsInitialized(true);
     });
 
     // Listen for auth changes (like clicking the magic link)
@@ -25,14 +27,14 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (redirectPath = '/') => {
     try {
       setLoading(true);
       setError(null);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${window.location.origin}${redirectPath}`,
         },
       });
       if (error) throw error;
@@ -43,7 +45,7 @@ export function useAuth() {
     }
   };
 
-  const signInWithMagicLink = async (email: string) => {
+  const signInWithMagicLink = async (email: string, redirectPath = '/') => {
     try {
       setLoading(true);
       setError(null);
@@ -52,7 +54,7 @@ export function useAuth() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}${redirectPath}`,
         },
       });
 
@@ -71,6 +73,7 @@ export function useAuth() {
   };
 
   return {
+    isInitialized,
     loading,
     error,
     message,

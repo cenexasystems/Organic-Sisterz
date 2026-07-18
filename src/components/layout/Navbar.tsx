@@ -3,7 +3,7 @@ import {
   X,
   User,
   Gift,
-  ShoppingBag,
+  ShoppingCart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -211,8 +211,13 @@ export default function Navbar({
           <div className="flex justify-start">
             <a
               href="/"
-              className="font-display text-2xl xl:text-3xl font-extrabold tracking-tight select-none text-primary flex items-center"
+              className="font-display text-xl xl:text-2xl font-extrabold tracking-tight select-none text-primary flex items-center gap-2.5"
             >
+              <img
+                src="/logo.jpg"
+                alt="Organic Sisterz Logo"
+                className="w-10 h-10 xl:w-12 xl:h-12 rounded-full object-cover border border-[#2B3E2F]/20 shadow-sm shrink-0"
+              />
               Organic Sisterz
             </a>
           </div>
@@ -255,13 +260,13 @@ export default function Navbar({
               <Gift className="w-3.5 h-3.5" /> Gift a Friend
             </button>
             <button
-              onClick={() => navigate('/cart')}
-              className="text-primary hover:text-secondary hover:bg-[#2B3E2F]/5 transition-all p-2 rounded-full cursor-pointer relative"
+              onClick={() => navigate(user ? '/cart' : '/login?redirect=/cart')}
+              className="text-primary hover:text-secondary transition-colors cursor-pointer relative flex items-center gap-1.5 font-display font-black text-sm md:text-base tracking-widest uppercase ml-1 mr-2"
               title="View Cart"
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingCart className="w-5 h-5" strokeWidth={2.5} /> CART
               {totalQuantity > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-secondary text-white rounded-full flex items-center justify-center font-body text-[8px] font-bold shadow-sm animate-pulse-slow">
+                <span className="bg-secondary text-white rounded-full flex items-center justify-center font-body text-[10px] font-bold shadow-sm animate-pulse-slow px-1.5 py-0.5">
                   {totalQuantity}
                 </span>
               )}

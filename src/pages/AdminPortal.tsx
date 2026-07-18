@@ -18,7 +18,7 @@ import {
   fetchOrders, insertOrder, updateOrderStatus as updateOrderStatusDb
 } from '../utils/db';
 import type { Product, Order, Coupon, UserProfile } from '../utils/store';
-
+import ConfirmModal from '../components/ui/ConfirmModal';
 
 export default function AdminPortal() {
   const navigate = useNavigate();
@@ -83,6 +83,23 @@ export default function AdminPortal() {
 
   // Filter state for Gifts Received tab
   const [giftPeriodFilter, setGiftPeriodFilter] = useState<'all' | 'today' | 'week' | 'month' | 'year' | 'custom'>('all');
+
+  // Confirm Modal state
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const requestDelete = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm
+    });
+  };
   const [giftCustomStart, setGiftCustomStart] = useState('');
   const [giftCustomEnd, setGiftCustomEnd] = useState('');
 
@@ -364,15 +381,19 @@ export default function AdminPortal() {
   };
 
   const deleteProduct = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await dbDeleteProduct(id);
-        setProducts(prev => prev.filter(p => p.id !== id));
-      } catch (err) {
-        console.error(err);
-        alert('Failed to delete product');
+    requestDelete(
+      'Delete Product',
+      'Are you sure you want to delete this product? This action cannot be undone.',
+      async () => {
+        try {
+          await dbDeleteProduct(id);
+          setProducts(prev => prev.filter(p => p.id !== id));
+        } catch (err) {
+          console.error(err);
+          alert('Failed to delete product');
+        }
       }
-    }
+    );
   };
 
   // Order status updates
@@ -419,15 +440,19 @@ export default function AdminPortal() {
   };
 
   const deleteCategory = async (cat: string) => {
-    if (window.confirm(`Are you sure you want to delete category "${cat}"?`)) {
-      try {
-        await dbDeleteCategory(cat);
-        setCategories(categories.filter(c => c !== cat));
-      } catch (err) {
-        console.error(err);
-        alert('Failed to delete category');
+    requestDelete(
+      'Delete Category',
+      `Are you sure you want to delete category "${cat}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await dbDeleteCategory(cat);
+          setCategories(categories.filter(c => c !== cat));
+        } catch (err) {
+          console.error(err);
+          alert('Failed to delete category');
+        }
       }
-    }
+    );
   };
 
   // Coupon additions
@@ -493,13 +518,19 @@ export default function AdminPortal() {
   };
 
   const deleteCoupon = async (code: string) => {
-    try {
-      await dbDeleteCoupon(code);
-      setCoupons(coupons.filter(c => c.code !== code));
-    } catch (err) {
-      console.error(err);
-      alert('Failed to delete coupon');
-    }
+    requestDelete(
+      'Delete Coupon',
+      `Are you sure you want to delete coupon "${code}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await dbDeleteCoupon(code);
+          setCoupons(coupons.filter(c => c.code !== code));
+        } catch (err) {
+          console.error(err);
+          alert('Failed to delete coupon');
+        }
+      }
+    );
   };
 
   const toggleCouponStatus = async (code: string) => {
@@ -686,6 +717,16 @@ export default function AdminPortal() {
       await insertOrder(newOrder);
       const updatedOrders = [newOrder, ...orders];
       setOrders(updatedOrders);
+
+      // Increment coupon usage if a valid coupon was used
+      if (billingCoupon) {
+        const dbCoupon = coupons.find(c => c.code === billingCoupon);
+        if (dbCoupon) {
+          const updatedCoupon = { ...dbCoupon, usedCount: (dbCoupon.usedCount || 0) + 1 };
+          await upsertCoupon(updatedCoupon);
+          setCoupons(prev => prev.map(c => c.code === updatedCoupon.code ? updatedCoupon : c));
+        }
+      }
     } catch (err) {
       console.error(err);
       alert('Failed to save POS bill');
@@ -2799,7 +2840,7 @@ export default function AdminPortal() {
                   )}
                 </AnimatePresence>
                 
-                <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-x-auto shadow-sm">
                   {filteredGiftRequests.length === 0 ? (
                     <div className="p-12 text-center text-on-surface-variant text-sm italic">
                       No gift orders found.
@@ -2935,7 +2976,7 @@ export default function AdminPortal() {
                         {/* Order Items Table */}
                         <div className="space-y-3">
                           <span className="block text-[10px] font-bold text-primary uppercase tracking-wider">Gift Box Contents</span>
-                          <div className="bg-white rounded-2xl border border-outline-variant/20 overflow-hidden shadow-sm">
+                          <div className="bg-white rounded-2xl border border-outline-variant/20 overflow-x-auto shadow-sm">
                             <table className="w-full text-left text-xs">
                               <thead>
                                 <tr className="bg-[#FAF9F5] text-primary font-bold border-b border-outline-variant/20 uppercase tracking-wider text-[10px]">
@@ -3124,7 +3165,7 @@ export default function AdminPortal() {
                   )}
                   
                   {/* Bills List Table */}
-                  <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-x-auto shadow-sm">
                     {filteredBills.length === 0 ? (
                       <div className="p-12 text-center text-on-surface-variant text-sm italic">
                         No billing records found matching the active filters.
@@ -3330,7 +3371,7 @@ export default function AdminPortal() {
                       </button>
                     </div>
 
-                    <div className="bg-white border border-outline-variant/20 rounded-3xl overflow-hidden shadow-md">
+                    <div className="bg-white border border-outline-variant/20 rounded-3xl overflow-x-auto shadow-md">
                       <table className="w-full text-left text-sm min-w-[700px]">
                         <thead>
                           <tr className="bg-surface-container-low text-primary font-bold border-b border-outline-variant/25">
@@ -3604,7 +3645,13 @@ export default function AdminPortal() {
                               </div>
                               <button
                                 type="button"
-                                onClick={() => removeSizeField(idx)}
+                                onClick={() => {
+                                  requestDelete(
+                                    'Delete Pack Size',
+                                    'Are you sure you want to remove this size option?',
+                                    () => removeSizeField(idx)
+                                  );
+                                }}
                                 disabled={prodSizes.length === 1}
                                 className="w-10 h-10 rounded-full border border-outline-variant/30 hover:border-error flex items-center justify-center text-on-surface-variant hover:text-error disabled:opacity-40 disabled:hover:border-outline-variant/30 cursor-pointer"
                               >
@@ -3944,7 +3991,7 @@ export default function AdminPortal() {
                 </div>
 
                 {/* Users Table */}
-                <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-white border border-outline-variant/20 rounded-2xl overflow-x-auto shadow-sm">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-[#FAF9F6]/80 text-[#374151] font-bold border-b border-outline-variant/25">
@@ -4061,6 +4108,11 @@ export default function AdminPortal() {
           </div>
         </>
       )}
+
+      <ConfirmModal 
+        {...confirmModal} 
+        onClose={() => setConfirmModal(prev => ({...prev, isOpen: false}))} 
+      />
     </div>
   );
 }
